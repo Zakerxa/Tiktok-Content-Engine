@@ -113,6 +113,9 @@
         class="mt-8"
       />
 
+       <div class="mt-16">
+         <Footer :stats="stats" />
+       </div>
     </div>
   </div>
 </template>
@@ -121,6 +124,7 @@
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
+import Footer from '@/Components/Footer.vue';
 
 const props = defineProps({
   posts: Object,
