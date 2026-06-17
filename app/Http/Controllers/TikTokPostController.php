@@ -30,7 +30,7 @@ class TikTokPostController extends Controller
     public function index()
     {
         
-        $posts = TikTokPost::orderBy('created_at', 'desc')
+        $posts = TikTokPost::orderBy('id', 'desc')
             ->paginate(6)
             ->withQueryString()
             ->through(fn($post) => [
@@ -60,7 +60,7 @@ class TikTokPostController extends Controller
         $rawTopic = str_starts_with($topic, 'TOPICS_') ? $topic : 'TOPICS_' . $topic;
 
         $posts = TikTokPost::where('topic', $rawTopic)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(6)
             ->withQueryString()
             ->through(fn($post) => [
