@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('tiktok_posts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('slug')->unique()->nullable();
             $table->string('cover_title_burmese');
             $table->text('content');
             $table->text('image_prompt')->nullable();
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->string('topic')->nullable();
             $table->string('model_used')->nullable();
             $table->string('image_path')->nullable();
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
         });
     }
 

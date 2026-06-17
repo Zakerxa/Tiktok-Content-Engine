@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [TikTokPostController::class, 'index'])->name('home');
-Route::get('/posts/{post}', [TikTokPostController::class, 'show'])->name('posts.show');
+Route::get('/posts/{post:slug}', [TikTokPostController::class, 'show'])->name('posts.show');
 Route::get('/topics/{topic}', [TikTokPostController::class, 'category'])->name('topics.show');
 
 Route::get('/dashboard', function () {

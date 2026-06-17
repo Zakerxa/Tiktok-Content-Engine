@@ -29,11 +29,13 @@ class TikTokPostController extends Controller
 
     public function index()
     {
+        
         $posts = TikTokPost::orderBy('created_at', 'desc')
             ->paginate(6) // 3-column layout grid friendly
-            ->through(fn ($post) => [
+            ->through(fn($post) => [
                 'id' => $post->id,
                 'title' => $post->title,
+                'slug' => $post->slug,
                 'cover_title_burmese' => $post->cover_title_burmese,
                 'content' => $post->content,
                 'topic' => str_replace('TOPICS_', '', $post->topic),
@@ -41,6 +43,8 @@ class TikTokPostController extends Controller
                 'model_used' => $post->model_used,
                 'created_at' => $post->created_at?->format('M d, Y') ?? 'Recent',
             ]);
+
+        
 
         return Inertia::render('Home', [
             'posts' => $posts,
@@ -57,9 +61,10 @@ class TikTokPostController extends Controller
         $posts = TikTokPost::where('topic', $rawTopic)
             ->orderBy('created_at', 'desc')
             ->paginate(6)
-            ->through(fn ($post) => [
+            ->through(fn($post) => [
                 'id' => $post->id,
                 'title' => $post->title,
+                'slug' => $post->slug,
                 'cover_title_burmese' => $post->cover_title_burmese,
                 'content' => $post->content,
                 'topic' => str_replace('TOPICS_', '', $post->topic),
@@ -81,6 +86,7 @@ class TikTokPostController extends Controller
             'post' => [
                 'id' => $post->id,
                 'title' => $post->title,
+                'slug' => $post->slug,
                 'cover_title_burmese' => $post->cover_title_burmese,
                 'content' => $post->content,
                 'image_prompt' => $post->image_prompt,
@@ -89,34 +95,38 @@ class TikTokPostController extends Controller
                 'topic' => str_replace('TOPICS_', '', $post->topic),
                 'image_path' => $post->image_path,
                 'model_used' => $post->model_used,
-                'created_at' => $post->created_at?->format('F d, Y') ?? 'Recent',
+                'created_at' => $post->created_at?->format('F d, Y') ?? 'Recent'
             ]
         ]);
     }
 
     public function upload(Request $request)
     {
-        // Token စစ်ဆေးခြင်း (Security အတွက်)
+        // 1. Token စစ်ဆေးခြင်း (Security အတွက်)
         $token = $request->bearerToken();
         if ($token !== 'ZAKERXA_SECURE_SECRET_TOKEN_HERE') {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
 
-        // Validation စစ်ဆေးခြင်း
+        // 2. Validation တစ်ခါတည်း စစ်ဆေးခြင်း
         $request->validate([
             'title' => 'required|string',
+            'cover_title_burmese' => 'required|string',
             'content' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
+            'image_prompt' => 'nullable|string',
+            'b_roll_animation_suggestion' => 'nullable|string',
+            'hashtags' => 'nullable|string',
+            'topic' => 'nullable|string',
+            'model_used' => 'nullable|string',
         ]);
 
-        // ပုံကို storage/app/public/posts ထဲသို့ သိမ်းဆည်းခြင်း
+        // 3. ပုံကို storage/app/public/posts ထဲသို့ သိမ်းဆည်းခြင်း
+        $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('posts', 'public'); 
-            // ဒါဆိုရင် $imagePath က "posts/filename.jpg" ဖြစ်သွားမယ်
-            // Frontend မှာ ခေါ်ပြရင် asset('storage/' . $post->image_path) ဆိုပြီး ခေါ်သုံးရုံပါပဲ
+            $imagePath = $request->file('image')->store('images', 'public');
         }
 
-        // Database ထဲသို့ ပို့လိုက်သော Data များ သိမ်းဆည်းခြင်း
         $post = TikTokPost::create([
             'title' => $request->title,
             'cover_title_burmese' => $request->cover_title_burmese,
@@ -124,15 +134,16 @@ class TikTokPostController extends Controller
             'topic' => $request->topic,
             'model_used' => $request->model_used,
             'b_roll_animation_suggestion' => $request->b_roll_animation_suggestion,
-            'hashtags' => $request->hashtags, // Array ပြောင်းသိမ်းချင်ရင်လည်း အဆင်ပြေအောင် လုပ်ပါ
+            'hashtags' => $request->hashtags,
             'image_prompt' => $request->image_prompt,
-            'image_path' => '/storage/' . $imagePath, // လမ်းကြောင်းအမှန် ထည့်ပေးလိုက်ခြင်း
+            'image_path' => $imagePath ? '/storage/' . $imagePath : null,
         ]);
 
+        // 5. Response ပြန်ပို့ခြင်း
         return response()->json([
             'success' => true,
             'message' => 'Post and Image created successfully!',
-            'data' => $post
+            'post' => $post // main.sh ထဲက '.post.image_path' နဲ့ ကိုက်ညီအောင် 'post' ဟု ပြင်ထားပါသည်
         ], 201);
     }
 }

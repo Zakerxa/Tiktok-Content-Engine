@@ -69,7 +69,7 @@
   :key="post.id" 
   class="flex flex-col overflow-hidden rounded-2xl bg-white shadow-xs border border-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg"
 >
-  <Link :href="route('posts.show', post.id)" class="shrink-0 bg-gray-900 relative aspect-[4/3] overflow-hidden block">
+  <Link :href="route('posts.show', post.slug)" class="shrink-0 bg-gray-900 relative aspect-[4/3] overflow-hidden block">
     <img v-if="post.image_path" :src="post.image_path" :alt="post.title" class="h-full w-full object-cover" />
     <div v-else class="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex flex-col justify-end p-6">
       <span class="inline-flex items-center rounded-md bg-white/20 px-2 py-1 text-xs font-medium text-white backdrop-blur-md mb-2 w-max">
@@ -82,7 +82,7 @@
   <div class="flex flex-1 flex-col justify-between p-6">
     <div class="flex-1">
       <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">{{ post.topic }}</span>
-      <Link :href="route('posts.show', post.id)" class="mt-2 block group">
+      <Link :href="route('posts.show', post.slug)" class="mt-2 block group">
         <h2 class="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition duration-150 leading-snug">
           {{ post.title }}
         </h2>
@@ -104,14 +104,7 @@
         <p class="text-sm text-gray-500">No blog titles discovered matching "{{ searchQuery }}".</p>
       </div>
 
-      <div v-if="!searchQuery" class="mt-12">
-        <Pagination 
-          :links="posts.links" 
-          :from="posts.from" 
-          :to="posts.to" 
-          :total="posts.total" 
-        />
-      </div>
+    
 
     </div>
   </div>

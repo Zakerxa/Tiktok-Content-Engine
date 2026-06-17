@@ -12,6 +12,7 @@ class TikTokPost extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'cover_title_burmese',
         'content',
         'image_prompt',
@@ -26,4 +27,9 @@ class TikTokPost extends Model
     protected $casts = [
         'created_at' => 'datetime',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }
