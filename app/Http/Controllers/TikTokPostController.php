@@ -111,6 +111,7 @@ class TikTokPostController extends Controller
         // 2. Validation တစ်ခါတည်း စစ်ဆေးခြင်း
         $request->validate([
             'title' => 'required|string',
+            'slug' => 'required|string|unique:tiktok_posts,slug',
             'cover_title_burmese' => 'required|string',
             'content' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
@@ -129,6 +130,7 @@ class TikTokPostController extends Controller
 
         $post = TikTokPost::create([
             'title' => $request->title,
+            'slug' => $request->slug,
             'cover_title_burmese' => $request->cover_title_burmese,
             'content' => $request->content,
             'topic' => $request->topic,
