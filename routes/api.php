@@ -11,3 +11,4 @@ Route::get('/user', function (Request $request) {
 
 // ဘာမှမရှိတဲ့အောက်မှာ ဒီကောင်လေး လှမ်းထည့်လိုက်ပါ
 Route::post('/posts/upload', [TikTokPostController::class, 'upload']);
+Route::get('/posts/check/{slug}', [TikTokPostController::class, 'checkStatus']);

@@ -150,4 +150,13 @@ class TikTokPostController extends Controller
             'post' => $post // main.sh ထဲက '.post.image_path' နဲ့ ကိုက်ညီအောင် 'post' ဟု ပြင်ထားပါသည်
         ], 201);
     }
+
+    public function checkStatus($slug)
+    {
+        // Database ထဲမှာ အဲဒီ slug နဲ့ Post ရှိ/မရှိ စစ်ဆေးပါမယ်
+        $exists = TikTokPost::where('slug', $slug)->exists();
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
 }
