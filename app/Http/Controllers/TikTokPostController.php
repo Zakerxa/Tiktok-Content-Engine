@@ -31,7 +31,8 @@ class TikTokPostController extends Controller
     {
         
         $posts = TikTokPost::orderBy('created_at', 'desc')
-            ->paginate(6) // 3-column layout grid friendly
+            ->paginate(6)
+            ->withQueryString()
             ->through(fn($post) => [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -61,6 +62,7 @@ class TikTokPostController extends Controller
         $posts = TikTokPost::where('topic', $rawTopic)
             ->orderBy('created_at', 'desc')
             ->paginate(6)
+            ->withQueryString()
             ->through(fn($post) => [
                 'id' => $post->id,
                 'title' => $post->title,

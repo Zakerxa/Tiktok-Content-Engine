@@ -104,7 +104,14 @@
         <p class="text-sm text-gray-500">No blog titles discovered matching "{{ searchQuery }}".</p>
       </div>
 
-    
+      <Pagination 
+        v-if="posts.links && posts.total > 0"
+        :links="posts.links"
+        :from="posts.from"
+        :to="posts.to"
+        :total="posts.total"
+        class="mt-8"
+      />
 
     </div>
   </div>
