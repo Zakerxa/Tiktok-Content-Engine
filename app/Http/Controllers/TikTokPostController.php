@@ -48,7 +48,7 @@ class TikTokPostController extends Controller
 
 
 
-        return Inertia::render('Home', [
+        return Inertia::render('Blogs/Index', [
             'posts' => $posts,
             'stats' => $this->getTopicStats(),
             'currentTopic' => null
@@ -76,7 +76,7 @@ class TikTokPostController extends Controller
                 'created_at' => $post->created_at?->format('M d, Y') ?? 'Recent',
             ]);
 
-        return Inertia::render('Home', [
+        return Inertia::render('Blogs/Index', [
             'posts' => $posts,
             'stats' => $this->getTopicStats(),
             'currentTopic' => str_replace('TOPICS_', '', $rawTopic)
@@ -85,7 +85,7 @@ class TikTokPostController extends Controller
 
     public function show(TikTokPost $post)
     {
-        return Inertia::render('Posts/Show', [
+        return Inertia::render('Blogs/Show', [
             'post' => [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -109,7 +109,7 @@ class TikTokPostController extends Controller
     {
         $post = TikTokPost::findOrFail($id);
 
-        return Inertia::render('Posts/Edit', [
+        return Inertia::render('Blogs/Edit', [
             'post' => $post
         ]);
     }
