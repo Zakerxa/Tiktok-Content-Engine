@@ -196,17 +196,7 @@
                 </label>
               </div>
               <div ref="voiceoverContainer" class="opacity-50 pointer-events-none transition-all">
-                <label class="block text-xs font-semibold text-[#64748B] mb-2">Voiceover Character</label>
-                <select ref="voiceModel" class="w-full px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] text-sm text-[#F1F5F9] cursor-pointer outline-none focus:border-[#7C3AED]" :disabled="isProcessing">
-                  <optgroup label="Burmese (မြန်မာအသံ)">
-                    <option value="my-MM-NilarNeural">🇲🇲 Nilar (Female - Default)</option>
-                    <option value="my-MM-ThihaNeural" selected>🇲🇲 Thiha (Male)</option>
-                  </optgroup>
-                  <optgroup label="Regional Voices">
-                    <option value="th-TH-AcharaNeural">🇹🇭 Achara (Thai Female)</option>
-                    <option value="th-TH-NiwatNeural">🇹🇭 Niwat (Thai Male)</option>
-                  </optgroup>
-                </select>
+                <VoiceSelector v-model="selectedVoice" :isProcessing="isProcessing" />
               </div>
             </div>
 
@@ -354,6 +344,7 @@
 
 <script>
 import AppSidebar from '@/Components/AppSidebar.vue';
+import VoiceSelector from '@/Components/VoiceSelectorFetch.vue';
 export default {
   name: 'MovieRecapShow',
 
@@ -363,7 +354,8 @@ export default {
   },
 
   components:{
-    AppSidebar
+    AppSidebar,
+    VoiceSelector,
   },
 
   data() {
@@ -706,7 +698,7 @@ export default {
       const flip       = this.$refs.enableFlip?.checked;
       const watermark  = this.$refs.enableWatermark?.checked;
       const voiceover  = this.$refs.enableVoiceover?.checked;
-      const voice      = this.$refs.voiceModel?.value;
+      const voice      = this.selectedVoice;
       const logoFile   = this.$refs.logoFileInput?.files[0];
 
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
