@@ -1,36 +1,75 @@
 <template>
 
-<AppSidebar :auth="$page.props.auth">
-  <div class="min-h-screen flex flex-col bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif]">
+      <Head title="Movie-Recap Studio" />
+
+  <AppSidebar :auth="$page.props.auth">
+
+  <div class="dash-root">
+    <!-- Ambient brand orbs -->
+    <div class="orb orb-violet"></div>
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-gold"></div>
+
+<div class="min-h-screen flex flex-col bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif]">
 
     <AppNavbar :auth="auth" />
 
-    <!-- ══════════════ ERROR OVERLAY ══════════════ -->
+    <!-- ══════════════ BEAUTIFUL ALERT MODAL ══════════════ -->
+    <transition name="alert-fade">
     <div
       v-if="showErrorOverlay"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4"
       @click.self="closeErrorPopup"
     >
-      <div class="bg-[#0D1120] rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-sm border border-red-500/20">
+      <div class="w-full max-w-sm rounded-2xl shadow-2xl p-6 border"
+        :class="{
+          'bg-[#0D1120] border-red-500/25':    alertType === 'error',
+          'bg-[#0D1120] border-amber-500/25':  alertType === 'warning',
+          'bg-[#0D1120] border-[#7C3AED]/25':  alertType === 'info',
+        }"
+      >
+        <!-- Icon -->
         <div class="flex justify-center mb-4">
-          <div class="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
-            <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <div v-if="alertType === 'error'" class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
+            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+          </div>
+          <div v-else-if="alertType === 'warning'" class="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+          </div>
+          <div v-else class="w-16 h-16 rounded-full bg-[#7C3AED]/10 flex items-center justify-center">
+            <svg class="w-8 h-8 text-[#A78BFA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
           </div>
         </div>
-        <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">လုပ်ဆောင်မှု မအောင်မြင်ပါ</h3>
+        <!-- Title -->
+        <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">
+          <span v-if="alertType === 'error'">လုပ်ဆောင်မှု မအောင်မြင်ပါ</span>
+          <span v-else-if="alertType === 'warning'">သတိပေးချက်</span>
+          <span v-else>Login လိုအပ်သည်</span>
+        </h3>
         <p class="text-center text-sm text-[#94A3B8] mb-6 leading-relaxed">{{ errorPopupMsg }}</p>
+        <!-- Buttons -->
         <div class="flex flex-col gap-2">
-          <button @click="closeErrorPopup" class="w-full bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] hover:opacity-90 text-white font-semibold py-2.5 rounded-xl border-none cursor-pointer transition-opacity">နားလည်ပါပြီ</button>
-          <a href="/logout" class="block text-center w-full bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-[#94A3B8] text-sm font-medium py-2.5 rounded-xl no-underline transition-colors">Logout လုပ်မည်</a>
+          <button @click="closeErrorPopup"
+            class="w-full bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] hover:opacity-90 text-white font-semibold py-2.5 rounded-xl border-none cursor-pointer transition-opacity">
+            နားလည်ပါပြီ
+          </button>
+          <a v-if="alertType === 'error'" href="/logout"
+            class="block text-center w-full bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-[#94A3B8] text-sm font-medium py-2.5 rounded-xl no-underline transition-colors">
+            Logout လုပ်မည်
+          </a>
         </div>
       </div>
     </div>
+    </transition>
 
     <!-- ══════════════ MAIN CARD ══════════════ -->
-    <main class="flex-1 flex items-start justify-center px-3 py-6 sm:px-4 sm:py-10">
+    <main class="flex-1 flex items-start justify-center px-3 py-6 mt-12 sm:px-4 sm:py-10">
     <div class="w-full max-w-6xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-3xl shadow-2xl border border-[rgba(255,255,255,0.08)] px-4 py-5 sm:px-6 sm:py-6 md:px-8">
 
       <!-- Header -->
@@ -76,7 +115,7 @@
             <label class="block text-sm font-semibold text-[#CBD5E1] mb-2">Select Local Video File</label>
             <div
                 ref="uploadZone"
-                v-show="!$refs.videoFileInput || !$refs.videoFileInput.files || !$refs.videoFileInput.files.length"
+                v-show="!hasVideoSelected"
                 class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-2xl p-6 text-center cursor-pointer relative bg-[rgba(255,255,255,0.02)] hover:border-[#7C3AED] transition-colors"
                 :class="{ 'pointer-events-none opacity-60': isProcessing }"
               >
@@ -84,7 +123,6 @@
                 <input
                   ref="videoFileInput"
                   type="file"
-                  v-show="!hasVideoSelected"
                   accept="video/mp4,video/x-matroska,video/quicktime,video/*"
                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   :disabled="isProcessing"
@@ -308,7 +346,9 @@
 
     <AppFooter />
 
-  </div>
+</div>
+
+</div>
 </AppSidebar>
 </template>
 
@@ -319,40 +359,34 @@ export default {
 
   props: {
     auth: Object,
-    user: Object 
+    user: Object
   },
 
   components:{
     AppSidebar
   },
 
-  // ══════════════════════════════════════════
-  // data — reactive state
-  // ══════════════════════════════════════════
   data() {
     return {
       activeMode:       'upload',
       isProcessing:     false,
       showErrorOverlay: false,
       errorPopupMsg:    '',
+      alertType:        'error',
       inlineError:      '',
 
-      // positions
       logoX: 0,
       logoY: 0,
       blurX: 0,
       blurY: 85,
       blurH: 15,
 
-      // upload progress  (null = hidden)
-      uploadProgress: null,
+      uploadProgress:   null,
       hasVideoSelected: false,
 
-      // pipeline
       stepCurrent:  0,
       stepProgress: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
 
-      // internal drag state (not reactive, just variables)
       _logoIsDragging: false,
       _logoStartX: 0, _logoStartY: 0,
       _logoInitialX: 0, _logoInitialY: 0,
@@ -362,9 +396,6 @@ export default {
     };
   },
 
-  // ══════════════════════════════════════════
-  // computed — derived state
-  // ══════════════════════════════════════════
   computed: {
     pipelineSteps() {
       const cur  = this.stepCurrent;
@@ -412,19 +443,14 @@ export default {
     },
   },
 
-  // ══════════════════════════════════════════
-  // methods
-  // ══════════════════════════════════════════
   methods: {
 
-    // ─── Tab ───
     switchTab(mode) {
       if (this.isProcessing) return;
       this.activeMode = mode;
       if (mode === 'youtube') this.removeSelectedVideo();
     },
 
-    // ─── Video preview ───
     previewVideo(event) {
       const file = event.target.files[0];
       if (!file) { this.removeSelectedVideo(); return; }
@@ -433,7 +459,7 @@ export default {
       const allowed = ['.mp4', '.mkv', '.mov', '.avi', '.webm'];
       const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
       if (!isVideo && !allowed.includes(ext)) {
-        alert('❌ Invalid File Type! Please upload a valid video file (MP4, MKV, MOV).');
+        this.showAlert('warning', '❌ Invalid File Type! Please upload a valid video file (MP4, MKV, MOV).');
         this.removeSelectedVideo(); return;
       }
 
@@ -469,21 +495,18 @@ export default {
       this.hasVideoSelected = false;
     },
 
-    // ─── Logo drag ───
     previewLogo(event) {
-        const file = event.target.files[0];
-        const img  = this.$refs.watermarkLogo;
-        if (!file || !img) return;
-        img.src           = URL.createObjectURL(file);
-        img.style.display = 'block';
-        img.style.width   = '60px';
-        img.style.left    = '10px';
-        img.style.top     = '10px';
-        img.onload = () => this.updateLogoCoordinates();
-      
-        // Logo show ဖြစ်တဲ့အချိန် touch listener တပ်မည်
-        img.removeEventListener('touchstart', this.logoDragStart);
-        img.addEventListener('touchstart', this.logoDragStart, { passive: false });
+      const file = event.target.files[0];
+      const img  = this.$refs.watermarkLogo;
+      if (!file || !img) return;
+      img.src           = URL.createObjectURL(file);
+      img.style.display = 'block';
+      img.style.width   = '60px';
+      img.style.left    = '10px';
+      img.style.top     = '10px';
+      img.onload = () => this.updateLogoCoordinates();
+      img.removeEventListener('touchstart', this.logoDragStart);
+      img.addEventListener('touchstart', this.logoDragStart, { passive: false });
     },
 
     updateLogoCoordinates() {
@@ -494,7 +517,6 @@ export default {
       this.logoY = (img.offsetTop  / frame.clientHeight) * 100;
     },
 
-    // ─── Logo drag ───
     logoDragStart(e) {
       const pt = e.touches ? e.touches[0] : e;
       e.preventDefault();
@@ -524,8 +546,7 @@ export default {
       this._logoIsDragging = false;
       if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.style.cursor = 'grab';
     },
-    
-    // ─── Blur drag ───
+
     blurDragStart(e) {
       const pt = e.touches ? e.touches[0] : e;
       e.preventDefault();
@@ -577,7 +598,6 @@ export default {
       this.updateBlurCoordinates();
     },
 
-    // ─── Toggles ───
     toggleVoiceover() {
       const cont = this.$refs.voiceoverContainer;
       if (!cont) return;
@@ -597,8 +617,14 @@ export default {
       if (img) img.style.display = (isEnabled && img.src && !img.src.endsWith(window.location.pathname)) ? 'block' : 'none';
     },
 
-    // ─── Error ───
+    // ─── Alert helpers ───
+    showAlert(type, msg) {
+      this.alertType        = type;
+      this.errorPopupMsg    = msg;
+      this.showErrorOverlay = true;
+    },
     showError(msg) {
+      this.alertType        = 'error';
       this.inlineError      = msg;
       this.errorPopupMsg    = msg;
       this.showErrorOverlay = true;
@@ -608,7 +634,6 @@ export default {
       this.showErrorOverlay = false;
     },
 
-    // ─── Upload progress ───
     showUploadProgressState(current, total) {
       const pct = Math.round((current / total) * 100);
       this.uploadProgress = { current, total, pct, done: false };
@@ -620,7 +645,6 @@ export default {
       this.uploadProgress = null;
     },
 
-    // ─── Reset ───
     resetSteps() {
       this.stepCurrent  = 0;
       this.stepProgress = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -640,7 +664,6 @@ export default {
       this.removeSelectedVideo();
     },
 
-    // ─── Poll status ───
     async pollStatus(jobId) {
       try {
         const res = await fetch(`https://recap.zakerxa.com/status/${jobId}`);
@@ -671,12 +694,10 @@ export default {
       }
     },
 
-    // ─── Main start ───
     async startProcess() {
-
       if (!this.user) {
-          alert("Please login first!");
-          return;
+        this.showAlert('info', 'ဤ feature ကို အသုံးပြုရန် Login ဝင်ရောက်ရန် လိုအပ်ပါသည်။');
+        return;
       }
 
       const file       = this.$refs.videoFileInput?.files[0];
@@ -688,8 +709,8 @@ export default {
       const voice      = this.$refs.voiceModel?.value;
       const logoFile   = this.$refs.logoFileInput?.files[0];
 
-      if (this.activeMode === 'youtube' && !youtubeUrl) { alert('Please enter a YouTube URL'); return; }
-      if (this.activeMode === 'upload'  && !file)       { alert('Please select a video file to upload'); return; }
+      if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
+      if (this.activeMode === 'upload'  && !file)       { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
 
       this.isProcessing = true;
       this.inlineError  = '';
@@ -712,15 +733,14 @@ export default {
             chunkForm.append('totalChunks', totalChunks);
             chunkForm.append('sessionId',   sessionId);
 
-            const chunkRes = await fetch('https://recap.zakerxa.com/upload-chunk', 
-            { 
-              method: 'POST', 
+            const chunkRes = await fetch('https://recap.zakerxa.com/upload-chunk', {
+              method: 'POST',
               body: chunkForm,
               headers: {
-                'X-Auth-Username': this.user.username, // Laravel မှ လက်ရှိ Login ဝင်ထားသော username (e.g., this.username)
-                'X-Auth-Role': this.user.role_name        // Laravel မှ user ၏ role (e.g., this.role)
+                'X-Auth-Username': this.user.username,
+                'X-Auth-Role': this.user.role_name
               }
-             });
+            });
             if (!chunkRes.ok) {
               const err = await chunkRes.json().catch(() => null);
               throw new Error(err?.detail || 'Chunk upload failed.');
@@ -745,10 +765,14 @@ export default {
             finalForm.append('watermark_y', this.logoY.toFixed(2));
             if (logoFile) finalForm.append('watermark_file', logoFile);
           }
-          response = await fetch('https://recap.zakerxa.com/upload-chunk-finalize', { method: 'POST', body: finalForm,              headers: {
-                'X-Auth-Username': this.user.username, // Laravel မှ လက်ရှိ Login ဝင်ထားသော username (e.g., this.username)
-                'X-Auth-Role': this.user.role_name        // Laravel မှ user ၏ role (e.g., this.role)
-              } });
+          response = await fetch('https://recap.zakerxa.com/upload-chunk-finalize', {
+            method: 'POST',
+            body: finalForm,
+            headers: {
+              'X-Auth-Username': this.user.username,
+              'X-Auth-Role': this.user.role_name
+            }
+          });
 
         } else {
           const formData = new FormData();
@@ -766,10 +790,14 @@ export default {
             formData.append('watermark_y', this.logoY.toFixed(2));
             if (logoFile) formData.append('watermark_file', logoFile);
           }
-          response = await fetch('https://recap.zakerxa.com/process-youtube', { method: 'POST', body: formData,              headers: {
-                'X-Auth-Username': this.user.username, // Laravel မှ လက်ရှိ Login ဝင်ထားသော username (e.g., this.username)
-                'X-Auth-Role': this.user.role_name        // Laravel မှ user ၏ role (e.g., this.role)
-              } });
+          response = await fetch('https://recap.zakerxa.com/process-youtube', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Auth-Username': this.user.username,
+              'X-Auth-Role': this.user.role_name
+            }
+          });
         }
 
         if (!response.ok) {
@@ -788,43 +816,34 @@ export default {
     },
   },
 
-  // ══════════════════════════════════════════
-  // lifecycle hooks
-  // ══════════════════════════════════════════
   mounted() {
-
-   
-    // Logo — mousedown သာ (touchstart က previewLogo မှာ တပ်မည်)
     if (this.$refs.watermarkLogo) {
       this.$refs.watermarkLogo.addEventListener('mousedown', this.logoDragStart);
     }
-    // Logo move/end — mouse + touch
     document.addEventListener('mousemove',   this.logoDrag);
     document.addEventListener('mouseup',     this.logoDragEnd);
     document.addEventListener('touchmove',   this.logoDrag,    { passive: false });
     document.addEventListener('touchend',    this.logoDragEnd);
     document.addEventListener('touchcancel', this.logoDragEnd);
-  
-    // Blur — mousedown + touchstart နှစ်ခုလုံး (blur box က mounted အချိန်ကတည်းက DOM မှာ ရှိသည်)
+
     if (this.$refs.blurBoxEl) {
       this.$refs.blurBoxEl.addEventListener('mousedown',  this.blurDragStart);
       this.$refs.blurBoxEl.addEventListener('touchstart', this.blurDragStart, { passive: false });
     }
-    // Blur move/end — mouse + touch
     document.addEventListener('mousemove',   this.blurDrag);
     document.addEventListener('mouseup',     this.blurDragEnd);
     document.addEventListener('touchmove',   this.blurDrag,    { passive: false });
     document.addEventListener('touchend',    this.blurDragEnd);
     document.addEventListener('touchcancel', this.blurDragEnd);
   },
-  
+
   beforeUnmount() {
     document.removeEventListener('mousemove',   this.logoDrag);
     document.removeEventListener('mouseup',     this.logoDragEnd);
     document.removeEventListener('touchmove',   this.logoDrag);
     document.removeEventListener('touchend',    this.logoDragEnd);
     document.removeEventListener('touchcancel', this.logoDragEnd);
-  
+
     document.removeEventListener('mousemove',   this.blurDrag);
     document.removeEventListener('mouseup',     this.blurDragEnd);
     document.removeEventListener('touchmove',   this.blurDrag);
@@ -833,3 +852,15 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.alert-fade-enter-active,
+.alert-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.alert-fade-enter-from,
+.alert-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+</style>

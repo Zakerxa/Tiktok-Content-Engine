@@ -334,20 +334,6 @@ const formattedExpiry = computed(() => {
 </script>
 
 <style scoped>
-.dash-root {
-  background: #080B14;
-  color: #F1F5F9;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ─── Ambient orbs ─── */
-.orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
-.orb-violet { width: 560px; height: 560px; background: rgba(124,58,237,0.18); top: -120px; left: -160px; }
-.orb-cyan   { width: 460px; height: 460px; background: rgba(6,182,212,0.14);  top: 400px; right: -160px; }
-.orb-gold   { width: 280px; height: 280px; background: rgba(245,158,11,0.08); bottom: -100px; left: 30%; }
-
 .dash-main {
   position: relative; z-index: 5;
   max-width: 1100px; margin: 0 auto;

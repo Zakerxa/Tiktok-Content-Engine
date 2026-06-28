@@ -2,9 +2,14 @@
   <Head title="TikTok Post" />
 
   <AppSidebar :auth="$page.props.auth">
-  <div class="index-root">
+    <div class="dash-root">
+    <!-- Ambient brand orbs -->
+    <div class="orb orb-violet"></div>
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-gold"></div>
+
     
-    <main class="mt-10 px-10">
+    <main class="mt-10 px-10 pt-10">
 
       <!-- ═══════════ Hero / search ═══════════ -->
       <section class="hero-block">

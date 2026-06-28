@@ -79,11 +79,18 @@ function resendVerification() {
     <Head title="Profile" />
 
     <AppSidebar :auth="$page.props.auth">
+
+          <div class="dash-root">
+    <!-- Ambient brand orbs -->
+    <div class="orb orb-violet"></div>
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-gold"></div>
+
         <div class="py-10 px-4 sm:px-8">
             <div class="mx-auto max-w-3xl">
 
                 <!-- Page header -->
-                <div class="mb-8">
+                <div class="mb-8 mt-10">
                     <h1 class="text-2xl font-extrabold text-[#F1F5F9] tracking-tight">Account Settings</h1>
                     <p class="text-sm text-[#94A3B8] mt-1">Manage your profile, password, and account.</p>
                 </div>
@@ -185,5 +192,6 @@ function resendVerification() {
                 </div>
             </div>
         </div>
+    </div>
     </AppSidebar>
 </template>

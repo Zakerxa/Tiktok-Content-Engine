@@ -33,7 +33,7 @@
         </p>
 
         <div class="flex gap-4 justify-center flex-wrap mb-14">
-          <a href="/recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
+          <a href="/movie-recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Start Movie Recap
           </a>

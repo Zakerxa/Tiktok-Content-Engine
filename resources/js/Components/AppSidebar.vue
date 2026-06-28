@@ -29,9 +29,9 @@
 
       <!-- Main nav items -->
       <NavItem :href="route('dashboard')" icon="grid" label="Dashboard" :active="isRoute('dashboard')" />
-      <NavItem :href="route('profile.edit')" icon="user" label="Profile" :active="isRoute('profile.edit')" />
       <NavItem :href="route('recap.dashboardrecap')" icon="zap" label="Recap Studio" :active="isRoute('recap.*')" />
       <NavItem :href="route('blogs.dashboardshow')" icon="tiktok" label="TikTok Post" :active="isRoute('tiktok.*')" />
+      <NavItem :href="route('profile.edit')" icon="user" label="Profile" :active="isRoute('profile.edit')" />
       <!-- <NavItem :href="route('messages.index')" icon="message" label="Message Box" :active="isRoute('messages.*')" /> -->
 
       <!-- Admin section -->
@@ -106,7 +106,7 @@
     </button>
 
     <!-- Logo center -->
-    <span style="font-size:16px;font-weight:800;letter-spacing:-0.4px;color:#F1F5F9;">Recap<span style="color:#7C3AED;">AI</span></span>
+    <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
 
     <!-- Avatar -->
     <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0" style="border:1px solid rgba(255,255,255,0.1);">
@@ -182,4 +182,33 @@ const avatarInitial = computed(() => {
 .pc{
     color:#7C3AED;
 }
+.dash-main {
+  position: relative; z-index: 5;
+  max-width: 1100px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: flex; flex-direction: column; gap: 28px;
+}
+
+.dash-root {
+  background: #080B14;
+  color: #F1F5F9;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Ambient orbs ─── */
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+.orb-violet { width: 560px; height: 560px; background: rgba(63, 31, 117, 0.18); top: -120px; left: -160px; }
+.orb-cyan   { width: 460px; height: 460px; background: rgba(6,182,212,0.14);  top: 400px; right: -160px; }
+.orb-gold   { width: 280px; height: 280px; background: rgba(245,158,11,0.08); bottom: -100px; left: 30%; }
+
+.dash-main {
+  position: relative; z-index: 5;
+  max-width: 1100px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: flex; flex-direction: column; gap: 28px;
+}
+
+
 </style>
