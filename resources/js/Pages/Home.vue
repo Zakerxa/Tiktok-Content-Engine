@@ -1,128 +1,134 @@
 <template>
-  <div class="home-root">
+  <div class="bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif] min-h-screen overflow-x-hidden">
 
     <AppNavbar :auth="auth" />
 
     <!-- ═══════════════ HERO ═══════════════ -->
-    <section class="hero-section">
-      <div class="orb orb-violet"></div>
-      <div class="orb orb-cyan"></div>
-      <div class="orb orb-gold"></div>
+    <section class="relative min-h-screen flex flex-col items-center justify-center pt-[120px] px-6 pb-20 overflow-hidden text-center">
+      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[600px] h-[600px] bg-[rgba(124,58,237,0.25)] -top-[100px] -left-[150px]"></div>
+      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[500px] h-[500px] bg-[rgba(6,182,212,0.18)] top-[100px] -right-[100px]"></div>
+      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[300px] h-[300px] bg-[rgba(245,158,11,0.12)] bottom-0 left-[40%]"></div>
 
-      <div class="film-strip film-strip-top">
-  <div class="film-track-top">
-    <span v-for="n in 27" :key="`a${n}`" class="film-hole"></span>
-    <span v-for="n in 27" :key="`b${n}`" class="film-hole"></span>
-  </div>
-</div>
+      <div class="absolute left-0 right-0 h-[28px] bg-[rgba(255,255,255,0.025)] border-y border-[rgba(255,255,255,0.06)] flex items-center gap-6 px-6 overflow-hidden top-16 -left-[240px]">
+        <div class="flex gap-7 w-max animate-[film-top_18s_linear_infinite] motion-reduce:animate-none">
+          <span v-for="n in 27" :key="`a${n}`" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.1)]"></span>
+          <span v-for="n in 27" :key="`b${n}`" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.1)]"></span>
+        </div>
+      </div>
 
-      <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
+      <div class="relative z-10 max-w-[780px]">
+        <div class="inline-flex items-center gap-2 bg-[rgba(124,58,237,0.15)] border border-[rgba(124,58,237,0.35)] text-[#A78BFA] text-[13px] font-medium px-4 py-1.5 rounded-full mb-8">
+          <span class="w-[7px] h-[7px] bg-[#7C3AED] rounded-full animate-[badge-pulse_2s_infinite]"></span>
           AI-Powered Content Studio · Myanmar
         </div>
 
-        <h1 class="hero-title">
+        <h1 class="text-[clamp(40px,7vw,80px)] font-black leading-[1.05] tracking-[-2px] text-[#F1F5F9] mb-6">
           Create. Protect.<br/>
-          <span class="gradient-text">Dominate TikTok.</span>
+          <span class="bg-gradient-to-br from-[#7C3AED] via-[#06B6D4] to-[#F59E0B] bg-clip-text text-transparent">Dominate TikTok.</span>
         </h1>
 
-        <p class="hero-sub">
+        <p class="text-[18px] text-[#94A3B8] leading-[1.7] max-w-[600px] mx-auto mb-10">
           One-click movie recaps with copyright protection, custom blur &amp; watermark.
           Plus free AI-generated TikTok content with image prompts — all in one platform.
         </p>
 
-        <div class="hero-ctas">
-          <a href="/recap" class="cta-primary">
+        <div class="flex gap-4 justify-center flex-wrap mb-14">
+          <a href="/recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Start Movie Recap
           </a>
-          <a href="/blogs" class="cta-secondary">
+          <a href="/blogs" class="inline-flex items-center gap-2.5 bg-[rgba(255,255,255,0.06)] text-[#F1F5F9] no-underline text-base font-semibold px-8 py-4 rounded-[14px] border border-[rgba(255,255,255,0.12)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             Free TikTok Content
           </a>
         </div>
 
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-num">70%</span>
-            <span class="stat-label">Copyright Safe</span>
+        <div class="flex items-center justify-center gap-8 flex-wrap">
+          <div class="flex flex-col items-center gap-0.5">
+            <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">70%</span>
+            <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">Copyright Safe</span>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num">1/Click</span>
-            <span class="stat-label">Movie Recap</span>
+          <div class="w-px h-10 bg-[rgba(255,255,255,0.1)]"></div>
+          <div class="flex flex-col items-center gap-0.5">
+            <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">1/Click</span>
+            <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">Movie Recap</span>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num">Free</span>
-            <span class="stat-label">Blog Generator</span>
+          <div class="w-px h-10 bg-[rgba(255,255,255,0.1)]"></div>
+          <div class="flex flex-col items-center gap-0.5">
+            <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">Free</span>
+            <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">Blog Generator</span>
           </div>
         </div>
       </div>
 
-      <div class="film-strip film-strip-bottom">
-        <div class="film-track">
-          <span v-for="n in 24" :key="`a${n}`" class="film-hole"></span>
-          <span v-for="n in 24" :key="`b${n}`" class="film-hole"></span>
+      <div class="absolute left-0 right-0 h-[28px] bg-[rgba(255,255,255,0.025)] border-y border-[rgba(255,255,255,0.06)] flex items-center gap-6 px-6 overflow-hidden bottom-0">
+        <div class="flex gap-7 w-max animate-[film-scroll_18s_linear_infinite] motion-reduce:animate-none">
+          <span v-for="n in 24" :key="`a${n}`" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.1)]"></span>
+          <span v-for="n in 24" :key="`b${n}`" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.1)]"></span>
         </div>
       </div>
     </section>
 
     <!-- ═══════════════ PRODUCTS ═══════════════ -->
-    <section class="products-section">
-      <div class="section-inner">
-        <div class="section-eyebrow">Two Powerful Tools</div>
-        <h2 class="section-title">Everything Your Channel Needs</h2>
+    <section class="py-[120px] bg-gradient-to-b from-[#080B14] via-[#0D1120] to-[#080B14]">
+      <div class="max-w-[1200px] mx-auto px-6 lg:max-w-[1080px]">
+        <div class="text-center text-xs font-bold uppercase tracking-[2px] text-[#7C3AED] mb-3">Two Powerful Tools</div>
+        <h2 class="text-center text-[clamp(28px,4vw,44px)] font-extrabold text-[#F1F5F9] tracking-[-1px] mb-4">Everything Your Channel Needs</h2>
 
-        <div class="products-grid">
-          <div class="product-card">
-            <div class="product-glow product-glow-violet"></div>
-            <div class="product-icon-wrap">🎬</div>
-            <h3 class="product-name">Movie Recap Studio</h3>
-            <p class="product-desc">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-[6em] mt-16">
+          <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
+            <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(124,58,237,0.4)]"></div>
+            <div class="w-14 h-14 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[26px] mb-5">🎬</div>
+            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">Movie Recap Studio</h3>
+            <p class="text-[15px] text-[#64748B] leading-[1.7] mb-7">
               Turn any movie into a viral TikTok recap in seconds. Our AI handles copyright protection automatically so you can focus on growing your audience.
             </p>
-            <ul class="product-features">
-              <li v-for="feat in recapFeatures" :key="feat.label" class="feature-row">
-                <span class="feature-icon" :class="feat.available ? 'feature-yes' : 'feature-no'">{{ feat.available ? '✓' : '○' }}</span>
-                <span class="feature-label">{{ feat.label }}</span>
-                <span v-if="feat.badge" class="feature-badge">{{ feat.badge }}</span>
+            <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
+              <li v-for="feat in recapFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
+                <span
+                  class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                  :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
+                >{{ feat.available ? '✓' : '○' }}</span>
+                <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
+                <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)]">{{ feat.badge }}</span>
               </li>
             </ul>
-            <a href="/recap" class="product-cta product-cta-violet">Launch Recap Studio →</a>
+            <a href="/recap" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white">Launch Recap Studio →</a>
           </div>
 
-          <div class="product-card">
-            <div class="product-glow product-glow-cyan"></div>
-            <div class="product-icon-wrap">✍️</div>
-            <h3 class="product-name">TikTok Blog Generator</h3>
-            <p class="product-desc">
+          <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
+            <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(6,182,212,0.35)]"></div>
+            <div class="w-14 h-14 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[26px] mb-5">✍️</div>
+            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">TikTok Blog Generator</h3>
+            <p class="text-[15px] text-[#64748B] leading-[1.7] mb-7">
               Generate scroll-stopping TikTok content with matching image prompts. Add your own API key for fully custom content tailored to your niche.
             </p>
-            <ul class="product-features">
-              <li v-for="feat in blogFeatures" :key="feat.label" class="feature-row">
-                <span class="feature-icon" :class="feat.available ? 'feature-yes' : 'feature-no'">{{ feat.available ? '✓' : '○' }}</span>
-                <span class="feature-label">{{ feat.label }}</span>
-                <span v-if="feat.badge" class="feature-badge">{{ feat.badge }}</span>
+            <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
+              <li v-for="feat in blogFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
+                <span
+                  class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                  :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
+                >{{ feat.available ? '✓' : '○' }}</span>
+                <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
+                <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)]">{{ feat.badge }}</span>
               </li>
             </ul>
-            <a href="/blogs" class="product-cta product-cta-cyan">Explore Free Blogs →</a>
+            <a href="/blogs" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#0891B2] to-[#06B6D4] text-white">Explore Free Blogs →</a>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
-    <section class="how-section">
-      <div class="section-inner">
-        <div class="section-eyebrow">Workflow</div>
-        <h2 class="section-title">From Idea to Viral — Fast</h2>
-        <div class="steps-grid">
-          <div v-for="(step, i) in steps" :key="i" class="step-card">
-            <div class="step-icon">{{ step.icon }}</div>
-            <h4 class="step-title">{{ step.title }}</h4>
-            <p class="step-desc">{{ step.desc }}</p>
+    <section class="py-[120px] bg-[#080B14]">
+      <div class="max-w-[1200px] mx-auto px-6">
+        <div class="text-center text-xs font-bold uppercase tracking-[2px] text-[#7C3AED] mb-3">Workflow</div>
+        <h2 class="text-center text-[clamp(28px,4vw,44px)] font-extrabold text-[#F1F5F9] tracking-[-1px] mb-4">From Idea to Viral — Fast</h2>
+        <div class="grid grid-cols-1 min-[481px]:grid-cols-2 min-[901px]:grid-cols-4 gap-5 mt-16">
+          <div v-for="(step, i) in steps" :key="i" class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-[20px] py-8 px-6">
+            <div class="text-[32px] mb-4">{{ step.icon }}</div>
+            <h4 class="text-[17px] font-bold text-[#E2E8F0] mb-2.5">{{ step.title }}</h4>
+            <p class="text-[13px] text-[#64748B] leading-[1.65]">{{ step.desc }}</p>
           </div>
         </div>
       </div>
@@ -174,71 +180,16 @@ const steps = [
 ];
 </script>
 
-<style scoped>
-.home-root {
-  background: #080B14;
-  color: #F1F5F9;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ─── Hero ─── */
-.hero-section {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120px 24px 80px;
-  overflow: hidden;
-  text-align: center;
-}
-.orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
-.orb-violet { width: 600px; height: 600px; background: rgba(124,58,237,0.25);  top: -100px; left: -150px; }
-.orb-cyan   { width: 500px; height: 500px; background: rgba(6,182,212,0.18);   top: 100px;  right: -100px; }
-.orb-gold   { width: 300px; height: 300px; background: rgba(245,158,11,0.12);  bottom: 0;   left: 40%; }
-
-.film-strip {
-  position: absolute; left: 0; right: 0; height: 28px;
-  background: rgba(255,255,255,0.025);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex; align-items: center; gap: 24px; padding: 0 24px; overflow: hidden;
-}
-.film-strip-top    { 
-  top: 64px;
-  left: -240px;}
-.film-strip-bottom { bottom:0}
-
-.film-track {
-  display: flex;
-  gap: 28px; /* match whatever spacing your holes already use */
-  width: max-content;
-  animation: film-scroll 18s linear infinite;
-}
-
-.film-track-top{
-  display: flex;
-  gap: 28px; /* match whatever spacing your holes already use */
-  width: max-content;
-  animation: film-top 18s linear infinite;
-}
-
-
-.film-hole {
-  flex-shrink: 0; width: 14px; height: 14px; border-radius: 3px;
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-}
-
+<style>
+/*
+  Tailwind has no utility for declaring brand-new @keyframes, so these three
+  stay as plain CSS. Everything else has been moved into Tailwind classes
+  in the template above. They're referenced via Tailwind's arbitrary
+  animation syntax, e.g. animate-[film-scroll_18s_linear_infinite].
+*/
 @keyframes film-top {
   from { transform: translateX(0); }
   to   { transform: translateX(50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .film-track { animation: none; }
 }
 
 @keyframes film-scroll {
@@ -246,112 +197,8 @@ const steps = [
   to   { transform: translateX(-50%); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .film-track { animation: none; }
-}
-
-.hero-content { position: relative; z-index: 10; max-width: 780px; }
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.35);
-  color: #A78BFA; font-size: 13px; font-weight: 500;
-  padding: 6px 16px; border-radius: 100px; margin-bottom: 32px;
-}
-.badge-dot {
-  width: 7px; height: 7px; background: #7C3AED; border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
+@keyframes badge-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.5; transform: scale(0.8); }
 }
-.hero-title {
-  font-size: clamp(40px, 7vw, 80px); font-weight: 900;
-  line-height: 1.05; letter-spacing: -2px; color: #F1F5F9; margin-bottom: 24px;
-}
-.gradient-text {
-  background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 50%, #F59E0B 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.hero-sub {
-  font-size: 18px; color: #94A3B8; line-height: 1.7;
-  max-width: 600px; margin: 0 auto 40px;
-}
-.hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
-.cta-primary {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: linear-gradient(135deg, #7C3AED, #06B6D4); color: white;
-  text-decoration: none; font-size: 16px; font-weight: 700;
-  padding: 16px 32px; border-radius: 14px;
-  box-shadow: 0 0 40px rgba(124,58,237,0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.cta-primary:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(124,58,237,0.6); }
-.cta-secondary {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(255,255,255,0.06); color: #F1F5F9;
-  text-decoration: none; font-size: 16px; font-weight: 600;
-  padding: 16px 32px; border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-  transition: background 0.2s, border-color 0.2s;
-}
-.cta-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
-.hero-stats { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
-.stat-item  { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.stat-num   { font-size: 26px; font-weight: 800; color: #F1F5F9; letter-spacing: -0.5px; }
-.stat-label { font-size: 12px; color: #64748B; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-.stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.1); }
-
-/* ─── Shared ─── */
-.section-inner   { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.section-eyebrow { text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #7C3AED; margin-bottom: 12px; }
-.section-title   { text-align: center; font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: #F1F5F9; letter-spacing: -1px; margin-bottom: 16px; }
-
-/* ─── Products ─── */
-.products-section { padding: 120px 0; background: linear-gradient(180deg, #080B14 0%, #0D1120 50%, #080B14 100%); }
-.products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6em; margin-top: 64px; }
-@media (max-width: 768px) { .products-grid { grid-template-columns: 1fr; } }
-.product-card {
-  position: relative; background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;
-  padding: 40px; overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s;
-}
-.product-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
-.product-glow { position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; filter: blur(50px); pointer-events: none; }
-.product-glow-violet { background: rgba(124,58,237,0.4); }
-.product-glow-cyan   { background: rgba(6,182,212,0.35); }
-.product-icon-wrap { width: 56px; height: 56px; background: rgba(255,255,255,0.06); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 20px; }
-.product-name    { font-size: 24px; font-weight: 800; color: #F1F5F9; margin-bottom: 12px; letter-spacing: -0.5px; }
-.product-desc    { font-size: 15px; color: #64748B; line-height: 1.7; margin-bottom: 28px; }
-.product-features { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 10px; }
-.feature-row   { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-.feature-icon  { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-.feature-yes   { background: rgba(6,182,212,0.15); color: #06B6D4; }
-.feature-no    { background: rgba(255,255,255,0.05); color: #475569; }
-.feature-label { color: #CBD5E1; flex: 1; }
-.feature-badge { font-size: 10px; font-weight: 700; background: rgba(245,158,11,0.15); color: #F59E0B; padding: 2px 8px; border-radius: 100px; border: 1px solid rgba(245,158,11,0.3); }
-.product-cta   { display: inline-block; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 12px; transition: opacity 0.2s, transform 0.2s; }
-.product-cta:hover       { opacity: 0.85; transform: translateY(-1px); }
-.product-cta-violet      { background: linear-gradient(135deg, #7C3AED, #9333EA); color: white; }
-.product-cta-cyan        { background: linear-gradient(135deg, #0891B2, #06B6D4); color: white; }
-
-
-@media (min-width: 1024px) {
-  .products-section .section-inner {
-    max-width: 1080px;
-  }
-}
-
-
-/* ─── How It Works ─── */
-.how-section { padding: 120px 0; background: #080B14; }
-.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 64px; }
-@media (max-width: 900px) { .steps-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .steps-grid { grid-template-columns: 1fr; } }
-.step-card  { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 32px 24px; }
-.step-num   { font-size: 11px; font-weight: 700; color: #7C3AED; letter-spacing: 1px; margin-bottom: 16px; font-family: monospace; }
-.step-icon  { font-size: 32px; margin-bottom: 16px; }
-.step-title { font-size: 17px; font-weight: 700; color: #E2E8F0; margin-bottom: 10px; }
-.step-desc  { font-size: 13px; color: #64748B; line-height: 1.65; }
 </style>

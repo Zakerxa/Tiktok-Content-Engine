@@ -1,84 +1,88 @@
 <template>
-  <!-- ══════════════ ROOT ══════════════ -->
-  <div class="font-sans min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center px-4 py-8">
+  <div class="min-h-screen flex flex-col bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif]">
+
+    <AppNavbar :auth="auth" />
 
     <!-- ══════════════ ERROR OVERLAY ══════════════ -->
     <div
       v-if="showErrorOverlay"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
       @click.self="closeErrorPopup"
     >
-      <div class="bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-sm border border-red-100">
+      <div class="bg-[#0D1120] rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-sm border border-red-500/20">
         <div class="flex justify-center mb-4">
-          <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
-            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
+            <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
             </svg>
           </div>
         </div>
-        <h3 class="text-center text-lg font-bold text-slate-800 mb-2">လုပ်ဆောင်မှု မအောင်မြင်ပါ</h3>
-        <p class="text-center text-sm text-slate-500 mb-6 leading-relaxed">{{ errorPopupMsg }}</p>
+        <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">လုပ်ဆောင်မှု မအောင်မြင်ပါ</h3>
+        <p class="text-center text-sm text-[#94A3B8] mb-6 leading-relaxed">{{ errorPopupMsg }}</p>
         <div class="flex flex-col gap-2">
-          <button @click="closeErrorPopup" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl border-none cursor-pointer transition-colors">နားလည်ပါပြီ</button>
-          <a href="/logout" class="block text-center w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium py-2.5 rounded-xl no-underline transition-colors">Logout လုပ်မည်</a>
+          <button @click="closeErrorPopup" class="w-full bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] hover:opacity-90 text-white font-semibold py-2.5 rounded-xl border-none cursor-pointer transition-opacity">နားလည်ပါပြီ</button>
+          <a href="/logout" class="block text-center w-full bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-[#94A3B8] text-sm font-medium py-2.5 rounded-xl no-underline transition-colors">Logout လုပ်မည်</a>
         </div>
       </div>
     </div>
 
     <!-- ══════════════ MAIN CARD ══════════════ -->
-    <div class="w-full max-w-6xl bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/60 px-6 py-6 md:px-8">
+    <main class="flex-1 flex items-start justify-center px-3 py-6 sm:px-4 sm:py-10">
+    <div class="w-full max-w-6xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-3xl shadow-2xl border border-[rgba(255,255,255,0.08)] px-4 py-5 sm:px-6 sm:py-6 md:px-8">
 
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 mb-8 pb-6 border-b border-slate-100">
-        <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white p-3.5 rounded-2xl shadow-lg shadow-indigo-200 shrink-0">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3 mb-8 pb-6 border-b border-[rgba(255,255,255,0.08)]">
+        <div class="bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white p-3.5 rounded-2xl shadow-lg shadow-[#7C3AED]/30 shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 002 2v8a2 2 0 002 2z"/>
           </svg>
         </div>
         <div>
-          <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Auto Movie Recap Engine</h1>
-          <p class="text-sm font-medium text-slate-500 mt-0.5">AI-Powered Video Transcription &amp; Recap Generator</p>
+          <h1 class="text-2xl font-extrabold text-[#F1F5F9] tracking-tight">Auto Movie Recap Engine</h1>
+          <p class="text-sm font-medium text-[#94A3B8] mt-0.5">AI-Powered Video Transcription &amp; Recap Generator</p>
         </div>
       </div>
 
       <!-- Body Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-6 mb-8">
 
         <!-- ── LEFT COLUMN ── -->
         <div class="flex flex-col gap-5">
 
           <!-- Tab switcher -->
-          <div class="flex bg-slate-100 p-1.5 rounded-xl">
+          <div class="flex bg-[rgba(255,255,255,0.05)] p-1.5 rounded-xl">
             <button
               @click="switchTab('upload')"
               :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
                 activeMode === 'upload'
-                  ? 'bg-white text-indigo-600 shadow border border-slate-200/60'
-                  : 'bg-transparent text-slate-400 hover:text-slate-600']"
+                  ? 'bg-[rgba(124,58,237,0.12)] text-[#A78BFA] shadow border border-[rgba(124,58,237,0.3)]'
+                  : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']"
             >📤 Upload Video File</button>
             <button
               @click="switchTab('youtube')"
               :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
                 activeMode === 'youtube'
-                  ? 'bg-white text-indigo-600 shadow border border-slate-200/60'
-                  : 'bg-transparent text-slate-400 hover:text-slate-600']"
+                  ? 'bg-[rgba(124,58,237,0.12)] text-[#A78BFA] shadow border border-[rgba(124,58,237,0.3)]'
+                  : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']"
             >🔗 YouTube URL</button>
           </div>
 
           <!-- Upload mode -->
           <div v-show="activeMode === 'upload'">
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Select Local Video File</label>
+            <label class="block text-sm font-semibold text-[#CBD5E1] mb-2">Select Local Video File</label>
             <div
-              ref="uploadZone"
-              class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer relative bg-slate-50/50 hover:border-indigo-400 transition-colors"
-              :class="{ 'pointer-events-none opacity-60': isProcessing }"
-            >
-              <div ref="uploadIconArea" class="flex flex-col items-center justify-center py-2 pb-3 text-slate-400">
+                ref="uploadZone"
+                v-show="!$refs.videoFileInput || !$refs.videoFileInput.files || !$refs.videoFileInput.files.length"
+                class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-2xl p-6 text-center cursor-pointer relative bg-[rgba(255,255,255,0.02)] hover:border-[#7C3AED] transition-colors"
+                :class="{ 'pointer-events-none opacity-60': isProcessing }"
+              >
+              <div ref="uploadIconArea" class="flex flex-col items-center justify-center py-2 pb-3 text-[#64748B]">
                 <input
                   ref="videoFileInput"
                   type="file"
+                  v-show="!hasVideoSelected"
                   accept="video/mp4,video/x-matroska,video/quicktime,video/*"
                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   :disabled="isProcessing"
@@ -90,12 +94,12 @@
                 </svg>
                 <p ref="uploadPlaceholder" class="text-sm font-semibold">Click to upload or drag &amp; drop video</p>
               </div>
-              <p ref="uploadFormats" class="text-xs text-slate-400 mt-1 opacity-70">MP4, MKV, MOV (Max 2GB)</p>
+              <p ref="uploadFormats" class="text-xs text-[#64748B] mt-1 opacity-70">MP4, MKV, MOV (Max 2GB)</p>
             </div>
 
             <!-- Video preview -->
-            <div ref="videoPreviewContainer" class="mt-4 p-4 rounded-2xl border border-slate-200/60 bg-slate-100 justify-center items-center" style="display:none">
-              <div ref="previewFrame" class="relative w-full max-w-[280px] mx-auto bg-black rounded-xl overflow-hidden shadow-2xl border-4 border-slate-800" style="aspect-ratio:9/16">
+            <div ref="videoPreviewContainer" class="mt-3 p-3 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] justify-center items-center" style="display:none">
+              <div ref="previewFrame" class="relative w-full max-w-[350px] mx-auto bg-black rounded-xl overflow-hidden shadow-2xl border-4 border-slate-800" style="aspect-ratio:9/16">
 
                 <button type="button" @click="removeSelectedVideo"
                   class="absolute top-3 right-3 z-50 p-2 rounded-full bg-black/50 hover:bg-red-600 border-none text-white cursor-pointer transition-colors">
@@ -122,36 +126,38 @@
 
           <!-- YouTube mode -->
           <div v-show="activeMode === 'youtube'">
-            <label class="block text-sm font-semibold text-slate-700 mb-2">YouTube Video URL</label>
+            <label class="block text-sm font-semibold text-[#CBD5E1] mb-2">YouTube Video URL</label>
             <input
               ref="urlInput"
               type="text"
               placeholder="https://www.youtube.com/watch?v=..."
-              class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-700 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 placeholder:text-slate-400"
+              class="w-full px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] text-sm text-[#F1F5F9] outline-none transition-all focus:border-[#7C3AED] focus:ring-4 focus:ring-[#7C3AED]/15 placeholder:text-[#64748B]"
               :disabled="isProcessing"
             />
           </div>
         </div>
 
         <!-- ── RIGHT COLUMN ── -->
-        <div class="flex flex-col gap-5">
-          <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">⚙️ Processing Settings</h3>
+        <div class="flex flex-col gap-5 mt-2 lg:mt-0">
+          <!-- Mobile divider -->
+          <div class="lg:hidden border-t border-[rgba(255,255,255,0.08)] pt-4"></div>
+          <h3 class="text-lg font-bold text-[#F1F5F9] flex items-center gap-2">⚙️ Processing Settings</h3>
 
-          <div class="bg-slate-50/80 rounded-2xl p-6 border border-slate-200/60 shadow-sm flex flex-col gap-4">
+          <div class="bg-[rgba(255,255,255,0.02)] rounded-2xl p-4 sm:p-6 border border-[rgba(255,255,255,0.06)] shadow-sm flex flex-col gap-4">
 
             <!-- Voiceover toggle -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm">
+            <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
               <div class="flex justify-between items-center mb-3">
-                <label class="font-bold text-slate-600 text-sm">Enable AI 🎙️ Voiceover</label>
+                <label class="font-bold text-[#CBD5E1] text-sm">Enable AI 🎙️ Voiceover</label>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input ref="enableVoiceover" type="checkbox" class="sr-only peer" @change="toggleVoiceover" :disabled="isProcessing"/>
-                  <div class="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors"></div>
-                  <div class="absolute top-0.5 left-0.5 bg-white border border-slate-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
+                  <div class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors"></div>
+                  <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
                 </label>
               </div>
               <div ref="voiceoverContainer" class="opacity-50 pointer-events-none transition-all">
-                <label class="block text-xs font-semibold text-slate-500 mb-2">Voiceover Character</label>
-                <select ref="voiceModel" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 cursor-pointer outline-none focus:border-indigo-500" :disabled="isProcessing">
+                <label class="block text-xs font-semibold text-[#64748B] mb-2">Voiceover Character</label>
+                <select ref="voiceModel" class="w-full px-4 py-3 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] text-sm text-[#F1F5F9] cursor-pointer outline-none focus:border-[#7C3AED]" :disabled="isProcessing">
                   <optgroup label="Burmese (မြန်မာအသံ)">
                     <option value="my-MM-NilarNeural">🇲🇲 Nilar (Female - Default)</option>
                     <option value="my-MM-ThihaNeural" selected>🇲🇲 Thiha (Male)</option>
@@ -165,15 +171,15 @@
             </div>
 
             <!-- Blur region -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200/60 shadow-sm">
-              <label class="font-bold text-slate-600 text-sm block mb-2">🌀 Blur Region</label>
-              <p class="text-xs text-slate-400 mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
+            <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+              <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
+              <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
               <div class="flex flex-wrap gap-2 items-center">
-                <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
+                <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
                 <div class="flex flex-wrap gap-2 mt-2">
-                  <div class="bg-blue-50 px-2 py-1 rounded-md text-xs font-semibold text-indigo-600 font-mono">X: <span>{{ blurX.toFixed(2) }}</span>%</div>
-                  <div class="bg-blue-50 px-2 py-1 rounded-md text-xs font-semibold text-indigo-600 font-mono">Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
-                  <div class="bg-blue-50 px-2 py-1 rounded-md text-xs font-semibold text-indigo-600 font-mono">H: <span>{{ blurH.toFixed(2) }}</span>%</div>
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">X: <span>{{ blurX.toFixed(2) }}</span>%</div>
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">H: <span>{{ blurH.toFixed(2) }}</span>%</div>
                 </div>
               </div>
             </div>
@@ -183,35 +189,35 @@
               <label class="inline-flex items-center cursor-pointer gap-3">
                 <div class="relative inline-flex items-center">
                   <input ref="enableSubtitles" type="checkbox" class="sr-only peer" :disabled="isProcessing"/>
-                  <div class="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors"></div>
-                  <div class="absolute top-0.5 left-0.5 bg-white border border-slate-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
+                  <div class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors"></div>
+                  <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
                 </div>
-                <span class="text-sm font-medium text-slate-600">Auto Subtitles</span>
+                <span class="text-sm font-medium text-[#CBD5E1]">Auto Subtitles</span>
               </label>
               <label class="inline-flex items-center cursor-pointer gap-3">
                 <div class="relative inline-flex items-center">
                   <input ref="enableFlip" type="checkbox" class="sr-only peer" :disabled="isProcessing"/>
-                  <div class="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors"></div>
-                  <div class="absolute top-0.5 left-0.5 bg-white border border-slate-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
+                  <div class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors"></div>
+                  <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
                 </div>
-                <span class="text-sm font-medium text-slate-600">Mirror Mode</span>
+                <span class="text-sm font-medium text-[#CBD5E1]">Mirror Mode</span>
               </label>
               <label class="inline-flex items-center cursor-pointer gap-3 col-span-2">
                 <div class="relative inline-flex items-center">
                   <input ref="enableWatermark" type="checkbox" class="sr-only peer" @change="waterMarkToggle" :disabled="isProcessing"/>
-                  <div class="w-11 h-6 bg-slate-300 peer-checked:bg-indigo-600 rounded-full transition-colors"></div>
-                  <div class="absolute top-0.5 left-0.5 bg-white border border-slate-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
+                  <div class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors"></div>
+                  <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm"></div>
                 </div>
-                <span class="text-sm font-medium text-slate-600">Enable Watermark Logo</span>
+                <span class="text-sm font-medium text-[#CBD5E1]">Enable Watermark Logo</span>
               </label>
             </div>
 
             <!-- Watermark upload -->
-            <div ref="watermarkUploadSection" class="mt-2 p-4 bg-white rounded-xl border border-slate-200 shadow-sm" style="display:none">
-              <label class="block text-sm font-semibold text-slate-700 mb-3">Upload &amp; Drag Logo</label>
+            <div ref="watermarkUploadSection" class="mt-2 p-4 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm" style="display:none">
+              <label class="block text-sm font-semibold text-[#CBD5E1] mb-3">Upload &amp; Drag Logo</label>
               <div class="flex gap-4 items-center">
-                <label class="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-slate-300 hover:border-indigo-500 hover:bg-indigo-50 rounded-xl cursor-pointer transition-all group">
-                  <div class="flex flex-col items-center text-slate-400 group-hover:text-indigo-500">
+                <label class="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group">
+                  <div class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -220,12 +226,12 @@
                   </div>
                   <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="previewLogo" :disabled="isProcessing"/>
                 </label>
-                <div class="flex-1 bg-slate-50 border border-slate-100 rounded-lg p-3 text-xs text-slate-400">
-                  <p class="font-semibold text-slate-700 mb-1">Logo Position</p>
+                <div class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
+                  <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
                   <p>Upload a logo, then drag it around the video player to set position.</p>
-                  <div class="flex gap-3 font-mono text-indigo-600 font-bold mt-2">
-                    <div class="bg-blue-50 px-2 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
-                    <div class="bg-blue-50 px-2 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
+                  <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
+                    <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
+                    <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
                   </div>
                 </div>
               </div>
@@ -239,8 +245,8 @@
             :disabled="isProcessing"
             :class="['w-full py-4 rounded-xl text-base font-semibold border-none cursor-pointer flex items-center justify-center gap-2 transition-all mt-2',
               isProcessing
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200']"
+                ? 'bg-[rgba(255,255,255,0.08)] text-[#64748B] cursor-not-allowed'
+                : 'bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] hover:opacity-90 text-white shadow-lg shadow-[#7C3AED]/30']"
           >
             <span>{{ isProcessing ? 'Processing Video... Please wait' : 'Generate Recap Video' }}</span>
           </button>
@@ -248,54 +254,58 @@
       </div>
 
       <!-- ══════════════ STATUS CARD ══════════════ -->
-      <div class="border border-slate-200/80 rounded-2xl px-6 py-5 bg-slate-50/50">
-        <h3 class="font-bold text-slate-800 mb-5 flex items-center gap-2 text-base">
+      <div class="border border-[rgba(255,255,255,0.08)] rounded-2xl px-6 py-5 bg-[rgba(255,255,255,0.02)]">
+        <h3 class="font-bold text-[#F1F5F9] mb-5 flex items-center gap-2 text-base">
           <span v-if="isProcessing" class="relative inline-flex w-2.5 h-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full w-2.5 h-2.5 bg-indigo-600"></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7C3AED] opacity-60"></span>
+            <span class="relative inline-flex rounded-full w-2.5 h-2.5 bg-[#7C3AED]"></span>
           </span>
           Processing Pipeline Status
         </h3>
 
         <!-- Upload progress -->
         <div v-if="uploadProgress" class="mb-5">
-          <div :class="['bg-white border rounded-xl p-4 shadow-sm', uploadProgress.done ? 'border-emerald-200' : 'border-indigo-200']">
+          <div :class="['bg-[rgba(255,255,255,0.03)] border rounded-xl p-4 shadow-sm', uploadProgress.done ? 'border-emerald-500/30' : 'border-[#7C3AED]/30']">
             <div class="flex items-center gap-2">
               <span class="relative flex h-2.5 w-2.5">
-                <span :class="['animate-ping absolute inline-flex h-full w-full rounded-full opacity-75', uploadProgress.done ? 'bg-emerald-400' : 'bg-indigo-400']"></span>
-                <span :class="['relative inline-flex rounded-full h-2.5 w-2.5', uploadProgress.done ? 'bg-emerald-500' : 'bg-indigo-500']"></span>
+                <span :class="['animate-ping absolute inline-flex h-full w-full rounded-full opacity-60', uploadProgress.done ? 'bg-emerald-400' : 'bg-[#7C3AED]']"></span>
+                <span :class="['relative inline-flex rounded-full h-2.5 w-2.5', uploadProgress.done ? 'bg-emerald-500' : 'bg-[#7C3AED]']"></span>
               </span>
-              <span :class="['text-sm font-bold', uploadProgress.done ? 'text-emerald-700 animate-pulse' : 'text-indigo-700']">
+              <span :class="['text-sm font-bold', uploadProgress.done ? 'text-emerald-400 animate-pulse' : 'text-[#A78BFA]']">
                 {{ uploadProgress.done ? '✅ Upload complete. Starting pipeline...' : `📡 Uploading to Server... ${uploadProgress.pct}%` }}
               </span>
-              <span v-if="!uploadProgress.done" class="ml-auto text-xs text-slate-400 font-mono">{{ uploadProgress.current }} / {{ uploadProgress.total }} chunks</span>
+              <span v-if="!uploadProgress.done" class="ml-auto text-xs text-[#64748B] font-mono">{{ uploadProgress.current }} / {{ uploadProgress.total }} chunks</span>
             </div>
-            <div v-if="!uploadProgress.done" class="w-full bg-slate-100 rounded-full h-2 overflow-hidden mt-3">
-              <div class="h-full rounded-full bg-indigo-500 transition-all duration-300" :style="`width:${uploadProgress.pct}%`"></div>
+            <div v-if="!uploadProgress.done" class="w-full bg-[rgba(255,255,255,0.08)] rounded-full h-2 overflow-hidden mt-3">
+              <div class="h-full rounded-full bg-[#7C3AED] transition-all duration-300" :style="`width:${uploadProgress.pct}%`"></div>
             </div>
           </div>
         </div>
 
         <!-- Pipeline steps -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
-          <div v-for="(step, idx) in pipelineSteps" :key="idx" class="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm">
+          <div v-for="(step, idx) in pipelineSteps" :key="idx" class="bg-[rgba(255,255,255,0.03)] p-3.5 rounded-xl border border-[rgba(255,255,255,0.06)] shadow-sm">
             <div :class="['font-semibold flex flex-col gap-1', step.colorClass]">
               <span class="flex items-center gap-1 text-xs">{{ step.icon }} <span>{{ step.label }}</span></span>
               <span v-if="step.showPct" :class="['font-mono text-xs', step.pctClass]">{{ step.pctText }}</span>
             </div>
-            <div v-if="step.showBar" class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+            <div v-if="step.showBar" class="w-full bg-[rgba(255,255,255,0.08)] rounded-full h-1.5 mt-2 overflow-hidden">
               <div :class="['h-full rounded-full transition-all duration-300', step.barClass]" :style="`width:${step.pct}%`"></div>
             </div>
           </div>
         </div>
 
         <!-- Inline error -->
-        <div v-if="inlineError" class="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-medium">
+        <div v-if="inlineError" class="mt-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-sm font-medium">
           <span class="font-bold">Error Occurred: </span>{{ inlineError }}
         </div>
       </div>
 
     </div>
+    </main>
+
+    <AppFooter />
+
   </div>
 </template>
 
@@ -328,6 +338,7 @@ export default {
 
       // upload progress  (null = hidden)
       uploadProgress: null,
+      hasVideoSelected: false,
 
       // pipeline
       stepCurrent:  0,
@@ -418,6 +429,8 @@ export default {
         this.removeSelectedVideo(); return;
       }
 
+      this.hasVideoSelected = true;
+
       if (this.$refs.uploadPlaceholder) {
         this.$refs.uploadPlaceholder.innerHTML = `Selected File: <span style="color:#4F46E5;font-weight:700">${file.name}</span>`;
       }
@@ -445,6 +458,7 @@ export default {
       if (this.$refs.uploadIconArea)        this.$refs.uploadIconArea.style.display  = 'flex';
       if (this.$refs.uploadFormats)         this.$refs.uploadFormats.style.display   = 'block';
       if (this.$refs.uploadPlaceholder)     this.$refs.uploadPlaceholder.innerText   = 'Click to upload or drag & drop video';
+      this.hasVideoSelected = false;
     },
 
     // ─── Logo drag ───
@@ -609,7 +623,7 @@ export default {
     // ─── Poll status ───
     async pollStatus(jobId) {
       try {
-        const res = await fetch(`/status/${jobId}`);
+        const res = await fetch(`https://recap.zakerxa.com/status/${jobId}`);
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }
@@ -621,7 +635,7 @@ export default {
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
             const link    = document.createElement('a');
-            link.href     = `/download/${jobId}`;
+            link.href = `https://recap.zakerxa.com/download/${jobId}`;
             link.download = 'Recap_Ready.mp4';
             document.body.appendChild(link);
             link.click();

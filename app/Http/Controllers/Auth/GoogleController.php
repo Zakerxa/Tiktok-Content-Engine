@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class GoogleController extends Controller
 {
@@ -36,6 +37,7 @@ class GoogleController extends Controller
                 $user->update([
                     'google_id' => $googleUser->getId(),
                     'avatar'    => $googleUser->getAvatar(),
+                    'email_verified_at' => $user->email_verified_at ?? now()
                 ]);
             }
         } else {
@@ -45,9 +47,11 @@ class GoogleController extends Controller
                 'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'avatar'    => $googleUser->getAvatar(),
-                'password'  => bcrypt(\Str::random(32)), // Google login မို့ random
+                'password'  => bcrypt(Str::random(32)), // Google login မို့ random
                 'role_name' => 'tester',
                 'is_active' => true,
+                'recap_limit' => 1,
+                'email_verified_at' => now(),
             ]);
         }
 
