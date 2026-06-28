@@ -5,21 +5,21 @@
 
         <div class="footer-brand">
           <a href="/" class="footer-logo">
-            <span class="logo-icon">▶</span>
-            <span class="logo-text">ReelAI</span>
+            <img src="/favicon.png" alt="icon" class="logo-icon" srcset="">
+                    <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
           </a>
           <p class="footer-tagline">The AI content studio built for Myanmar TikTok creators.</p>
           <div class="footer-socials">
-            <a href="#" class="social-link">TikTok</a>
-            <a href="#" class="social-link">Facebook</a>
-            <a href="#" class="social-link">Telegram</a>
+            <a href="https://www.tiktok.com/@z.a.k.e.r.x.a" class="social-link">TikTok</a>
+            <a href="https://t.me/+PgQX0UwLGIRhYTU1" target="_blank" class="social-link">Telegram Channel</a>
+            <a href="https://t.me/+6hc4y3AceQJmNTQ1" target="_blank" class="social-link">Telegram Group</a>
           </div>
         </div>
 
         <div class="footer-links-group">
           <h4 class="footer-group-title">Products</h4>
-          <a href="/recap" class="footer-link">Movie Recap Studio</a>
-          <a href="/blogs" class="footer-link">TikTok Blog Generator</a>
+          <a href="/movie-recap" class="footer-link">Movie Recap Studio</a>
+          <a href="/blogs" class="footer-link">TikTok Posts Generator</a>
           <a href="/dashboard" class="footer-link">Dashboard</a>
         </div>
 
@@ -32,15 +32,15 @@
 
         <div class="footer-links-group">
           <h4 class="footer-group-title">Support</h4>
-          <a href="#" class="footer-link">How It Works</a>
-          <a href="#" class="footer-link">FAQ</a>
-          <a href="#" class="footer-link">Contact Us</a>
+          <a href="/Disclaimer" class="footer-link">Disclaimer</a>
+          <a href="/Policy" class="footer-link">Privacy & Policy</a>
+          <a href="/ContactUs" class="footer-link">Contact Us</a>
         </div>
 
       </div>
 
       <div class="footer-bottom">
-        <p class="footer-copy">© {{ year }} ReelAI Studio. All rights reserved.</p>
+        <p class="footer-copy">© {{ year }} Z.A.K.E.R.X.A Studio. All rights reserved.</p>
         <p class="footer-made">Made with ♥ for Myanmar Creators</p>
       </div>
     </div>
@@ -80,23 +80,6 @@ const year = new Date().getFullYear();
   gap: 8px;
   text-decoration: none;
   margin-bottom: 16px;
-}
-.logo-icon {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #7C3AED, #06B6D4);
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: white;
-}
-.logo-text {
-  font-size: 18px;
-  font-weight: 800;
-  color: #F1F5F9;
-  letter-spacing: -0.5px;
 }
 .footer-tagline {
   font-size: 14px;

@@ -32,7 +32,7 @@ class TikTokPostController extends Controller
     {
 
         $posts = TikTokPost::orderBy('id', 'desc')
-            ->paginate(6)
+            ->paginate(12)
             ->withQueryString()
             ->through(fn($post) => [
                 'id' => $post->id,
@@ -49,6 +49,33 @@ class TikTokPostController extends Controller
 
 
         return Inertia::render('Blogs/Index', [
+            'posts' => $posts,
+            'stats' => $this->getTopicStats(),
+            'currentTopic' => null
+        ]);
+    }
+
+    public function dashboardIndex()
+    {
+
+        $posts = TikTokPost::orderBy('id', 'desc')
+            ->paginate(18)
+            ->withQueryString()
+            ->through(fn($post) => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'slug' => $post->slug,
+                'cover_title_burmese' => $post->cover_title_burmese,
+                'content' => $post->content,
+                'topic' => str_replace('TOPICS_', '', $post->topic),
+                'image_path' => $post->image_path,
+                'model_used' => $post->model_used,
+                'created_at' => $post->created_at?->format('M d, Y') ?? 'Recent',
+            ]);
+
+
+
+        return Inertia::render('Blogs/DashboardShow', [
             'posts' => $posts,
             'stats' => $this->getTopicStats(),
             'currentTopic' => null

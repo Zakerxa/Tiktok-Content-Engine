@@ -1,9 +1,9 @@
 <template>
   <Head title="Dashboard" />
 
-  <div class="dash-root">
-    <AppNavbar :auth="$page.props.auth" />
+  <AppSidebar :auth="$page.props.auth">
 
+  <div class="dash-root">
     <!-- Ambient brand orbs -->
     <div class="orb orb-violet"></div>
     <div class="orb orb-cyan"></div>
@@ -201,10 +201,12 @@
 
     </main>
   </div>
+
+  </AppSidebar>
 </template>
 
 <script setup>
-import AppNavbar from '@/Components/AppNavbar.vue';
+import AppSidebar from '@/Components/AppSidebar.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
@@ -349,7 +351,7 @@ const formattedExpiry = computed(() => {
 .dash-main {
   position: relative; z-index: 5;
   max-width: 1100px; margin: 0 auto;
-  padding: 140px 24px 100px;
+  padding: 40px 24px 100px;
   display: flex; flex-direction: column; gap: 28px;
 }
 
@@ -527,7 +529,7 @@ const formattedExpiry = computed(() => {
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .dash-main { padding: 120px 16px 80px; gap: 20px; }
+  .dash-main { padding: 80px 16px 80px; gap: 20px; }
   .profile-strip { padding: 22px 20px; flex-direction: column; align-items: flex-start; }
   .stat-card { padding: 22px; }
   .posts-section { padding: 20px; }

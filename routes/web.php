@@ -22,8 +22,8 @@ Route::get('/blogs/{post:slug}', [TikTokPostController::class, 'show'])->name('p
 Route::get('/blogs/topics/{topic}', [TikTokPostController::class, 'category'])->name('topics.show');
 
 // ─── Recap Main Page ───
-Route::get('/recap', function (Request $request) {
-   $userData = $request->user() ? [
+Route::get('/movie-recap', function (Request $request) {
+    $userData = $request->user() ? [
         'username'  => $request->user()->username,
         'role_name' => $request->user()->role_name,
     ] : null;
@@ -31,7 +31,10 @@ Route::get('/recap', function (Request $request) {
     return Inertia::render('MovieRecap/Show', [
         'user' => $userData,
     ]);
-})->name('recap.show');
+})->name('recap.index');
+
+
+
 
 // ─── Google OAuth ───
 Route::get('/auth/google',          [GoogleController::class, 'redirect'])->name('google.redirect');
@@ -62,64 +65,6 @@ Route::post('/logout', function (Request $request) {
 })->name('logout');
 
 
-// ─── Dashboard ───
-Route::get('/dashboard', function (Request $request) {
-    $userId = $request->user()->id;
-
-    $query = TikTokPost::query()->where('user_id', $userId);
-
-    if ($request->filled('search')) {
-        $query->where(function ($q) use ($request) {
-            $q->where('title', 'like', '%' . $request->search . '%')
-                ->orWhere('cover_title_burmese', 'like', '%' . $request->search . '%');
-        });
-    }
-    if ($request->filled('topic')) {
-        $rawTopic = str_starts_with($request->topic, 'TOPICS_') ? $request->topic : 'TOPICS_' . $request->topic;
-        $query->where('topic', $rawTopic);
-    }
-
-    $posts = $query->orderBy('id', 'desc')
-        ->paginate(6)
-        ->withQueryString()
-        ->through(fn($post) => [
-            'id'                  => $post->id,
-            'title'               => $post->title,
-            'slug'                => $post->slug,
-            'cover_title_burmese' => $post->cover_title_burmese,
-            'content'             => $post->content,
-            'topic'               => str_replace('TOPICS_', '', $post->topic),
-            'image_path'          => $post->image_path,
-            'model_used'          => $post->model_used,
-            'created_at'          => $post->created_at?->format('M d, Y') ?? 'Recent',
-        ]);
-
-    $stats = TikTokPost::select('topic', DB::raw('count(*) as total'))
-        ->where('user_id', $userId)
-        ->whereNotNull('topic')
-        ->groupBy('topic')
-        ->get()
-        ->map(fn($stat) => [
-            'clean' => str_replace('TOPICS_', '', $stat->topic),
-            'total' => $stat->total,
-        ]);
-
-    return Inertia::render('Dashboard', [
-        'posts'   => $posts,
-        'stats'   => $stats,
-        'filters' => $request->only(['search', 'topic']),
-        'user'    => [
-            'username'         => $request->user()->username,
-            'email'            => $request->user()->email,
-            'avatar'           => $request->user()->avatar,
-            'role_name'        => $request->user()->role_name,
-            'recap_limit'      => $request->user()->recap_limit,
-            'total_recap_used' => $request->user()->total_recap_used,
-            'plan_expires_at'  => $request->user()->plan_expires_at,
-            'is_active'        => $request->user()->is_active,
-        ],
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -128,6 +73,95 @@ Route::middleware('auth')->group(function () {
     Route::delete('/posts/{id}', [TikTokPostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/posts/edit/{id}', [TikTokPostController::class, 'edit'])->name('posts.edit');
     Route::post('/posts/{id}', [TikTokPostController::class, 'update'])->name('posts.update');
+
+
+    // ─── Dashboard ───
+    Route::get('/dashboard', function (Request $request) {
+        $userId = $request->user()->id;
+
+        $query = TikTokPost::query()->where('user_id', $userId);
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                    ->orWhere('cover_title_burmese', 'like', '%' . $request->search . '%');
+            });
+        }
+        if ($request->filled('topic')) {
+            $rawTopic = str_starts_with($request->topic, 'TOPICS_') ? $request->topic : 'TOPICS_' . $request->topic;
+            $query->where('topic', $rawTopic);
+        }
+
+        $posts = $query->orderBy('id', 'desc')
+            ->paginate(6)
+            ->withQueryString()
+            ->through(fn($post) => [
+                'id'                  => $post->id,
+                'title'               => $post->title,
+                'slug'                => $post->slug,
+                'cover_title_burmese' => $post->cover_title_burmese,
+                'content'             => $post->content,
+                'topic'               => str_replace('TOPICS_', '', $post->topic),
+                'image_path'          => $post->image_path,
+                'model_used'          => $post->model_used,
+                'created_at'          => $post->created_at?->format('M d, Y') ?? 'Recent',
+            ]);
+
+        $stats = TikTokPost::select('topic', DB::raw('count(*) as total'))
+            ->where('user_id', $userId)
+            ->whereNotNull('topic')
+            ->groupBy('topic')
+            ->get()
+            ->map(fn($stat) => [
+                'clean' => str_replace('TOPICS_', '', $stat->topic),
+                'total' => $stat->total,
+            ]);
+
+        return Inertia::render('Dashboard', [
+            'posts'   => $posts,
+            'stats'   => $stats,
+            'filters' => $request->only(['search', 'topic']),
+            'user'    => [
+                'username'         => $request->user()->username,
+                'email'            => $request->user()->email,
+                'avatar'           => $request->user()->avatar,
+                'role_name'        => $request->user()->role_name,
+                'recap_limit'      => $request->user()->recap_limit,
+                'total_recap_used' => $request->user()->total_recap_used,
+                'plan_expires_at'  => $request->user()->plan_expires_at,
+                'is_active'        => $request->user()->is_active,
+            ],
+        ]);
+    })->middleware(['verified'])->name('dashboard');
+
+
+    Route::get('/dashboard/recap', function (Request $request) {
+        $userData = $request->user() ? [
+            'username'  => $request->user()->username,
+            'role_name' => $request->user()->role_name,
+        ] : null;
+
+        return Inertia::render('MovieRecap/DashboardRecap', [
+            'user' => $userData,
+        ]);
+    })->name('recap.dashboardrecap');
+
+    Route::get('/dashboard/posts', [TikTokPostController::class, 'dashboardIndex'])->name('blogs.dashboardshow');
 });
 
+
+Route::get('/About', function () {
+    return Inertia::render('About');
+})->name('About');
+Route::get('/ContactUs', function () {
+    return Inertia::render('ContactUs');
+})->name('ContactUs');
+Route::get('/Policy', function () {
+    return Inertia::render('Policy');
+})->name('Policy');
+Route::get('/Disclaimer', function () {
+    return Inertia::render('Disclaimer');
+})->name('Disclaimer');
+
 require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';

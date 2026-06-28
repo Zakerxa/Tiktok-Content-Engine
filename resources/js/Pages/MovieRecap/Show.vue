@@ -28,7 +28,7 @@
     </div>
 
     <!-- ══════════════ MAIN CARD ══════════════ -->
-    <main class="flex-1 flex items-start justify-center px-3 py-6 sm:px-4 sm:py-10">
+    <main class="flex-1 flex items-start justify-center px-3 mt-20 py-6 sm:px-4 sm:py-10">
     <div class="w-full max-w-6xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-3xl shadow-2xl border border-[rgba(255,255,255,0.08)] px-4 py-5 sm:px-6 sm:py-6 md:px-8">
 
       <!-- Header -->
@@ -310,12 +310,18 @@
 </template>
 
 <script>
+import AppNavbar from '@/Components/AppNavbar.vue';
+import AppFooter from '@/Components/AppFooter.vue';
 export default {
   name: 'MovieRecapShow',
 
   props: {
     auth: Object,
     user: Object 
+  },
+  components:{
+    AppFooter,
+    AppNavbar
   },
 
   // ══════════════════════════════════════════
@@ -463,15 +469,19 @@ export default {
 
     // ─── Logo drag ───
     previewLogo(event) {
-      const file = event.target.files[0];
-      const img  = this.$refs.watermarkLogo;
-      if (!file || !img) return;
-      img.src           = URL.createObjectURL(file);
-      img.style.display = 'block';
-      img.style.width   = '60px';
-      img.style.left    = '10px';
-      img.style.top     = '10px';
-      img.onload = () => this.updateLogoCoordinates();
+        const file = event.target.files[0];
+        const img  = this.$refs.watermarkLogo;
+        if (!file || !img) return;
+        img.src           = URL.createObjectURL(file);
+        img.style.display = 'block';
+        img.style.width   = '60px';
+        img.style.left    = '10px';
+        img.style.top     = '10px';
+        img.onload = () => this.updateLogoCoordinates();
+      
+        // Logo show ဖြစ်တဲ့အချိန် touch listener တပ်မည်
+        img.removeEventListener('touchstart', this.logoDragStart);
+        img.addEventListener('touchstart', this.logoDragStart, { passive: false });
     },
 
     updateLogoCoordinates() {
@@ -482,9 +492,13 @@ export default {
       this.logoY = (img.offsetTop  / frame.clientHeight) * 100;
     },
 
+    // ─── Logo drag ───
     logoDragStart(e) {
+      const pt = e.touches ? e.touches[0] : e;
+      e.preventDefault();
       this._logoIsDragging = true;
-      this._logoStartX = e.clientX; this._logoStartY = e.clientY;
+      this._logoStartX   = pt.clientX;
+      this._logoStartY   = pt.clientY;
       this._logoInitialX = this.$refs.watermarkLogo.offsetLeft;
       this._logoInitialY = this.$refs.watermarkLogo.offsetTop;
       this.$refs.watermarkLogo.style.cursor = 'grabbing';
@@ -492,11 +506,12 @@ export default {
     logoDrag(e) {
       if (!this._logoIsDragging) return;
       e.preventDefault();
+      const pt    = e.touches ? e.touches[0] : e;
       const img   = this.$refs.watermarkLogo;
       const frame = this.$refs.previewFrame;
       if (!img || !frame) return;
-      let nx = this._logoInitialX + (e.clientX - this._logoStartX);
-      let ny = this._logoInitialY + (e.clientY - this._logoStartY);
+      let nx = this._logoInitialX + (pt.clientX - this._logoStartX);
+      let ny = this._logoInitialY + (pt.clientY - this._logoStartY);
       nx = Math.max(0, Math.min(nx, frame.clientWidth  - img.clientWidth));
       ny = Math.max(0, Math.min(ny, frame.clientHeight - img.clientHeight));
       img.style.left = nx + 'px';
@@ -507,24 +522,27 @@ export default {
       this._logoIsDragging = false;
       if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.style.cursor = 'grab';
     },
-
+    
     // ─── Blur drag ───
     blurDragStart(e) {
+      const pt = e.touches ? e.touches[0] : e;
+      e.preventDefault();
       this._blurIsDragging = true;
-      this._blurStartX = e.clientX; this._blurStartY = e.clientY;
+      this._blurStartX   = pt.clientX;
+      this._blurStartY   = pt.clientY;
       this._blurInitialX = this.$refs.blurBoxEl.offsetLeft;
       this._blurInitialY = this.$refs.blurBoxEl.offsetTop;
       this.$refs.blurBoxEl.style.cursor = 'grabbing';
-      e.preventDefault();
     },
     blurDrag(e) {
       if (!this._blurIsDragging) return;
       e.preventDefault();
+      const pt    = e.touches ? e.touches[0] : e;
       const box   = this.$refs.blurBoxEl;
       const frame = this.$refs.previewFrame;
       if (!box || !frame) return;
-      let nx = this._blurInitialX + (e.clientX - this._blurStartX);
-      let ny = this._blurInitialY + (e.clientY - this._blurStartY);
+      let nx = this._blurInitialX + (pt.clientX - this._blurStartX);
+      let ny = this._blurInitialY + (pt.clientY - this._blurStartY);
       nx = Math.max(0, Math.min(nx, frame.clientWidth  - box.clientWidth));
       ny = Math.max(0, Math.min(ny, frame.clientHeight - box.clientHeight));
       box.style.left = nx + 'px';
@@ -772,26 +790,42 @@ export default {
   // lifecycle hooks
   // ══════════════════════════════════════════
   mounted() {
-    // Logo drag listeners
+    // Logo — mousedown သာ (touchstart က previewLogo မှာ တပ်မည်)
     if (this.$refs.watermarkLogo) {
       this.$refs.watermarkLogo.addEventListener('mousedown', this.logoDragStart);
     }
-    document.addEventListener('mousemove', this.logoDrag);
-    document.addEventListener('mouseup',   this.logoDragEnd);
-
-    // Blur drag listeners
+    // Logo move/end — mouse + touch
+    document.addEventListener('mousemove',   this.logoDrag);
+    document.addEventListener('mouseup',     this.logoDragEnd);
+    document.addEventListener('touchmove',   this.logoDrag,    { passive: false });
+    document.addEventListener('touchend',    this.logoDragEnd);
+    document.addEventListener('touchcancel', this.logoDragEnd);
+  
+    // Blur — mousedown + touchstart နှစ်ခုလုံး (blur box က mounted အချိန်ကတည်းက DOM မှာ ရှိသည်)
     if (this.$refs.blurBoxEl) {
-      this.$refs.blurBoxEl.addEventListener('mousedown', this.blurDragStart);
+      this.$refs.blurBoxEl.addEventListener('mousedown',  this.blurDragStart);
+      this.$refs.blurBoxEl.addEventListener('touchstart', this.blurDragStart, { passive: false });
     }
-    document.addEventListener('mousemove', this.blurDrag);
-    document.addEventListener('mouseup',   this.blurDragEnd);
+    // Blur move/end — mouse + touch
+    document.addEventListener('mousemove',   this.blurDrag);
+    document.addEventListener('mouseup',     this.blurDragEnd);
+    document.addEventListener('touchmove',   this.blurDrag,    { passive: false });
+    document.addEventListener('touchend',    this.blurDragEnd);
+    document.addEventListener('touchcancel', this.blurDragEnd);
   },
-
+  
   beforeUnmount() {
-    document.removeEventListener('mousemove', this.logoDrag);
-    document.removeEventListener('mouseup',   this.logoDragEnd);
-    document.removeEventListener('mousemove', this.blurDrag);
-    document.removeEventListener('mouseup',   this.blurDragEnd);
+    document.removeEventListener('mousemove',   this.logoDrag);
+    document.removeEventListener('mouseup',     this.logoDragEnd);
+    document.removeEventListener('touchmove',   this.logoDrag);
+    document.removeEventListener('touchend',    this.logoDragEnd);
+    document.removeEventListener('touchcancel', this.logoDragEnd);
+  
+    document.removeEventListener('mousemove',   this.blurDrag);
+    document.removeEventListener('mouseup',     this.blurDragEnd);
+    document.removeEventListener('touchmove',   this.blurDrag);
+    document.removeEventListener('touchend',    this.blurDragEnd);
+    document.removeEventListener('touchcancel', this.blurDragEnd);
   },
 };
 </script>

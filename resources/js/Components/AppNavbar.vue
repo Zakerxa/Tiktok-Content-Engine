@@ -2,12 +2,14 @@
   <nav class="nav-bar">
     <div class="nav-inner">
       <a href="/" class="nav-logo">
-        <span class="logo-icon">▶</span>
-        <span class="logo-text">ReelAI</span>
+        <img src="/favicon.png" alt="icon" class="logo-icon" srcset="">
+        <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
       </a>
       <div class="nav-links">
         <a href="/blogs" class="nav-link">TikTok Post</a>
-        <a href="/recap" class="nav-link">Movie Recap</a>
+        <a href="/movie-recap" class="nav-link">Movie Recap</a>
+        <a href="/ContactUs" class="nav-link">Contct Us</a>
+        <a href="/About" class="nav-link">About</a>
         <a v-if="isHome" href="#pricing" class="nav-link">Pricing</a>
         <a v-if="auth?.user" href="/dashboard" class="btn-nav-primary">Dashboard</a>
         <template v-else>
@@ -27,7 +29,7 @@
     <!-- Mobile drawer -->
     <div v-if="open" class="mobile-drawer">
       <a href="/blogs" class="mobile-link" @click="open = false">TikTok Post</a>
-      <a href="/recap" class="mobile-link" @click="open = false">Movie Recap</a>
+      <a href="/movie-recap" class="mobile-link" @click="open = false">Movie Recap</a>
       <a v-if="isHome" href="#pricing" class="mobile-link" @click="open = false">Pricing</a>
       <div class="mobile-actions">
         <a v-if="auth?.user" href="/dashboard" class="btn-nav-primary w-full text-center">Dashboard</a>
@@ -54,7 +56,11 @@ const page = usePage();
 const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
 </script>
 
-<style scoped>
+<style>
+
+.pc{
+    color:#7C3AED;
+}
 .nav-bar {
   position: fixed;
   top: 0;
@@ -81,21 +87,21 @@ const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
   text-decoration: none;
 }
 .logo-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #7C3AED, #06B6D4);
-  border-radius: 8px;
+  width: 65px;
+  height: 65px;
+  /* background: linear-gradient(135deg, #180f27, #0c2327); */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
   color: white;
 }
 .logo-text {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #F1F5F9;
-  letter-spacing: -0.5px;
+  position: relative;
+  left: -10px;
+  letter-spacing: 1px;
 }
 .nav-links {
   display: flex;

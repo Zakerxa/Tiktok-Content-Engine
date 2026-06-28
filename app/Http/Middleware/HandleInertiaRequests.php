@@ -42,6 +42,8 @@ class HandleInertiaRequests extends Middleware
                     'total_recap_used' => $request->user()->total_recap_used,
                     'plan_expires_at'  => $request->user()->plan_expires_at,
                     'is_active'        => $request->user()->is_active,
+                    'google_id'        => $request->user()->google_id ? True : False,
+                    'email_verified_at'=> $request->user()->email_verified_at ? True : False
                 ] : null,
             ],
             'flash' => ['error' => fn () => $request->session()->get('error')],

@@ -26,7 +26,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'role_name',
         'is_active',
-        'recap_limit'
+        'recap_limit',
+        'email_verified_at',
+        'total_recap_used',
+        'plan_expires_at',
+        'session_expires_at',
     ];
 
     /**
@@ -47,8 +51,40 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'is_active'          => 'boolean',
+            'plan_expires_at'    => 'datetime',
+            'session_expires_at' => 'datetime',
+            'email_verified_at'  => 'datetime',
             'password' => 'hashed',
         ];
     }
+
+
+    // ── Relationships ──────────────────────────────
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_name', 'name');
+    }
+ 
+    public function usageLogs()
+    {
+        return $this->hasMany(UsageLog::class);
+    }
+ 
+    public function planHistories()
+    {
+        return $this->hasMany(PlanHistory::class, 'username', 'username');
+    }
+ 
+    // ── Helpers ────────────────────────────────────
+    public function isAdmin(): bool
+    {
+        return $this->role_name === 'admin';
+    }
+ 
+    public function isActive(): bool
+    {
+        return (bool) $this->is_active;
+    }
+    
 }

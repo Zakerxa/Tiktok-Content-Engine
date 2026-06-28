@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('tiktok_posts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->foreignId('user_id')->nullable();
             $table->string('slug')->unique()->nullable();
             $table->string('cover_title_burmese');
             $table->text('content');

@@ -22,11 +22,8 @@
 
       <!-- Brand header -->
       <div class="brand-block">
-        <div class="brand-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" class="brand-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-          </svg>
+        <div class="">
+         <img src="/favicon.png" alt="icon" class="logo-icon" srcset="">
         </div>
         <h1 class="brand-name">Movie Recap <span class="gradient-text">Engine</span></h1>
         <p class="brand-tag">Sign in to keep the recaps rolling</p>
@@ -147,6 +144,16 @@ function submit() {
   align-items: center;
   justify-content: center;
   padding: 100px 24px;
+}
+
+.logo-icon {
+  width: 100px;
+  height: 100px;
+  /* background: linear-gradient(135deg, #180f27, #0c2327); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .signin-row { text-align: center; font-size: 13px; color: #64748B; margin-top: 22px; }

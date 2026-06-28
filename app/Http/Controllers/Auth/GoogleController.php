@@ -28,8 +28,8 @@ class GoogleController extends Controller
 
         // Email နဲ့ google_id စစ်ပြီး user ရှာမည်
         $user = User::where('google_id', $googleUser->getId())
-                    ->orWhere('email', $googleUser->getEmail())
-                    ->first();
+            ->orWhere('email', $googleUser->getEmail())
+            ->first();
 
         if ($user) {
             // ရှိပြီးသား user — google_id မပါသေးရင် update
@@ -37,8 +37,11 @@ class GoogleController extends Controller
                 $user->update([
                     'google_id' => $googleUser->getId(),
                     'avatar'    => $googleUser->getAvatar(),
-                    'email_verified_at' => $user->email_verified_at ?? now()
                 ]);
+            }
+
+            if (!$user->email_verified_at) {
+                $user->markEmailAsVerified();
             }
         } else {
             // အသစ် — tester role နဲ့ create
@@ -47,7 +50,7 @@ class GoogleController extends Controller
                 'email'     => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'avatar'    => $googleUser->getAvatar(),
-                'password'  => bcrypt(Str::random(32)), // Google login မို့ random
+                'password'  => bcrypt(Str::random(32)),
                 'role_name' => 'tester',
                 'is_active' => true,
                 'recap_limit' => 1,
@@ -56,13 +59,16 @@ class GoogleController extends Controller
         }
 
         if (!$user->is_active) {
-            return redirect()->route('recap.show')
+            return redirect()->route('login')
                 ->with('error', 'Account ပိတ်ထားသည်။ Admin ကို ဆက်သွယ်ပါ။');
         }
 
         Auth::login($user, remember: true);
 
-        return redirect()->route('recap.show');
+        return redirect()->route('home')->withHeaders([
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            'Pragma'        => 'no-cache',
+        ]);
     }
 
     // Google name → unique username
