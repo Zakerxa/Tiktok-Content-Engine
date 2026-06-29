@@ -360,6 +360,14 @@ export default {
 
   data() {
     return {
+      baseUrl: '',
+      baseUrlReady: false,
+      servers: {
+        v1: 'https://zakerxa-zakerxa-v1.hf.space',
+        v2: 'https://zakerxa-zakerxa-v1.hf.space',
+        v3: 'https://zakerxav2-zakerxav2-v2.hf.space',
+        recap: 'https://recap.zakerxa.com',
+      },
       activeMode:       'upload',
       isProcessing:     false,
       showErrorOverlay: false,
@@ -614,6 +622,7 @@ export default {
       this.alertType        = type;
       this.errorPopupMsg    = msg;
       this.showErrorOverlay = true;
+      this.isProcessing = false;
     },
     showError(msg) {
       this.alertType        = 'error';
@@ -658,19 +667,19 @@ export default {
 
     async pollStatus(jobId) {
       try {
-        const res = await fetch(`https://recap.zakerxa.com/status/${jobId}`);
+        const res = await fetch(`${this.baseUrl}/status/${jobId}`);
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }
 
-        this.stepCurrent  = data.step;
+        this.stepCurrent = data.step;
         this.stepProgress = data.progress || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         if (data.done) {
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
-            const link    = document.createElement('a');
-            link.href = `https://recap.zakerxa.com/download/${jobId}`;
+            const link = document.createElement('a');
+            link.href = `${this.baseUrl}/download/${jobId}`;
             link.download = 'Recap_Ready.mp4';
             document.body.appendChild(link);
             link.click();
@@ -680,57 +689,178 @@ export default {
           this.cleanDashboardPreview();
           return;
         }
-        setTimeout(() => this.pollStatus(jobId), 1000);
+        setTimeout(() => this.pollStatus(jobId), 4000);
       } catch (err) {
-        setTimeout(() => this.pollStatus(jobId), 2000);
+        setTimeout(() => this.pollStatus(jobId), 5000);
       }
     },
 
+    async getVideoDuration(file) {
+      return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = URL.createObjectURL(file);
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src); // memory free
+          resolve(video.duration); // seconds အနေနဲ့ return
+        };
+      });
+    },
+
+    // Single endpoint health check with timeout
+    async checkHealth(url, timeoutMs = 4000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(`${url}/health`, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        console.log(`[health] ${url} ->`, data.status, data.message);
+
+        // TODO (later): queue/semaphore full check
+        // if (data.queue_count >= 3) return false;
+
+        return data.status === 'ok' || data.status === 'healthy';
+      } catch (err) {
+        clearTimeout(timer);
+        console.warn(`[health] ${url} unreachable:`, err.message);
+        return false;
+      }
+    },
+
+    // Decide [primary, fallback] pair based on role
+    getServerPairForRole(roleName) {
+      switch (roleName) {
+        case 'tester':
+          return [this.servers.v1, this.servers.v3];
+        case 'normal':
+          return [this.servers.v2, this.servers.v3];
+        case 'pro':
+          return [this.servers.recap, this.servers.v3];
+        default:
+          return [this.servers.recap, this.servers.v3];
+      }
+    },
+
+    // Resolve baseUrl: try primary, fallback if primary fails
+    async resolveBaseUrl() {
+      const roleName = this.auth.user?.role_name;
+      const [primary, fallback] = this.getServerPairForRole(roleName);
+
+      const primaryOk = await this.checkHealth(primary);
+      if (primaryOk) {
+        this.baseUrl = primary;
+        this.baseUrlReady = true;
+        // console.log(`[resolveBaseUrl] role=${roleName} -> primary (${primary})`);
+        return primary;
+      }
+
+      const fallbackOk = await this.checkHealth(fallback);
+      if (fallbackOk) {
+        this.baseUrl = fallback;
+        this.baseUrlReady = true;
+        // console.log(`[resolveBaseUrl] role=${roleName} -> fallback (${fallback})`);
+        return fallback;
+      }
+
+      // အကုန် fail ရင် primary ကိုပဲ ပြန်ပေးမယ် (startProcess() ထဲက try/catch က handle လုပ်ပေးလိမ့်မယ်)
+      // console.error(`[resolveBaseUrl] role=${roleName} -> both primary & fallback failed, defaulting to primary`);
+      this.baseUrl = primary;
+      this.baseUrlReady = true;
+      return primary;
+    },
+
     async startProcess() {
-      if (!this.user) {
+
+      if (!this.auth.user) {
         this.showAlert('info', 'ဤ feature ကို အသုံးပြုရန် Login ဝင်ရောက်ရန် လိုအပ်ပါသည်။');
         return;
       }
 
-      const file       = this.$refs.videoFileInput?.files[0];
+      await this.resolveBaseUrl();
+
+      const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
-      const subtitles  = this.$refs.enableSubtitles?.checked;
-      const flip       = this.$refs.enableFlip?.checked;
-      const watermark  = this.$refs.enableWatermark?.checked;
-      const voiceover  = this.$refs.enableVoiceover?.checked;
-      const voice      = this.selectedVoice;
-      const logoFile   = this.$refs.logoFileInput?.files[0];
+      const subtitles = this.$refs.enableSubtitles?.checked;
+      const flip = this.$refs.enableFlip?.checked;
+      const watermark = this.$refs.enableWatermark?.checked;
+      const voiceover = this.$refs.enableVoiceover?.checked;
+      const voice = this.selectedVoice;
+      const logoFile = this.$refs.logoFileInput?.files[0];
 
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
-      if (this.activeMode === 'upload'  && !file)       { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
+      if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
+
+      if (this.auth.user.role_name != 'admin') {
+
+        this.isProcessing = true;
+
+        if (this.auth.user.total_recap_used >= this.auth.user.recap_limit) {
+          this.showAlert('warning', `ဒီနေ့ limit (${this.auth.user.recap_limit}/day) ပြည့်သွားပြီ။ နောက်နေ့ ထပ်သုံးနိုင်သည်။`)
+          return;
+        }
+
+        const duration = await this.getVideoDuration(file);
+        // မိနစ်၊ စက္ကန့် အနေနဲ့ ကြည့်ချင်ရင်
+        const mins = Math.floor(duration / 60);
+        const secs = Math.floor(duration % 60);
+        console.log(`Video Duration: ${duration} seconds`, secs, mins);
+        if (this.auth.user.role_name == 'tester') {
+          if (watermark) {
+            this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
+          }
+          if (secs > 35) {
+            this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
+          }
+        }
+
+        if (this.auth.user.role_name == 'normal') {
+          if (watermark) {
+            this.showAlert('warning', 'WaterMark အသုံးပြုရန် Pro Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
+          }
+          if (secs > 60) {
+            this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Pro Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
+          }
+        }
+
+        if (this.auth.user.role_name == 'pro') {
+          if (secs > 105) {
+            this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
+          }
+        }
+
+      }
 
       this.isProcessing = true;
-      this.inlineError  = '';
+      this.inlineError = '';
       this.resetSteps();
 
       try {
         let response;
 
         if (this.activeMode === 'upload') {
-          const CHUNK_SIZE  = 5 * 1024 * 1024;
+          const CHUNK_SIZE = 5 * 1024 * 1024;
           const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-          const sessionId   = crypto.randomUUID();
+          const sessionId = crypto.randomUUID();
           this.showUploadProgressState(0, totalChunks);
 
           for (let i = 0; i < totalChunks; i++) {
-            const chunk     = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
             const chunkForm = new FormData();
-            chunkForm.append('chunk',       chunk, 'chunk');
-            chunkForm.append('chunkIndex',  i);
+            chunkForm.append('chunk', chunk, 'chunk');
+            chunkForm.append('chunkIndex', i);
             chunkForm.append('totalChunks', totalChunks);
-            chunkForm.append('sessionId',   sessionId);
+            chunkForm.append('sessionId', sessionId);
 
-            const chunkRes = await fetch('https://recap.zakerxa.com/upload-chunk', {
+
+            const chunkRes = await fetch(`${this.baseUrl}/upload-chunk`, {
               method: 'POST',
               body: chunkForm,
               headers: {
-                'X-Auth-Username': this.user.username,
-                'X-Auth-Role': this.user.role_name
+                'X-Auth-Username': this.auth.user.username,
+                'X-Auth-Role': this.auth.user.role_name
               }
             });
             if (!chunkRes.ok) {
@@ -743,13 +873,13 @@ export default {
           this.showUploadFinalizingState();
 
           const finalForm = new FormData();
-          finalForm.append('sessionId',        sessionId);
-          finalForm.append('voice_model',      voice);
-          finalForm.append('blur_x',           this.blurX.toFixed(2));
-          finalForm.append('blur_y',           this.blurY.toFixed(2));
-          finalForm.append('blur_h',           this.blurH.toFixed(2));
+          finalForm.append('sessionId', sessionId);
+          finalForm.append('voice_model', voice);
+          finalForm.append('blur_x', this.blurX.toFixed(2));
+          finalForm.append('blur_y', this.blurY.toFixed(2));
+          finalForm.append('blur_h', this.blurH.toFixed(2));
           finalForm.append('enable_subtitles', subtitles);
-          finalForm.append('enable_flip',      flip);
+          finalForm.append('enable_flip', flip);
           finalForm.append('enable_watermark', watermark);
           finalForm.append('enable_voiceover', voiceover);
           if (watermark) {
@@ -757,24 +887,31 @@ export default {
             finalForm.append('watermark_y', this.logoY.toFixed(2));
             if (logoFile) finalForm.append('watermark_file', logoFile);
           }
-          response = await fetch('https://recap.zakerxa.com/upload-chunk-finalize', {
+
+
+          response = await fetch(`${this.baseUrl}/upload-chunk-finalize`, {
             method: 'POST',
             body: finalForm,
             headers: {
-              'X-Auth-Username': this.user.username,
-              'X-Auth-Role': this.user.role_name
+              'X-Auth-Username': this.auth.user.username,
+              'X-Auth-Role': this.auth.user.role_name
             }
           });
 
         } else {
+
+          if (this.auth.user.role_name == 'tester') {
+            this.showAlert("warning", "Please upgrade your plan!");
+            return
+          }
           const formData = new FormData();
-          formData.append('url',              youtubeUrl);
-          formData.append('voice_model',      voice);
-          formData.append('blur_x',           this.blurX.toFixed(2));
-          formData.append('blur_y',           this.blurY.toFixed(2));
-          formData.append('blur_h',           this.blurH.toFixed(2));
+          formData.append('url', youtubeUrl);
+          formData.append('voice_model', voice);
+          formData.append('blur_x', this.blurX.toFixed(2));
+          formData.append('blur_y', this.blurY.toFixed(2));
+          formData.append('blur_h', this.blurH.toFixed(2));
           formData.append('enable_subtitles', subtitles);
-          formData.append('enable_flip',      flip);
+          formData.append('enable_flip', flip);
           formData.append('enable_watermark', watermark);
           formData.append('enable_voiceover', voiceover);
           if (watermark) {
@@ -782,12 +919,12 @@ export default {
             formData.append('watermark_y', this.logoY.toFixed(2));
             if (logoFile) formData.append('watermark_file', logoFile);
           }
-          response = await fetch('https://recap.zakerxa.com/process-youtube', {
+          response = await fetch(`${this.baseUrl}/process-youtube`, {
             method: 'POST',
             body: formData,
             headers: {
-              'X-Auth-Username': this.user.username,
-              'X-Auth-Role': this.user.role_name
+              'X-Auth-Username': this.auth.user.username,
+              'X-Auth-Role': this.auth.user.role_name
             }
           });
         }

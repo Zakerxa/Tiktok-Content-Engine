@@ -27,23 +27,9 @@
         <option value="ja-JP-KeitaNeural">🇯🇵 Keita (Male)</option>
       </optgroup>
 
-      <optgroup label="🇨🇳 Chinese Simplified (普通话)">
-        <option value="zh-CN-XiaoxiaoNeural">🇨🇳 Xiaoxiao (Female · News)</option>
-        <option value="zh-CN-XiaoyiNeural">🇨🇳 Xiaoyi (Female · Lively)</option>
-        <option value="zh-CN-YunxiaNeural">🇨🇳 Yunxia (Male · Cute)</option>
-        <option value="zh-CN-YunyangNeural">🇨🇳 Yunyang (Male · News)</option>
-      </optgroup>
-
-      <optgroup label="🇹🇼 Chinese Traditional (繁體)">
-        <option value="zh-TW-HsiaoChenNeural">🇹🇼 HsiaoChen (Female)</option>
-        <option value="zh-TW-HsiaoYuNeural">🇹🇼 HsiaoYu (Female)</option>
-        <option value="zh-TW-YunJheNeural">🇹🇼 YunJhe (Male)</option>
-      </optgroup>
-
       <optgroup label="🇰🇷 Korean (한국어)">
         <option value="ko-KR-SunHiNeural">🇰🇷 SunHi (Female)</option>
         <option value="ko-KR-InJoonNeural">🇰🇷 InJoon (Male)</option>
-        <option value="ko-KR-HyunsuMultilingualNeural">🇰🇷 Hyunsu (Male · Multilingual)</option>
       </optgroup>
 
       <optgroup label="🇻🇳 Vietnamese (Tiếng Việt)">

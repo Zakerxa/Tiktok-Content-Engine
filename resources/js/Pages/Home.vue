@@ -93,7 +93,7 @@
                 <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)]">{{ feat.badge }}</span>
               </li>
             </ul>
-            <a href="/recap" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white">Launch Recap Studio →</a>
+            <a href="/dashboard/recap" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white">Launch Recap Studio →</a>
           </div>
 
           <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
@@ -153,17 +153,17 @@ defineProps({
 });
 
 const recapFeatures = [
-  { label: '1-Click Copyright Protection', available: true, badge: '70% Safe' },
-  { label: 'Custom Blur & Mosaic',          available: true },
+  { label: 'Auto Subtitles (+7 Country )',                available: true },
+  { label: 'Voice Over (+14 )',                    available: true },
   { label: 'Custom Watermark',              available: true },
-  { label: 'Auto Subtitles',                available: true },
-  { label: 'Voice Over',                    available: true },
+  { label: 'Custom Blur & Mosaic',          available: true },
+  { label: 'Copyright Protection', available: true, badge: '70% Safe' },
   { label: 'HD Video Export',               available: true },
-  { label: 'Adjustable Video Length',       available: true },
+  { label: '1 Click Movie Recap',       available: true },
 ];
 
 const blogFeatures = [
-  { label: 'Free TikTok Blog Posts',        available: true },
+  { label: 'Free TikTok Content Posts',        available: true },
   { label: 'AI Image Prompts',              available: true },
   { label: 'Burmese Language Support',      available: true },
   { label: 'Custom API Key Integration',    available: true, badge: 'Own Key' },
