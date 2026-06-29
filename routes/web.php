@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TikTokPostController;
@@ -74,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/posts/edit/{id}', [TikTokPostController::class, 'edit'])->name('posts.edit');
     Route::post('/posts/{id}', [TikTokPostController::class, 'update'])->name('posts.update');
 
+    // routes/api.php
+    Route::get('/jobs/status/{jobId}', [AdminController::class, 'status']);
 
     // ─── Dashboard ───
     Route::get('/dashboard', function (Request $request) {

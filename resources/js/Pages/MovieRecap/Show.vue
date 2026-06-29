@@ -694,7 +694,7 @@ export default {
 
     async pollStatus(jobId) {
       try {
-        const res = await fetch(`${this.baseUrl}/status/${jobId}`);
+        const res = await fetch(`/jobs/status/${jobId}`);
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }

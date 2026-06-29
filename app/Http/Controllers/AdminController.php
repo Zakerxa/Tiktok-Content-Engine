@@ -37,6 +37,26 @@ class AdminController extends Controller
         return Inertia::render('Admin/Index', compact('stats'));
     }
 
+    // app/Http/Controllers/JobController.php
+    public function status($jobId)
+    {
+        $job = DB::table('recap_jobs')
+            ->where('id', $jobId)
+            ->first();
+
+        if (!$job) {
+            return response()->json(['error' => 'Job not found'], 404);
+        }
+
+        return response()->json([
+            'step'         => $job->step,
+            'progress'     => ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => $job->progress],
+            'done'         => $job->status === 'success',
+            'error'        => $job->error,
+            'download_url' => $job->download_url,
+        ]);
+    }
+
     // ─────────────────────────────────────────────
     // GET /admin/users  — User list with usage data
     // ─────────────────────────────────────────────
