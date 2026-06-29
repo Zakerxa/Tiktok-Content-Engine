@@ -53,7 +53,7 @@ class AdminController extends Controller
             'progress'     => ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => $job->progress],
             'done'         => $job->status === 'success',
             'error'        => $job->error,
-            'download_url' => $job->download_url,
+            'download_url' => $jobId,
         ]);
     }
 
