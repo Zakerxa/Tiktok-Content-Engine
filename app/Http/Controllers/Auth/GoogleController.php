@@ -22,7 +22,7 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
-            return redirect()->route('recap.show')
+            return redirect()->route('login')
                 ->with('error', 'Google login မအောင်မြင်ပါ။ ထပ်ကြိုးစားပါ။');
         }
 
@@ -65,7 +65,7 @@ class GoogleController extends Controller
 
         Auth::login($user, remember: true);
 
-        return redirect()->route('home')->withHeaders([
+        return redirect()->route('dashboard')->withHeaders([
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
             'Pragma'        => 'no-cache',
         ]);

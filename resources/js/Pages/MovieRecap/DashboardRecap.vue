@@ -344,7 +344,7 @@
 
 <script>
 import AppSidebar from '@/Components/AppSidebar.vue';
-import VoiceSelector from '@/Components/VoiceSelectorFetch.vue';
+import VoiceSelector from '@/Components/VoiceSelector.vue';
 export default {
   name: 'MovieRecapShow',
 
@@ -374,7 +374,7 @@ export default {
       errorPopupMsg:    '',
       alertType:        'error',
       inlineError:      '',
-
+      selectedVoice: 'my-MM-ThihaNeural',
       logoX: 0,
       logoY: 0,
       blurX: 0,
