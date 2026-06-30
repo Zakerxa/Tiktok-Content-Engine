@@ -44,7 +44,7 @@ const user = computed(() => page.props.auth?.user);
 
 // Google-linked accounts don't have a local password, so there's nothing
 // for UpdatePasswordForm to update — we show an explainer card instead.
-const isGoogleAccount = computed(() => !!user.value?.email_verified_at);
+const isGoogleAccount = computed(() => !!user.value?.google_id);
 
 const initials = computed(() => {
     const name = user.value?.username || '';
