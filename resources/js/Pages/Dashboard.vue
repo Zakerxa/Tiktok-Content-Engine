@@ -127,7 +127,7 @@
                 <th>Duration</th>
               </tr>
             </thead>
-            <tbody v-if="job">
+            <tbody v-if="jobs.data">
               <tr v-for="job in jobs.data" :key="job.id">
                 <td>
                   <span class="status-pill" :class="job.status === 'success' ? 'status-active' : 'status-inactive'">
