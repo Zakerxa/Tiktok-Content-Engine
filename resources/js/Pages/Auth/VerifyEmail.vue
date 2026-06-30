@@ -41,12 +41,20 @@
       </p>
 
       <form @submit.prevent="submit" class="login-form">
-        <button type="submit" :disabled="form.processing" class="btn-submit">
+        <button type="submit" :disabled="form.processing || cooldown > 0" class="btn-submit">
           <svg v-if="form.processing" class="spinner" viewBox="0 0 24 24" fill="none">
             <circle class="spinner-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
             <path class="spinner-head" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
           </svg>
-          <span>{{ form.processing ? 'ပို့နေသည်...' : 'Verification Email ပြန်ပို့ရန်' }}</span>
+          <span>
+            {{
+              form.processing
+                ? 'ပို့နေသည်...'
+                : cooldown > 0
+                  ? `${cooldown} စက္ကန့်အကြာတွင် ပြန်ပို့နိုင်ပါမည်`
+                  : 'Verification Email ပြန်ပို့ရန်'
+            }}
+          </span>
         </button>
       </form>
 
@@ -62,7 +70,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -73,8 +81,60 @@ const props = defineProps({
 
 const form = useForm({})
 
+// Cooldown is stored in localStorage so it survives page refresh / navigation.
+// Key includes nothing user-specific since this page is only reachable while
+// logged in as the unverified user, and the timer is just a UX guard
+// (the server should still rate-limit verification-notification requests).
+const COOLDOWN_KEY = 'verify_email_resend_until'
+const COOLDOWN_SECONDS = 60
+const cooldown = ref(0)
+let intervalId = null
+
+function startCooldownFromStorage() {
+  const until = Number(localStorage.getItem(COOLDOWN_KEY) || 0)
+  const remaining = Math.ceil((until - Date.now()) / 1000)
+  cooldown.value = remaining > 0 ? remaining : 0
+}
+
+function tick() {
+  startCooldownFromStorage()
+  if (cooldown.value <= 0 && intervalId) {
+    clearInterval(intervalId)
+    intervalId = null
+  }
+}
+
+function beginCooldown() {
+  const until = Date.now() + COOLDOWN_SECONDS * 1000
+  localStorage.setItem(COOLDOWN_KEY, String(until))
+  cooldown.value = COOLDOWN_SECONDS
+  if (!intervalId) {
+    intervalId = setInterval(tick, 1000)
+  }
+}
+
+onMounted(() => {
+  // A verification email is already sent automatically on registration,
+  // so start the cooldown immediately on first load too — this stops users
+  // from mashing the resend button before the first email has even arrived.
+  const until = Number(localStorage.getItem(COOLDOWN_KEY) || 0)
+  if (until > Date.now()) {
+    startCooldownFromStorage()
+    intervalId = setInterval(tick, 1000)
+  } else {
+    beginCooldown()
+  }
+})
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId)
+})
+
 function submit() {
-  form.post('/email/verification-notification')
+  if (cooldown.value > 0) return
+  form.post('/email/verification-notification', {
+    onSuccess: () => beginCooldown(),
+  })
 }
 
 const verificationLinkSent = computed(
