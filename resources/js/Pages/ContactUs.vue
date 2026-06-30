@@ -35,11 +35,8 @@
           person gets back to you, usually within a day.
         </p>
       </div>
-    </section>
-
-    <!-- ═══════════════ CONTACT GRID ═══════════════ -->
-    <section class="pb-24 px-6">
-      <div class="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-5 gap-10">
+    
+      <div class="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-5 gap-10 mt-40">
 
         <!-- LEFT: channels -->
         <div class="lg:col-span-2 flex flex-col gap-4">

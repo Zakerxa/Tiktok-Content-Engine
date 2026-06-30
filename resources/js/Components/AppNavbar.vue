@@ -14,7 +14,7 @@
         <Link v-if="auth?.user" href="/dashboard" class="btn-nav-primary">Dashboard</Link>
         <template v-else>
           <Link href="/login" class="btn-nav-ghost">Sign In</Link>
-          <Link href="/auth/google" class="btn-nav-primary">Get Started</Link>
+          <a href="/auth/google" class="btn-nav-primary">Get Started</a>
         </template>
       </div>
 
@@ -35,7 +35,7 @@
         <Link v-if="auth?.user" href="/dashboard" class="btn-nav-primary w-full text-center">Dashboard</Link>
         <template v-else>
           <Link href="/login" class="btn-nav-ghost text-center">Sign In</Link>
-          <Link href="/auth/google" class="btn-nav-primary text-center">Get Started</Link>
+          <a href="/auth/google" class="btn-nav-primary text-center">Get Started</a>
         </template>
       </div>
     </div>

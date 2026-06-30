@@ -4,10 +4,9 @@ use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TikTokPostController;
-use App\Models\TikTokPost;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobController;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -64,66 +63,8 @@ Route::middleware('auth')->group(function () {
     // routes/api.php
     Route::get('/jobs/status/{jobId}', [JobController::class, 'status']);
     
-
     // ─── Dashboard ───
-    Route::get('/dashboard', function (Request $request) {
-        $userId = $request->user()->id;
-
-        $query = TikTokPost::query()->where('user_id', $userId);
-
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                    ->orWhere('cover_title_burmese', 'like', '%' . $request->search . '%');
-            });
-        }
-        if ($request->filled('topic')) {
-            $rawTopic = str_starts_with($request->topic, 'TOPICS_') ? $request->topic : 'TOPICS_' . $request->topic;
-            $query->where('topic', $rawTopic);
-        }
-
-        $posts = $query->orderBy('id', 'desc')
-            ->paginate(6)
-            ->withQueryString()
-            ->through(fn($post) => [
-                'id'                  => $post->id,
-                'title'               => $post->title,
-                'slug'                => $post->slug,
-                'cover_title_burmese' => $post->cover_title_burmese,
-                'content'             => $post->content,
-                'topic'               => str_replace('TOPICS_', '', $post->topic),
-                'image_path'          => $post->image_path,
-                'model_used'          => $post->model_used,
-                'created_at'          => $post->created_at?->format('M d, Y') ?? 'Recent',
-            ]);
-
-        $stats = TikTokPost::select('topic', DB::raw('count(*) as total'))
-            ->where('user_id', $userId)
-            ->whereNotNull('topic')
-            ->groupBy('topic')
-            ->get()
-            ->map(fn($stat) => [
-                'clean' => str_replace('TOPICS_', '', $stat->topic),
-                'total' => $stat->total,
-            ]);
-
-        return Inertia::render('Dashboard', [
-            'posts'   => $posts,
-            'stats'   => $stats,
-            'filters' => $request->only(['search', 'topic']),
-            'user'    => [
-                'username'         => $request->user()->username,
-                'email'            => $request->user()->email,
-                'avatar'           => $request->user()->avatar,
-                'role_name'        => $request->user()->role_name,
-                'recap_limit'      => $request->user()->recap_limit,
-                'total_recap_used' => $request->user()->total_recap_used,
-                'plan_expires_at'  => $request->user()->plan_expires_at,
-                'is_active'        => $request->user()->is_active,
-            ],
-        ]);
-    })->middleware(['verified'])->name('dashboard');
-
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['verified'])->name('dashboard');
 
     Route::get('/dashboard/recap', function (Request $request) {
         $userData = $request->user() ? [

@@ -2,6 +2,7 @@
   <div class="bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif] min-h-screen overflow-x-hidden">
 
     <AppNavbar :auth="auth" />
+    
 
     <!-- ═══════════════ HERO ═══════════════ -->
     <section class="relative min-h-screen flex flex-col items-center justify-center pt-[120px] px-6 pb-20 overflow-hidden text-center">
@@ -50,13 +51,13 @@
           </div>
           <div class="w-px h-10 bg-[rgba(255,255,255,0.1)]"></div>
           <div class="flex flex-col items-center gap-0.5">
-            <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">1/Click</span>
+            <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">1-Click</span>
             <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">Movie Recap</span>
           </div>
           <div class="w-px h-10 bg-[rgba(255,255,255,0.1)]"></div>
           <div class="flex flex-col items-center gap-0.5">
             <span class="text-[26px] font-extrabold text-[#F1F5F9] tracking-[-0.5px]">Free</span>
-            <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">Blog Generator</span>
+            <span class="text-xs text-[#64748B] font-medium uppercase tracking-[0.5px]">POST Generator</span>
           </div>
         </div>
       </div>
@@ -69,6 +70,11 @@
       </div>
     </section>
 
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]"></div>
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]"></div>
+    </div>
+
     <!-- ═══════════════ PRODUCTS ═══════════════ -->
     <section class="py-[120px] bg-gradient-to-b from-[#080B14] via-[#0D1120] to-[#080B14]">
       <div class="max-w-[1200px] mx-auto px-6 lg:max-w-[1080px]">
@@ -78,9 +84,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-[6em] mt-16">
           <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
             <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(124,58,237,0.4)]"></div>
-            <div class="w-14 h-14 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[26px] mb-5">🎬</div>
+            <div class="w-20 h-20 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[40px] mb-5">🎬</div>
             <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">Movie Recap Studio</h3>
-            <p class="text-[15px] text-[#64748B] leading-[1.7] mb-7">
+            <p class="text-[17px] text-[#64748B] leading-[1.7] mb-7">
               Turn any movie into a viral TikTok recap in seconds. Our AI handles copyright protection automatically so you can focus on growing your audience.
             </p>
             <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
@@ -98,9 +104,9 @@
 
           <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
             <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(6,182,212,0.35)]"></div>
-            <div class="w-14 h-14 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[26px] mb-5">✍️</div>
-            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">TikTok Blog Generator</h3>
-            <p class="text-[15px] text-[#64748B] leading-[1.7] mb-7">
+            <div class="w-20 h-20 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[40px] mb-5">✍️</div>
+            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">TikTok Post Generator</h3>
+            <p class="text-[17px] text-[#64748B] leading-[1.7] mb-7">
               Generate scroll-stopping TikTok content with matching image prompts. Add your own API key for fully custom content tailored to your niche.
             </p>
             <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
@@ -166,8 +172,8 @@ const blogFeatures = [
   { label: 'Free TikTok Content Posts',        available: true },
   { label: 'AI Image Prompts',              available: true },
   { label: 'Burmese Language Support',      available: true },
-  { label: 'Custom API Key Integration',    available: true, badge: 'Own Key' },
   { label: 'Topic-based Generation',        available: true },
+  { label: 'Custom API Key Integration',    available: true, badge: 'Own Key' },
   { label: 'Script & Hook Templates',       available: true },
   { label: 'Unlimited Browsing',            available: true },
 ];

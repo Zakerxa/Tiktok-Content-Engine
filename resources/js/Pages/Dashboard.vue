@@ -105,6 +105,90 @@
 
       </section>
 
+
+      <!-- ═══════════════ RECAP JOB HISTORY ═══════════════ -->
+      <section class="posts-section">
+        <div class="posts-header">
+          <div>
+            <div class="card-eyebrow">Generation History</div>
+            <h2 class="posts-title">Recap Job History</h2>
+          </div>
+        </div>
+      
+        <!-- Desktop table -->
+        <div class="posts-table-wrap">
+          <table class="posts-table">
+           <thead>
+              <tr>
+                <th>Status</th>
+                <th>Step</th>
+                <th>Progress</th>
+                <th>Started</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody v-if="job">
+              <tr v-for="job in jobs.data" :key="job.id">
+                <td>
+                  <span class="status-pill" :class="job.status === 'success' ? 'status-active' : 'status-inactive'">
+                    <span class="status-dot"></span>
+                    {{ job.status === 'success' ? 'Success' : 'Failed' }}
+                  </span>
+                </td>
+                <td class="td-title">{{ job.step }}</td>
+                <td style="min-width: 180px;">
+                  <div class="progress-track">
+                    <div
+                      class="progress-fill"
+                      :class="job.status === 'success' ? 'progress-success' : 'progress-failed'"
+                      :style="{ width: job.progress + '%' }"
+                    ></div>
+                  </div>
+                  <span class="progress-text">{{ job.progress }}%</span>
+                  <p v-if="job.status === 'failed' && job.error" class="job-error">{{ job.error }}</p>
+                </td>
+                <td class="td-date">{{ job.started_at }}</td>
+                <td class="td-date">{{ job.duration || '—' }}</td>
+              </tr>
+              <tr v-if="jobs.data.length === 0">
+                <td colspan="5" class="empty-row">No job history yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="posts-cards">
+          <div v-for="job in jobs.data" :key="job.id" class="post-card">
+            <div class="post-card-body">
+              <div class="post-card-meta">
+                <span class="status-pill" :class="job.status === 'success' ? 'status-active' : 'status-inactive'">
+                  <span class="status-dot"></span>
+                  {{ job.status === 'success' ? 'Success' : 'Failed' }}
+                </span>
+                <span class="td-date">{{ job.step }}</span>
+                <span class="td-date">{{ job.started_at }}</span>
+                <span class="td-date">{{ job.duration || '—' }}</span>
+              </div>
+              <div class="progress-track">
+                <div
+                  class="progress-fill"
+                  :class="job.status === 'success' ? 'progress-success' : 'progress-failed'"
+                  :style="{ width: job.progress + '%' }"
+                ></div>
+              </div>
+              <span class="progress-text">{{ job.progress }}%</span>
+              <p v-if="job.status === 'failed' && job.error" class="job-error">{{ job.error }}</p>
+            </div>
+          </div>
+          <p v-if="jobs.data.length === 0" class="empty-row empty-row-mobile">No job history yet.</p>
+        </div>
+      
+        <div class="pagination-wrap">
+          <Pagination v-if="jobs.links" :links="jobs.links" />
+        </div>
+      </section>
+
       <!-- ═══════════════ MY POSTS ═══════════════ -->
       <section class="posts-section">
         <div class="posts-header">
@@ -199,6 +283,8 @@
         </div>
       </section>
 
+
+
     </main>
   </div>
 
@@ -215,6 +301,7 @@ import debounce from 'lodash/debounce';
 const props = defineProps({
   posts: Object,
   stats: Array,
+  jobs: Object,
   filters: Object,
   user: Object,        // logged-in user's own profile/usage data
 });
@@ -334,6 +421,20 @@ const formattedExpiry = computed(() => {
 </script>
 
 <style scoped>
+
+.progress-track {
+  width: 100%; height: 8px; border-radius: 100px;
+  background: rgba(255,255,255,0.07); overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 100px; transition: width 0.4s ease;
+}
+.progress-success { background: #34D399; }
+.progress-failed  { background: #F87171; }
+.progress-text { font-size: 11.5px; color: #94A3B8; margin-top: 4px; display: inline-block; }
+.job-error { font-size: 11.5px; color: #F87171; margin-top: 4px; }
+
+
 .dash-main {
   position: relative; z-index: 5;
   max-width: 1100px; margin: 0 auto;

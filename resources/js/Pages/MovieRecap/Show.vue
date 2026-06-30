@@ -94,10 +94,10 @@
                 activeMode === 'upload'
                   ? 'bg-[rgba(124,58,237,0.12)] text-[#A78BFA] shadow border border-[rgba(124,58,237,0.3)]'
                   : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']">📤 Upload Video File</button>
-              <button @click="switchTab('youtube')" :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
+              <!-- <button @click="switchTab('youtube')" :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
                 activeMode === 'youtube'
                   ? 'bg-[rgba(124,58,237,0.12)] text-[#A78BFA] shadow border border-[rgba(124,58,237,0.3)]'
-                  : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']">🔗 YouTube URL</button>
+                  : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']">🔗 YouTube URL</button> -->
             </div>
 
             <!-- Upload mode -->
@@ -428,7 +428,7 @@ export default {
     pipelineSteps() {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
-      const STEP_LABELS = ['Process Input', 'Extract Audio', 'AI Translate', 'AI Voice (TTS)', 'Render Final'];
+      const STEP_LABELS = ['Process Input', 'Extract Audio', 'AI Translate (STT)', 'AI Voice (TTS)', 'Render Final'];
       const isWaitingInQueue = cur === 1 && prog[1] === 100;
 
       return [1, 2, 3, 4, 5].map(i => {
@@ -691,6 +691,8 @@ export default {
       window._downloadTriggered = false;
       this.waterMarkToggle();
       this.removeSelectedVideo();
+      this.stepCurrent = 0;
+      this.stepProgress= { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     },
 
     async pollStatus(jobId) {
@@ -700,10 +702,12 @@ export default {
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }
 
-        this.stepCurrent = data.step;
         this.stepProgress = data.progress || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         if (data.done) {
+          // ✅ step ကို 6 အဖြစ် တင်လိုက်လို့ Step 5 ဟာ "done" condition (i < cur) ကို ဖြတ်ပြီး green ပြောင်းမယ်
+          this.stepCurrent = 6;
+
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
             const link = document.createElement('a');
@@ -713,11 +717,21 @@ export default {
             link.click();
             document.body.removeChild(link);
           }
+
           this.isProcessing = false;
-          this.cleanDashboardPreview();
+
+          // ✅ Green bar ကို ၁.၅ စက္ကန့်လောက် ပြပြီးမှ UI ကို clean ပြန်လုပ်မယ်
+          setTimeout(() => {
+            this.cleanDashboardPreview();
+          }, 1500);
+
           return;
         }
-        setTimeout(() => this.pollStatus(jobId), 4000);
+
+        // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
+        this.stepCurrent = data.step;
+
+        setTimeout(() => this.pollStatus(jobId), 3000);
       } catch (err) {
         setTimeout(() => this.pollStatus(jobId), 5000);
       }
@@ -826,6 +840,8 @@ export default {
 
         this.isProcessing = true;
 
+        console.log(this.auth.user)
+
         if (this.auth.user.total_recap_used >= this.auth.user.recap_limit) {
           this.showAlert('warning', `ဒီနေ့ limit (${this.auth.user.recap_limit}/day) ပြည့်သွားပြီ။ နောက်နေ့ ထပ်သုံးနိုင်သည်။`)
           return;
@@ -840,7 +856,7 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 35) {
+          if (secs > 40) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }

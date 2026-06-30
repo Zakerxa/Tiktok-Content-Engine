@@ -5,7 +5,7 @@ import { createInertiaApp,router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
-
+import GlobalBackground from './Layouts/GlobalBackground.vue';
 const appName = import.meta.env.VITE_APP_NAME || 'Z.A.K.E.R.X.A';
 
 router.on('navigate', () => {
@@ -16,7 +16,10 @@ createInertiaApp({
     title: (title) => `${title} ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`,import.meta.glob('./Pages/**/*.vue'),),
     setup({ el, App, props, plugin }) {
-        const app = createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(GlobalBackground, null, {
+            default: () => h(App, props),
+        }),
+    })
             .use(plugin)
             .use(ZiggyVue)
             .mount(el);

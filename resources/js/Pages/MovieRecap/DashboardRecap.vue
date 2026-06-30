@@ -102,6 +102,7 @@
                   : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']"
             >📤 Upload Video File</button>
             <button
+              :if="auth.user.role_name == 'pro' || auth.user.role_name == 'admin'"
               @click="switchTab('youtube')"
               :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
                 activeMode === 'youtube'
@@ -653,16 +654,18 @@ export default {
 
     cleanDashboardPreview() {
       this.blurX = 0; this.blurY = 85; this.blurH = 15;
-      if (this.$refs.urlInput)        this.$refs.urlInput.value        = '';
+      if (this.$refs.urlInput) this.$refs.urlInput.value = '';
       if (this.$refs.enableSubtitles) this.$refs.enableSubtitles.checked = false;
-      if (this.$refs.enableFlip)      this.$refs.enableFlip.checked      = false;
+      if (this.$refs.enableFlip) this.$refs.enableFlip.checked = false;
       if (this.$refs.enableWatermark) this.$refs.enableWatermark.checked = false;
-      if (this.$refs.logoFileInput)   this.$refs.logoFileInput.value     = '';
-      if (this.$refs.watermarkLogo)   this.$refs.watermarkLogo.src       = '';
-      if (this.$refs.voiceModel)      this.$refs.voiceModel.value        = 'my-MM-ThihaNeural';
+      if (this.$refs.logoFileInput) this.$refs.logoFileInput.value = '';
+      if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.src = '';
+      if (this.$refs.voiceModel) this.$refs.voiceModel.value = 'my-MM-ThihaNeural';
       window._downloadTriggered = false;
       this.waterMarkToggle();
       this.removeSelectedVideo();
+      this.stepCurrent = 0;
+      this.stepProgress= { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     },
 
     async pollStatus(jobId) {
@@ -672,10 +675,12 @@ export default {
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }
 
-        this.stepCurrent = data.step;
         this.stepProgress = data.progress || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         if (data.done) {
+          // ✅ step ကို 6 အဖြစ် တင်လိုက်လို့ Step 5 ဟာ "done" condition (i < cur) ကို ဖြတ်ပြီး green ပြောင်းမယ်
+          this.stepCurrent = 6;
+
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
             const link = document.createElement('a');
@@ -685,11 +690,21 @@ export default {
             link.click();
             document.body.removeChild(link);
           }
+
           this.isProcessing = false;
-          this.cleanDashboardPreview();
+
+          // ✅ Green bar ကို ၁.၅ စက္ကန့်လောက် ပြပြီးမှ UI ကို clean ပြန်လုပ်မယ်
+          setTimeout(() => {
+            this.cleanDashboardPreview();
+          }, 1500);
+
           return;
         }
-        setTimeout(() => this.pollStatus(jobId), 4000);
+
+        // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
+        this.stepCurrent = data.step;
+
+        setTimeout(() => this.pollStatus(jobId), 3000);
       } catch (err) {
         setTimeout(() => this.pollStatus(jobId), 5000);
       }
@@ -811,7 +826,7 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 35) {
+          if (secs > 40) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }

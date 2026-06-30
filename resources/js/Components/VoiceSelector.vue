@@ -17,50 +17,75 @@
         <option value="my-MM-ThihaNeural">🇲🇲 Thiha (Male)</option>
       </optgroup>
 
-      <optgroup label="🇹🇭 Thai (ไทย)">
-        <option value="th-TH-NiwatNeural">🇹🇭 Niwat (Male)</option>
-        <option value="th-TH-PremwadeeNeural">🇹🇭 Premwadee (Female)</option>
-      </optgroup>
+      <!-- isTester ဖြစ်ရင် အောက်က optgroup တွေ အကုန် ဖျောက်ထားမယ် -->
+      <template v-if="!isTester">
+        <optgroup label="🇹🇭 Thai (ไทย)">
+          <option value="th-TH-NiwatNeural">🇹🇭 Niwat (Male)</option>
+          <option value="th-TH-PremwadeeNeural">🇹🇭 Premwadee (Female)</option>
+        </optgroup>
 
-      <optgroup label="🇯🇵 Japanese (日本語)">
-        <option value="ja-JP-NanamiNeural">🇯🇵 Nanami (Female)</option>
-        <option value="ja-JP-KeitaNeural">🇯🇵 Keita (Male)</option>
-      </optgroup>
+        <optgroup label="🇯🇵 Japanese (日本語)">
+          <option value="ja-JP-NanamiNeural">🇯🇵 Nanami (Female)</option>
+          <option value="ja-JP-KeitaNeural">🇯🇵 Keita (Male)</option>
+        </optgroup>
 
-      <optgroup label="🇰🇷 Korean (한국어)">
-        <option value="ko-KR-SunHiNeural">🇰🇷 SunHi (Female)</option>
-        <option value="ko-KR-InJoonNeural">🇰🇷 InJoon (Male)</option>
-      </optgroup>
+        <optgroup label="🇰🇷 Korean (한국어)">
+          <option value="ko-KR-SunHiNeural">🇰🇷 SunHi (Female)</option>
+          <option value="ko-KR-InJoonNeural">🇰🇷 InJoon (Male)</option>
+        </optgroup>
 
-      <optgroup label="🇻🇳 Vietnamese (Tiếng Việt)">
-        <option value="vi-VN-HoaiMyNeural">🇻🇳 HoaiMy (Female)</option>
-        <option value="vi-VN-NamMinhNeural">🇻🇳 NamMinh (Male)</option>
-      </optgroup>
+        <optgroup label="🇬🇧 English">
+          <option value="en-US-JennyNeural">🇬🇧 Jenny (Female)</option>
+          <option value="en-US-GuyNeural">🇬🇧 Guy (Male)</option>
+        </optgroup>
 
-      <optgroup label="🇮🇩 Indonesian (Bahasa)">
-        <option value="id-ID-GadisNeural">🇮🇩 Gadis (Female)</option>
-        <option value="id-ID-ArdiNeural">🇮🇩 Ardi (Male)</option>
-      </optgroup>
+        <optgroup label="🇻🇳 Vietnamese (Tiếng Việt)">
+          <option value="vi-VN-HoaiMyNeural">🇻🇳 HoaiMy (Female)</option>
+          <option value="vi-VN-NamMinhNeural">🇻🇳 NamMinh (Male)</option>
+        </optgroup>
 
-      <optgroup label="🇮🇳 Hindi (हिन्दी)">
-        <option value="hi-IN-SwaraNeural">🇮🇳 Swara (Female)</option>
-        <option value="hi-IN-MadhurNeural">🇮🇳 Madhur (Male)</option>
-      </optgroup>
+        <optgroup label="🇮🇩 Indonesian (Bahasa)">
+          <option value="id-ID-GadisNeural">🇮🇩 Gadis (Female)</option>
+          <option value="id-ID-ArdiNeural">🇮🇩 Ardi (Male)</option>
+        </optgroup>
+
+        <optgroup label="🇮🇳 Hindi (हिन्दी)">
+          <option value="hi-IN-SwaraNeural">🇮🇳 Swara (Female)</option>
+          <option value="hi-IN-MadhurNeural">🇮🇳 Madhur (Male)</option>
+        </optgroup>
+      </template>
     </select>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
   modelValue: { type: String, default: 'my-MM-ThihaNeural' },
   isProcessing: { type: Boolean, default: false },
+  auth: Object,
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue']);
+
+const page = usePage();
+
+// auth.user.user_role === 'tester' ဆိုရင် Burmese voice ပဲ ရွေးခွင့်ပေးမယ်
+const isTester = computed(() => {
+  return (page.props.auth?.user?.role_name || '').toLowerCase() === 'tester';
+});
 
 const selected = ref(props.modelValue);
+
+// tester ဖြစ်ပြီး modelValue က Burmese မဟုတ်ဘူးဆိုရင် default Burmese voice ဆီ force ပြန်ချပေးမယ်
+watch(isTester, (val) => {
+  if (val && !selected.value.toLowerCase().startsWith('my-mm')) {
+    selected.value = 'my-MM-ThihaNeural';
+    emit('update:modelValue', selected.value);
+  }
+}, { immediate: true });
 
 // Mirror of voice_config.py — prefix-based detection
 const PREFIX_LANG = {
@@ -69,7 +94,7 @@ const PREFIX_LANG = {
   'ja-jp': 'Japanese 🇯🇵',
   'zh-cn': 'Chinese Simplified 🇨🇳',
   'zh-tw': 'Chinese Traditional 🇹🇼',
-  'ko-kr': 'Korean 🇰🇷',      // SunHi, InJoon, HyunsuMultilingual
+  'ko-kr': 'Korean 🇰🇷',
   'vi-vn': 'Vietnamese 🇻🇳',
   'id-id': 'Indonesian 🇮🇩',
   'hi-in': 'Hindi 🇮🇳',
