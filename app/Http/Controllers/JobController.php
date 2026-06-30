@@ -26,7 +26,7 @@ class JobController extends Controller
         }
 
         return response()->json([
-            'step'         => $job->step,
+            'step'         => (int)$job->step,
             'progress'     => $this->buildProgressBreakdown($job->step, $job->progress),
             'done'         => in_array($job->status, ['success', 'failed']),
             'error'        => $job->status === 'failed' ? $job->error : null,

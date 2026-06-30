@@ -691,8 +691,7 @@ export default {
       window._downloadTriggered = false;
       this.waterMarkToggle();
       this.removeSelectedVideo();
-      this.stepCurrent = 0;
-      this.stepProgress= { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      this.resetSteps();
     },
 
     async pollStatus(jobId) {
@@ -729,7 +728,7 @@ export default {
         }
 
         // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
-        this.stepCurrent = data.step;
+        this.stepCurrent = Number(data.step);
 
         setTimeout(() => this.pollStatus(jobId), 3000);
       } catch (err) {

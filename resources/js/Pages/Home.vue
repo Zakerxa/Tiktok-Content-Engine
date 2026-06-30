@@ -3,7 +3,6 @@
 
     <AppNavbar :auth="auth" />
     
-
     <!-- ═══════════════ HERO ═══════════════ -->
     <section class="relative min-h-screen flex flex-col items-center justify-center pt-[120px] px-6 pb-20 overflow-hidden text-center">
       <div class="absolute rounded-full blur-[80px] pointer-events-none w-[600px] h-[600px] bg-[rgba(124,58,237,0.25)] -top-[100px] -left-[150px]"></div>
@@ -69,11 +68,6 @@
         </div>
       </div>
     </section>
-
-    <div class="pointer-events-none absolute inset-0">
-      <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]"></div>
-      <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]"></div>
-    </div>
 
     <!-- ═══════════════ PRODUCTS ═══════════════ -->
     <section class="py-[120px] bg-gradient-to-b from-[#080B14] via-[#0D1120] to-[#080B14]">

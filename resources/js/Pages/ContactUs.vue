@@ -17,7 +17,8 @@
 
     <!-- ═══════════════ HERO ═══════════════ -->
     <section class="relative pt-[120px] px-6 pb-16 overflow-hidden text-center">
-      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[500px] h-[500px] bg-[rgba(6,182,212,0.18)] -top-[100px] -right-[150px]"></div>
+      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[500px] h-[500px] bg-[rgba(124,58,237,0.2)] -top-[100px] -left-[150px]"></div>
+      <div class="absolute rounded-full blur-[80px] pointer-events-none w-[400px] h-[400px] bg-[rgba(6,182,212,0.15)] top-[80px] -right-[100px]"></div>
 
       <div class="relative z-10 max-w-[700px] mx-auto">
         <div class="inline-flex items-center gap-2 bg-[rgba(124,58,237,0.15)] border border-[rgba(124,58,237,0.35)] text-[#A78BFA] text-[13px] font-medium px-4 py-1.5 rounded-full mb-8">
