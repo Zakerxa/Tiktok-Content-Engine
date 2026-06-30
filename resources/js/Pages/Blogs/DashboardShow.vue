@@ -51,7 +51,7 @@
             </Link>
 
             <div class="post-footer">
-              <span class="post-date">📅 {{ post.created_at }}</span>
+              <span class="post-date text-xs text-[#64748B]">📅 {{ post.created_at_human }}</span>
               <span class="post-model">{{ post.model_used }}</span>
             </div>
           </div>

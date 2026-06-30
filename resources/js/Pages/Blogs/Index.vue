@@ -253,10 +253,10 @@ const filteredPosts = computed(() => {
 .post-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); }
 
 .cover-link {
-  position: relative; display: block; aspect-ratio: 3 / 4;
+  position: relative; display: block; aspect-ratio: 4 / 5;
   background: #050710; overflow: hidden;
 }
-.cover-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; }
+.cover-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
 .cover-placeholder {
   position: absolute; inset: 0;
   background: linear-gradient(160deg, #1B1036 0%, #2B0F3D 60%, #1A0B2E 100%);

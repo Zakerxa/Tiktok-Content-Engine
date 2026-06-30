@@ -1,20 +1,20 @@
 <template>
   <nav class="nav-bar">
     <div class="nav-inner">
-      <a href="/" class="nav-logo">
+      <Link href="/" class="nav-logo">
         <img src="/favicon.png" alt="icon" class="logo-icon" srcset="">
         <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
-      </a>
+      </Link>
       <div class="nav-links">
-        <a href="/blogs" class="nav-link">TikTok Post</a>
-        <a href="/movie-recap" class="nav-link">Movie Recap</a>
-        <a href="/ContactUs" class="nav-link">Contct Us</a>
-        <a href="/About" class="nav-link">About</a>
-        <a v-if="isHome" href="#pricing" class="nav-link">Pricing</a>
-        <a v-if="auth?.user" href="/dashboard" class="btn-nav-primary">Dashboard</a>
+        <Link href="/blogs" class="nav-link">TikTok Post</Link>
+        <Link href="/movie-recap" class="nav-link">Movie Recap</Link>
+        <Link href="/ContactUs" class="nav-link nav-link-contactus">Contct Us</Link>
+        <Link href="/About" class="nav-link nav-link-about">About</Link>
+        <Link v-if="isHome" href="#pricing" class="nav-link nav-link-pricing">Pricing</Link>
+        <Link v-if="auth?.user" href="/dashboard" class="btn-nav-primary">Dashboard</Link>
         <template v-else>
-          <a href="/login" class="btn-nav-ghost">Sign In</a>
-          <a href="/auth/google" class="btn-nav-primary">Get Started</a>
+          <Link href="/login" class="btn-nav-ghost">Sign In</Link>
+          <Link href="/auth/google" class="btn-nav-primary">Get Started</Link>
         </template>
       </div>
 
@@ -28,14 +28,14 @@
 
     <!-- Mobile drawer -->
     <div v-if="open" class="mobile-drawer">
-      <a href="/blogs" class="mobile-link" @click="open = false">TikTok Post</a>
-      <a href="/movie-recap" class="mobile-link" @click="open = false">Movie Recap</a>
-      <a v-if="isHome" href="#pricing" class="mobile-link" @click="open = false">Pricing</a>
+      <Link href="/blogs" class="mobile-link" @click="open = false">TikTok Post</Link>
+      <Link href="/movie-recap" class="mobile-link" @click="open = false">Movie Recap</Link>
+      <Link v-if="isHome" href="#pricing" class="mobile-link" @click="open = false">Pricing</Link>
       <div class="mobile-actions">
-        <a v-if="auth?.user" href="/dashboard" class="btn-nav-primary w-full text-center">Dashboard</a>
+        <Link v-if="auth?.user" href="/dashboard" class="btn-nav-primary w-full text-center">Dashboard</Link>
         <template v-else>
-          <a href="/login" class="btn-nav-ghost text-center">Sign In</a>
-          <a href="/auth/google" class="btn-nav-primary text-center">Get Started</a>
+          <Link href="/login" class="btn-nav-ghost text-center">Sign In</Link>
+          <Link href="/auth/google" class="btn-nav-primary text-center">Get Started</Link>
         </template>
       </div>
     </div>
@@ -44,7 +44,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Link } from '@inertiajs/vue3';
 
 defineProps({
   auth: Object,
@@ -108,7 +108,7 @@ const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
   align-items: center;
   gap: 8px;
 }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .nav-links { display: none; }
 }
 .nav-link {
@@ -121,6 +121,18 @@ const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
   transition: color 0.2s;
 }
 .nav-link:hover { color: #F1F5F9; }
+
+/* 930px အောက်ရောက်ရင် Pricing link ကိုပဲ ဖျောက်ပါမယ် (ကျန် nav-link တွေက 720px အထိ ဆက်ပြနေဦးမှာပါ) */
+@media (max-width: 930px) {
+  .nav-link-pricing { display: none; }
+}
+@media (max-width: 860px){
+  .nav-link-about { display: none;}
+}
+@media (max-width: 800px){
+  .nav-link-contactus { display: none;}
+}
+
 .btn-nav-ghost {
   color: #F1F5F9;
   text-decoration: none;
@@ -155,7 +167,7 @@ const isHome = computed(() => page.url === '/' || page.url.startsWith('/?'));
   cursor: pointer;
   padding: 4px;
 }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .mobile-menu-btn { display: flex; }
 }
 .hamburger-line {

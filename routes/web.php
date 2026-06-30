@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TikTokPostController;
 use App\Models\TikTokPost;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\JobController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -13,28 +14,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 // ─── Home ───
-Route::get('/', function () {
-    return Inertia::render('Home');
-})->name('home');
+Route::get('/', function () { return Inertia::render('Home');})->name('home');
+Route::get('/movie-recap', function () { return Inertia::render('MovieRecap/Show');})->name('recap.index');
 
 // ─── Blogs ───
 Route::get('/blogs', [TikTokPostController::class, 'index'])->name('blogs.index');
 Route::get('/blogs/{post:slug}', [TikTokPostController::class, 'show'])->name('posts.show');
 Route::get('/blogs/topics/{topic}', [TikTokPostController::class, 'category'])->name('topics.show');
-
-// ─── Recap Main Page ───
-Route::get('/movie-recap', function (Request $request) {
-    $userData = $request->user() ? [
-        'username'  => $request->user()->username,
-        'role_name' => $request->user()->role_name,
-    ] : null;
-
-    return Inertia::render('MovieRecap/Show', [
-        'user' => $userData,
-    ]);
-})->name('recap.index');
-
-
 
 
 // ─── Google OAuth ───
@@ -76,7 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/{id}', [TikTokPostController::class, 'update'])->name('posts.update');
 
     // routes/api.php
-    Route::get('/jobs/status/{jobId}', [AdminController::class, 'status']);
+    Route::get('/jobs/status/{jobId}', [JobController::class, 'status']);
+    
 
     // ─── Dashboard ───
     Route::get('/dashboard', function (Request $request) {
@@ -153,18 +140,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('/About', function () {
-    return Inertia::render('About');
-})->name('About');
-Route::get('/ContactUs', function () {
-    return Inertia::render('ContactUs');
-})->name('ContactUs');
-Route::get('/Policy', function () {
-    return Inertia::render('Policy');
-})->name('Policy');
-Route::get('/Disclaimer', function () {
-    return Inertia::render('Disclaimer');
-})->name('Disclaimer');
+collect(['About' => 'About','ContactUs' => 'ContactUs','Policy' => 'Policy','Disclaimer' => 'Disclaimer',])->each(fn ($view, $uri) => Route::inertia("/{$uri}", $view)->name($uri));
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';

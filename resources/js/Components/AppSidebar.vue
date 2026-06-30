@@ -106,7 +106,9 @@
     </button>
 
     <!-- Logo center -->
-    <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
+    <a href="/">
+      <span style="font-size:20px;font-weight:800;letter-spacing:1px;color:#F1F5F9;position: relative;left: -10px;">Z.<span class="pc">A</span>.K.<span class="pc">E</span>.R.<span class="pc">X</span><span>.A</span></span>
+    </a>
 
     <!-- Avatar -->
     <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0" style="border:1px solid rgba(255,255,255,0.1);">

@@ -1,4 +1,5 @@
 <template>
+  <Head title="Movie-Recap Studio" />
   <div class="min-h-screen flex flex-col bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif]">
 
     <AppNavbar :auth="auth" />
