@@ -49,7 +49,7 @@
 
             <select v-model="roleFilter" class="filter-input select-input">
               <option value="">All Roles</option>
-              <option v-for="r in roles" :key="r.name" :value="r.name">
+              <option v-for="r in roles" :key="r.name" :value="r.name" class="bg-[#0F1320] text-slate-100">
                 {{ r.name }}
               </option>
             </select>
@@ -173,9 +173,9 @@
           <div class="modal-field">
             <label class="modal-label">New Role</label>
             <select v-model="renewForm.new_role" class="filter-input select-input" style="width: 100%;">
-              <option value="normal">normal</option>
-              <option value="pro">pro</option>
-              <option value="vip">vip</option>
+              <option value="normal" class="bg-[#0F1320] text-slate-100">normal</option>
+              <option value="pro" class="bg-[#0F1320] text-slate-100">pro</option>
+              <option value="vip" class="bg-[#0F1320] text-slate-100">vip</option>
             </select>
           </div>
 

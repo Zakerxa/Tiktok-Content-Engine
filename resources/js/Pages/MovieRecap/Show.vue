@@ -326,7 +326,7 @@
                   ${uploadProgress.pct}%` }}
                 </span>
                 <span v-if="!uploadProgress.done" class="ml-auto text-xs text-[#64748B] font-mono">{{
-                  uploadProgress.current }} / {{ uploadProgress.total }} chunks</span>
+                  uploadProgress.current }} / {{ uploadProgress.total }}</span>
               </div>
               <div v-if="!uploadProgress.done"
                 class="w-full bg-[rgba(255,255,255,0.08)] rounded-full h-2 overflow-hidden mt-3">
@@ -423,18 +423,18 @@ export default {
     pipelineSteps() {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
-      const STEP_LABELS = ['Process Input', 'Extract Audio', 'AI Translate (STT)', 'AI Voice (TTS)', 'Render Final'];
-      const isWaitingInQueue = cur === 1 && prog[1] === 100;
+      const STEP_LABELS = ['Preprocessing Input...', 'Extracting Audio...', 'Translating Speech (STT)', 'Generating Voice (TTS)', 'Producing Final Video ...'];
+      const isWaitingInQueue = cur === 1 && (!prog[1] || prog[1] === 0);
 
       return [1, 2, 3, 4, 5].map(i => {
         const pct = prog[i] || 0;
         const label = `${i}. ${STEP_LABELS[i - 1]}`;
-        const isQueue = i === 2 && isWaitingInQueue;
-        const isDone = i < cur || (i === 1 && isWaitingInQueue);
+        const isQueue = i === 1 && isWaitingInQueue;
+        const isDone = i < cur;
         const isActive = i === cur && !isWaitingInQueue;
 
         if (isQueue) return {
-          icon: '⏳', label: '2. Waiting in Queue...',
+          icon: '⏳', label: '1. Waiting in Queue...',
           colorClass: 'text-amber-500 font-bold flex flex-col gap-1',
           pctText: 'စောင့်ဆိုင်းနေပါသည်',
           pctClass: 'font-mono text-[10px] text-amber-600 animate-pulse',
@@ -691,6 +691,7 @@ export default {
 
     async pollStatus(jobId,jobBaseUrl) {
       try {
+        
         const res = await fetch(`/jobs/status/${jobId}`);
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
@@ -784,17 +785,42 @@ export default {
       }
     },
 
-    // role အလိုက် candidate server တွေကို filter + priority sort
+    // role အလိုက် candidate server တွေကို filter + priority sort + role-position sort
     getServersForRole(allServers, roleName) {
-      return allServers.filter(s => !s.role_access?.length || s.role_access.includes(roleName))
-        .sort((a, b) => a.priority - b.priority);  // priority နိမ့်စဉ်
+      return allServers
+        .filter(s => !s.role_access?.length || s.role_access.includes(roleName))
+        .map(s => {
+          // role_access ထဲမှာ ကိုယ့် role ဘယ်နေရာမှာရှိလဲ ကြည့်မယ်
+          // role_access အလွတ် [] ဆိုရင် "All" ဖြစ်လို့ tie-break အနေနဲ့ အနောက်ဆုံးထားမယ်
+          const roleIdx = s.role_access?.length ? s.role_access.indexOf(roleName) : Infinity;
+          return { ...s, _roleIdx: roleIdx };
+        })
+        .sort((a, b) => {
+          // 1st: priority (small = first)
+          if (a.priority !== b.priority) return a.priority - b.priority;
+          // 2nd: same priority ဆိုရင် role_access array ထဲက role position (small index = first)
+          // V1/V3 လိုမျိုး index တူသွားရင် Array.sort ဟာ stable sort ဖြစ်တဲ့အတွက်
+          // DB order (id အလိုက်) အတိုင်း ဘယ်ဟာအရင်လာလာ ကျန်နေမယ် — order မတူသော်လည်း
+          // logic အရ ဘယ်ဟာယူယူ ကိစ္စမရှိပါ (busy check ကနေဆက်စစ်မှာမို့)
+          return a._roleIdx - b._roleIdx;
+        });
     },
-
-     // Resolve baseUrl: candidate list ကို priority order အတိုင်း တစ်ခုချင်းစမ်း
+    
+    // Resolve baseUrl: candidate list ကို priority + role-position order အတိုင်း တစ်ခုချင်းစမ်း
     async resolveBaseUrl() {
       const roleName = this.auth.user?.role_name;
       const allServers = await this.fetchServers();
       const candidates = this.getServersForRole(allServers, roleName);
+    
+      if (!candidates.length) {
+        console.error(`[resolveBaseUrl] role=${roleName} -> no server configured for this role`);
+        this.showAlert('error', 'ဒီ role အတွက် Server မသတ်မှတ်ရသေးပါ။');
+        this.baseUrl = null;
+        this.baseUrlReady = false;
+        return null;
+      }
+
+      console.log(allServers, candidates);
     
       for (const server of candidates) {
         // Busy ဆိုရင် skip (health check တောင် မလုပ်ဘဲ ကျော်)
@@ -813,30 +839,26 @@ export default {
         // Busy မဟုတ်၊ Health ok ဆိုရင်သာ သုံး
         this.baseUrl = server.url;
         this.baseUrlReady = true;
+        console.log("Using server: ",server.name);
         // console.log(`[resolveBaseUrl] role=${roleName} -> ${server.name}`);
         return server.url;
       }
     
-      // candidate အကုန် (busy ဖြစ်ဖြစ်၊ unreachable ဖြစ်ဖြစ်) သုံးမရတော့ရင်
-      console.error(`[resolveBaseUrl] role=${roleName} -> no healthy server available`);
-      this.showAlert('error', 'လောလောဆယ် Server အားလုံး အလုပ်များနေပါသည်။ နောက်မှ ပြန်ကြိုးစားပါ။');
-      this.baseUrl = null;
-      this.baseUrlReady = false;
-      return null;
+      // candidate အားလုံး busy ဖြစ်နေရင် — error မထုတ်ဘဲ ပထမဆုံး preference
+      // (candidates[0]) ကို default အနေနဲ့ ပြန်ယူပြီး queue လုပ်ထားခိုင်းမယ်
+      const fallback = candidates[0];
+      console.warn(`[resolveBaseUrl] role=${roleName} -> all busy, falling back to default ${fallback.name}`);
+      // this.showAlert('warning', `Server အားလုံး အလုပ်များနေလို့ ${fallback.name} ကို queue ထဲထည့်ပေးလိုက်ပါပြီ။`);
+      this.baseUrl = fallback.url;
+      this.baseUrlReady = true;
+      console.log("Fall back to ",candidates[0].name);
+      return fallback.url;
     },
 
     async startProcess() {
 
       if (!this.auth.user) {
         this.showAlert('info', 'ဤ feature ကို အသုံးပြုရန် Login ဝင်ရောက်ရန် လိုအပ်ပါသည်။');
-        return;
-      }
-
-      const jobBaseUrl = await this.resolveBaseUrl(); // local variable
-
-      console.log(jobBaseUrl);
-      if (!jobBaseUrl) {
-        this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
         return;
       }
 
@@ -849,12 +871,12 @@ export default {
       const voice = this.selectedVoice;
       const logoFile = this.$refs.logoFileInput?.files[0];
 
+      this.isProcessing = true;
+
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
       if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
 
       if (this.auth.user.role_name != 'admin') {
-
-        this.isProcessing = true;
 
         console.log(this.auth.user)
 
@@ -894,11 +916,18 @@ export default {
 
       }
 
-      this.isProcessing = true;
+      const jobBaseUrl = await this.resolveBaseUrl(); // local variable
+
+      if (!jobBaseUrl) {
+        this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
+        return;
+      }
+
       this.inlineError = '';
       this.resetSteps();
 
       try {
+        
         let response;
 
         if (this.activeMode === 'upload') {
@@ -959,7 +988,8 @@ export default {
             }
           });
 
-        } else {
+        } 
+        else {
 
           if (this.auth.user.role_name == 'tester') {
             this.showAlert("warning", "Please upgrade your plan!");
@@ -997,7 +1027,8 @@ export default {
 
         this.hideUploadProgressState();
         const data = await response.json();
-        this.pollStatus(data.job_id);
+        console.log(jobBaseUrl);
+        this.pollStatus(data.job_id,jobBaseUrl);
 
       } catch (error) {
         this.hideUploadProgressState();
