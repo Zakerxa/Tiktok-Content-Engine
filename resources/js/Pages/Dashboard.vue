@@ -47,9 +47,38 @@
       <!-- ═══════════════ USAGE + PLAN ═══════════════ -->
       <section class="stats-grid">
 
-        <!-- Usage ring gauge -->
+         <!-- Today's usage -->
         <div class="stat-card usage-card">
-          <div class="card-eyebrow">Today's Usage</div>
+          <div class="card-eyebrow">Today Recap Usage</div>
+          <div class="usage-body">
+            <svg class="usage-ring" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="58" class="ring-track" />
+              <circle
+                cx="70" cy="70" r="58"
+                class="ring-progress"
+                :class="todayUsageRingClass"
+                :stroke-dasharray="ringCircumference"
+                :stroke-dashoffset="todayRingOffset"
+              />
+            </svg>
+            <div class="usage-center">
+              <span class="usage-num">{{ today_used }}</span>
+              <span class="usage-slash">/ {{ daily_limit }}</span>
+              <span class="usage-label">generations</span>
+            </div>
+          </div>
+          <p class="usage-footnote" v-if="daily_limit > 0 && today_used >= daily_limit">
+            Limit reached — try again tomorrow.
+          </p>
+          <p class="usage-footnote" v-else-if="daily_limit === 0">
+            No generation limit set on this account.
+          </p>
+        </div>
+
+
+        <!-- Total ring gauge -->
+        <div class="stat-card usage-card">
+          <div class="card-eyebrow">Recap PLAN Usage</div>
           <div class="usage-body">
             <svg class="usage-ring" viewBox="0 0 140 140">
               <circle cx="70" cy="70" r="58" class="ring-track" />
@@ -62,48 +91,73 @@
               />
             </svg>
             <div class="usage-center">
-              <span class="usage-num">{{ usedToday }}</span>
+              <span class="usage-num">{{ total_recap_used }}</span>
               <span class="usage-slash">/ {{ recapLimitDisplay }}</span>
               <span class="usage-label">generations</span>
             </div>
           </div>
-          <p class="usage-footnote" v-if="recapLimitNum > 0 && usedToday >= recapLimitNum">
+          <p class="usage-footnote" v-if="total_recap_limit > 0 && total_recap_used >= total_recap_limit">
             Limit reached — upgrade your plan for more generations.
           </p>
-          <p class="usage-footnote" v-else-if="recapLimitNum === 0">
+          <p class="usage-footnote" v-else-if="total_recap_limit === 0">
             No generation limit set on this account.
           </p>
         </div>
 
-        <!-- Plan expiry / countdown -->
-        <div class="stat-card plan-card">
-          <div class="card-eyebrow">Plan Status</div>
 
-          <div v-if="user.plan_expires_at" class="plan-body">
-            <div class="countdown-row">
-              <div class="countdown-block" v-for="seg in countdownSegments" :key="seg.label">
-                <span class="countdown-num">{{ seg.value }}</span>
-                <span class="countdown-label">{{ seg.label }}</span>
-              </div>
+         <!-- Total ring gauge -->
+        <!-- <div class="stat-card usage-card">
+          <div class="card-eyebrow">Today Post Usage</div>
+          <div class="usage-body">
+            <svg class="usage-ring" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="58" class="ring-track" />
+              <circle
+                cx="70" cy="70" r="58"
+                class="ring-progress"
+                :class="usageRingClass"
+                :stroke-dasharray="ringCircumference"
+                :stroke-dashoffset="ringOffset"
+              />
+            </svg>
+            <div class="usage-center">
+              <h2 class="mt-20 text-lg font-semibold">Coming Soon</h2>
             </div>
-            <p class="plan-expiry-date">
-              {{ isExpired ? 'Expired on' : 'Expires on' }}
-              <strong>{{ formattedExpiry }}</strong>
-            </p>
-            <p v-if="isExpired" class="plan-warning">
-              Your plan has expired. Renew to keep your current limits.
-            </p>
           </div>
-
-          <div v-else class="plan-body plan-body-free">
-            <p class="plan-free-text">
-              You're on the free <strong>{{ roleMeta.label }}</strong> plan — no expiry date.
-            </p>
-            <a href="/#pricing" class="plan-upgrade-link">View plans →</a>
-          </div>
-        </div>
+          <p class="usage-footnote" v-if="total_recap_limit > 0 && total_recap_used >= total_recap_limit">
+            Limit reached — upgrade your plan for more generations.
+          </p>
+          <p class="usage-footnote" v-else-if="total_recap_limit === 0">
+            No generation limit set on this account.
+          </p>
+        </div> -->
 
       </section>
+
+      <!-- Plan expiry / countdown -->
+      <div class="stat-card plan-card">
+        <div class="card-eyebrow">Plan Status</div>
+        <div v-if="user.plan_expires_at" class="plan-body">
+          <div class="countdown-row">
+            <div class="countdown-block" v-for="seg in countdownSegments" :key="seg.label">
+              <span class="countdown-num">{{ seg.value }}</span>
+              <span class="countdown-label">{{ seg.label }}</span>
+            </div>
+          </div>
+          <p class="plan-expiry-date">
+            {{ isExpired ? 'Expired on' : 'Expires on' }}
+            <strong>{{ formattedExpiry }}</strong>
+          </p>
+          <p v-if="isExpired" class="plan-warning">
+            Your plan has expired. Renew to keep your current limits.
+          </p>
+        </div>
+        <div v-else class="plan-body plan-body-free">
+          <p class="plan-free-text">
+            You're on the free <strong>{{ roleMeta.label }}</strong> plan — no expiry date.
+          </p>
+          <a href="/#pricing" class="plan-upgrade-link">View plans →</a>
+        </div>
+      </div>
 
 
       <!-- ═══════════════ RECAP JOB HISTORY ═══════════════ -->
@@ -121,7 +175,6 @@
            <thead>
               <tr>
                 <th>Status</th>
-                <th>Step</th>
                 <th>Progress</th>
                 <th>Started</th>
                 <th>Duration</th>
@@ -135,7 +188,7 @@
                     {{ job.status === 'success' ? 'Success' : 'Failed' }}
                   </span>
                 </td>
-                <td class="td-title">{{ job.step }}</td>
+               
                 <td style="min-width: 180px;">
                   <div class="progress-track">
                     <div
@@ -351,21 +404,40 @@ const roleMeta = computed(() => {
 const roleClass = computed(() => roleMeta.value.cls);
 
 /* ───────── Usage ring ───────── */
-const usedToday = computed(() => Number(user.value.total_recap_used || 0));
-const recapLimitNum = computed(() => Number(user.value.recap_limit ?? 0));
-const recapLimitDisplay = computed(() => recapLimitNum.value > 0 ? recapLimitNum.value : '∞');
+const total_recap_used = computed(() => Number(user.value.total_recap_used || 0));
+const total_recap_limit = computed(() => Number(user.value.recap_limit ?? 0));
+const recapLimitDisplay = computed(() => total_recap_limit.value > 0 ? total_recap_limit.value : '∞');
 
-const usagePercent = computed(() => {
-  if (recapLimitNum.value <= 0) return 0;
-  return Math.min(usedToday.value / recapLimitNum.value, 1);
+const today_used = computed(() => Number(user.value.today_used || 0));
+const daily_limit = computed(() => Number(user.value.daily_limit ?? 0));
+
+const todayPercent = computed(() => {
+  if (daily_limit.value <= 0) return 0;
+  return Math.min(today_used.value / daily_limit.value, 1);
 });
 
 const RADIUS = 58;
 const ringCircumference = 2 * Math.PI * RADIUS;
+const todayRingOffset = computed(() => ringCircumference - todayPercent.value * ringCircumference);
+
+const todayUsageRingClass = computed(() => {
+  if (daily_limit.value > 0 && today_used.value >= daily_limit.value) return 'ring-danger';
+  if (todayPercent.value > 0.7) return 'ring-warning';
+  return 'ring-ok';
+});
+
+
+const usagePercent = computed(() => {
+  if (total_recap_limit.value <= 0) return 0;
+  return Math.min(total_recap_used.value / total_recap_limit.value, 1);
+});
+
+
+
 const ringOffset = computed(() => ringCircumference - usagePercent.value * ringCircumference);
 
 const usageRingClass = computed(() => {
-  if (recapLimitNum.value > 0 && usedToday.value >= recapLimitNum.value) return 'ring-danger';
+  if (total_recap_limit.value > 0 && total_recap_used.value >= total_recap_limit.value) return 'ring-danger';
   if (usagePercent.value > 0.7) return 'ring-warning';
   return 'ring-ok';
 });

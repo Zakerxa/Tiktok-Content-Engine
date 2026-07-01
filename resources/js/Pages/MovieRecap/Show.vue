@@ -376,7 +376,8 @@ export default {
 
   props: {
     auth: Object,
-    user: Object
+    todayUsed: Number,
+    dailyLimit: Number,
   },
 
   components: {
@@ -880,8 +881,12 @@ export default {
 
         console.log(this.auth.user)
 
-        if (this.auth.user.total_recap_used >= this.auth.user.recap_limit) {
-          this.showAlert('warning', `ဒီနေ့ limit (${this.auth.user.recap_limit}/day) ပြည့်သွားပြီ။ နောက်နေ့ ထပ်သုံးနိုင်သည်။`)
+        if (this.todayUsed >= this.dailyLimit) {
+          let msg = '';
+          console.log("Daily limit reached:", this.auth.user.recap_limit, this.auth.user.total_recap_used);
+          if(this.auth.user.recap_limit >= this.auth.user.total_recap_used)  msg = 'သင့် Plan အရ နောက်နေ့မှသာ အသုံးပြုနိုင်ပါသည်။' ;
+          else msg = 'သင့် Plan ကိုအဆင့်မြင့်တင်ပါ။';
+          this.showAlert('warning', `ဒီနေ့ limit (${this.todayUsed}/${this.dailyLimit}) ပြည့်သွားပြီ။ ${msg}`)
           return;
         }
 

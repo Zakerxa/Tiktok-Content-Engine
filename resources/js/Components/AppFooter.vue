@@ -16,21 +16,21 @@
           </div>
         </div>
 
-        <div class="footer-links-group">
+        <div class="footer-links-group mt-5">
           <h4 class="footer-group-title">Products</h4>
           <a href="/movie-recap" class="footer-link">Movie Recap Studio</a>
           <a href="/blogs" class="footer-link">TikTok Posts Generator</a>
           <a href="/dashboard" class="footer-link">Dashboard</a>
         </div>
 
-        <div class="footer-links-group">
+        <div class="footer-links-group mt-5">
           <h4 class="footer-group-title">Account</h4>
           <a href="/auth/google" class="footer-link">Sign In with Google</a>
           <a href="/profile" class="footer-link">My Profile</a>
           <a href="#pricing" class="footer-link">Upgrade Plan</a>
         </div>
 
-        <div class="footer-links-group">
+        <div class="footer-links-group mt-5">
           <h4 class="footer-group-title">Support</h4>
           <a href="/Disclaimer" class="footer-link">Disclaimer</a>
           <a href="/Policy" class="footer-link">Privacy & Policy</a>

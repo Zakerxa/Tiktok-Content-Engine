@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // ─── Home ───
 Route::inertia('/', 'Home')->name('home');
-Route::inertia('/movie-recap', 'MovieRecap/Show')->name('recap.index');
+Route::get('/movie-recap', [DashboardController::class, 'homeRecap'])->name('recap.index');
 
 // ─── Blogs ───
 Route::get('/blogs', [TikTokPostController::class, 'index'])->name('blogs.index');
@@ -34,7 +34,7 @@ Route::middleware(['auth','verified'])->group(function () {
     // ─── Dashboard ───
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['verified'])->name('dashboard');
     Route::get('/dashboard/posts', [TikTokPostController::class, 'dashboardIndex'])->name('blogs.dashboardshow');
-    Route::inertia('/dashboard/recap', 'MovieRecap/DashboardRecap')->name('recap.dashboardrecap');
+    Route::get('/dashboard/recap', [DashboardController::class, 'dashboardRecap'])->name('recap.dashboardrecap');
 
 });
 

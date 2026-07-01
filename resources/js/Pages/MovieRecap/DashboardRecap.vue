@@ -101,8 +101,8 @@
                   ? 'bg-[rgba(124,58,237,0.12)] text-[#A78BFA] shadow border border-[rgba(124,58,237,0.3)]'
                   : 'bg-transparent text-[#64748B] hover:text-[#94A3B8]']"
             >📤 Upload Video File</button>
-            <button
-              :if="auth.user.role_name == 'pro' || auth.user.role_name == 'admin'"
+
+            <button v-if="auth.user.role_name == 'admin'"
               @click="switchTab('youtube')"
               :class="['flex-1 py-2.5 text-sm font-semibold rounded-lg border-none cursor-pointer transition-all',
                 activeMode === 'youtube'
@@ -117,7 +117,7 @@
             <div
                 ref="uploadZone"
                 v-show="!hasVideoSelected"
-                class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-2xl p-6 text-center cursor-pointer relative bg-[rgba(255,255,255,0.02)] hover:border-[#7C3AED] transition-colors"
+                class="border-2 border-dashed h-full border-[rgba(255,255,255,0.15)] rounded-2xl p-6 text-center cursor-pointer relative bg-[rgba(255,255,255,0.02)] hover:border-[#7C3AED] transition-colors"
                 :class="{ 'pointer-events-none opacity-60': isProcessing }"
               >
               <div ref="uploadIconArea" class="flex flex-col items-center justify-center py-2 pb-3 text-[#64748B]">
@@ -186,6 +186,20 @@
 
           <div class="bg-[rgba(255,255,255,0.02)] rounded-2xl p-4 sm:p-6 border border-[rgba(255,255,255,0.06)] shadow-sm flex flex-col gap-4">
 
+            <!-- Blur region -->
+            <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+              <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
+              <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
+              <div class="flex flex-wrap gap-2 items-center">
+                <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">X: <span>{{ blurX.toFixed(2) }}</span>%</div>
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
+                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">H: <span>{{ blurH.toFixed(2) }}</span>%</div>
+                </div>
+              </div>
+            </div>
+
             <!-- Voiceover toggle -->
             <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
               <div class="flex justify-between items-center mb-3">
@@ -198,20 +212,6 @@
               </div>
               <div ref="voiceoverContainer" class="opacity-50 pointer-events-none transition-all">
                 <VoiceSelector v-model="selectedVoice" :isProcessing="isProcessing" />
-              </div>
-            </div>
-
-            <!-- Blur region -->
-            <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
-              <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
-              <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
-              <div class="flex flex-wrap gap-2 items-center">
-                <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">X: <span>{{ blurX.toFixed(2) }}</span>%</div>
-                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
-                  <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">H: <span>{{ blurH.toFixed(2) }}</span>%</div>
-                </div>
               </div>
             </div>
 
@@ -247,22 +247,35 @@
             <div ref="watermarkUploadSection" class="mt-2 p-4 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm" style="display:none">
               <label class="block text-sm font-semibold text-[#CBD5E1] mb-3">Upload &amp; Drag Logo</label>
               <div class="flex gap-4 items-center">
-                <label class="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group">
-                  <div class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label class="relative flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group overflow-hidden">
+                
+                  <!-- Placeholder icon — logo upload ပြီးရင် ဖျောက်ပေးမည် -->
+                  <div ref="logoUploadPlaceholder" class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
+                    <svg class="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
                     <span class="text-[10px] font-bold uppercase tracking-wide">Upload</span>
                   </div>
+                
+                  <!-- ✅ NEW — static thumbnail only, drag logic မပါ -->
+                  <img
+                    ref="uploadBoxThumbnail"
+                    src=""
+                    class="absolute inset-0 w-full h-full object-contain p-2"
+                    alt="Uploaded logo"
+                    draggable="false"
+                    style="display:none"
+                  />
+                
                   <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="previewLogo" :disabled="isProcessing"/>
                 </label>
                 <div class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
                   <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
-                  <p>Upload a logo, then drag it around the video player to set position.</p>
+                  <p>Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
                   <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
-                    <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
-                    <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
+                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
+                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
                   </div>
                 </div>
               </div>
@@ -350,7 +363,9 @@ export default {
   name: 'MovieRecapShow',
 
   props: {
-    auth: Object
+    auth: Object,
+    todayUsed: Number,
+    dailyLimit: Number,
   },
 
   components:{
@@ -492,9 +507,12 @@ export default {
 
     previewLogo(event) {
       const file = event.target.files[0];
-      const img  = this.$refs.watermarkLogo;
+      const img  = this.$refs.watermarkLogo;      // ← Video preview draggable logo (ဟောင်း, မပြောင်း)
       if (!file || !img) return;
-      img.src           = URL.createObjectURL(file);
+    
+      const objectUrl = URL.createObjectURL(file);
+    
+      img.src           = objectUrl;
       img.style.display = 'block';
       img.style.width   = '60px';
       img.style.left    = '10px';
@@ -502,6 +520,15 @@ export default {
       img.onload = () => this.updateLogoCoordinates();
       img.removeEventListener('touchstart', this.logoDragStart);
       img.addEventListener('touchstart', this.logoDragStart, { passive: false });
+    
+      // ✅ NEW — Upload box ထဲက static thumbnail ကိုပါ update (drag logic လုံးဝမပါ)
+      const thumb = this.$refs.uploadBoxThumbnail;
+      const placeholder = this.$refs.logoUploadPlaceholder;
+      if (thumb) {
+        thumb.src = objectUrl;
+        thumb.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+      }
     },
 
     updateLogoCoordinates() {
@@ -848,8 +875,12 @@ export default {
 
       if (this.auth.user.role_name != 'admin') {       
 
-        if (this.auth.user.total_recap_used >= this.auth.user.recap_limit) {
-          this.showAlert('warning', `ဒီနေ့ limit (${this.auth.user.recap_limit}/day) ပြည့်သွားပြီ။ နောက်နေ့ ထပ်သုံးနိုင်သည်။`)
+        if (this.todayUsed >= this.dailyLimit) {
+          let msg = '';
+          console.log("Daily limit reached:", this.auth.user.recap_limit, this.auth.user.total_recap_used);
+          if(this.auth.user.recap_limit >= this.auth.user.total_recap_used)  msg = 'သင့် Plan အရ နောက်နေ့မှသာ အသုံးပြုနိုင်ပါသည်။' ;
+          else msg = 'သင့် Plan ကိုအဆင့်မြင့်တင်ပါ။';
+          this.showAlert('warning', `ဒီနေ့ limit (${this.todayUsed}/${this.dailyLimit}) ပြည့်သွားပြီ။ ${msg}`)
           return;
         }
 

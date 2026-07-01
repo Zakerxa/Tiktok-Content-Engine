@@ -2,14 +2,14 @@
   <section id="pricing" class="relative overflow-hidden py-24 sm:py-28 lg:py-32">
 
 
-    <div class="relative mx-auto max-w-7xl px-5 sm:px-8">
+    <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
       <!-- Header -->
       <div class="mx-auto max-w-3xl text-center pb-20">
         <span class="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-violet-300">
           Pricing Plans
         </span>
         <h2 class="mt-5 text-balance text-3xl font-extrabold leading-tight tracking-tight text-slate-50 sm:text-4xl lg:text-[44px]">
-          Start free, scale as your channel grows
+          Free to start. Built to scale.
         </h2>
         <p class="mt-4 text-balance text-[15px] leading-relaxed text-slate-400">
           Every plan unlocks both <span class="text-slate-300">Movie Recap Studio</span> and <span class="text-slate-300">Blog Generator</span> — pay only for speed, length, and quality.
@@ -17,7 +17,7 @@
       </div>
 
       <!-- Cards -->
-      <div class="mt-16 grid grid-cols-1 items-start gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:pb-6">
+      <div class="mt-16 grid grid-cols-1 items-start gap-12 sm:grid-cols-2 xl:grid-cols-3 xl:pb-6">
         <div
           v-for="plan in plans"
           :key="plan.name"
@@ -100,7 +100,7 @@
 const plans = [
   {
     name: 'Tester',
-    icon: '🧪',
+    icon: '🔥',
     price: 0,
     tagline: 'Try before you commit',
     priorityLabel: null,
@@ -113,38 +113,16 @@ const plans = [
       { label: 'Auto Subtitles (+1 )', included: true },
       { label: 'AI Voice Over (+2 )', included: true, tooltip: 'Upgrade for more AI Voice' },
       { label: 'Custom Blur & Mosaic', included: true },
-      { label: '40sec Video Max', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Copyright Protection (50%)', included: true, type: 'warning', tooltip: 'Upgrade for longer durations' },
+      { label: '40 sec Video Max', included: true, tooltip: 'Upgrade for longer durations' },
+      { label: 'Copyright Protection (40%)', included: true, type: 'warning', tooltip: 'Upgrade for longer durations' },
       { label: 'Low quality export', included: true, type: 'warning' },
       { label: 'Low processing', included: true, type: 'warning' },
       { label: 'Custom Watermark', included: false },
     ],
   },
   {
-    name: 'Normal',
-    icon: '⚡',
-    price: 2000,
-    tagline: 'Reliable, steady daily output',
-    priorityLabel: null,
-    featured: false,
-    glowColor: 'radial-gradient(circle, rgba(6,182,212,0.22) 0%, transparent 70%)',
-    href: '/dashboard',
-    cta: 'Get Normal',
-    features: [
-      { label: '2 generations/day', included: true, tooltip: 'Upgrade for more generation' },
-      { label: 'Auto Subtitles (+8 )', included: true },
-      { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
-      { label: 'Custom Blur & Mosaic', included: true },
-      { label: '1 min Video Max', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Standard quality export', included: true },
-      { label: 'Standard processing', included: true },
-      { label: 'Custom Watermark', included: false },
-    ],
-  },
-  {
     name: 'Pro',
-    icon: '🔥',
+    icon: '👑',
     price: 3000,
     tagline: 'Priority rendering, built to scale',
     priorityLabel: '⚡ Priority Queue',
@@ -164,29 +142,52 @@ const plans = [
       { label: 'Custom Watermark', included: true },
     ],
   },
-  {
-    name: 'VIP',
-    icon: '👑',
-    price: 5000,
-    tagline: 'Top priority, unlimited power',
-    priorityLabel: '👑 Top Priority',
+    {
+    name: 'Normal',
+    icon: '⚡',
+    price: 2000,
+    tagline: 'Reliable, steady daily output',
+    priorityLabel: null,
     featured: false,
-    vip: true,
+    vip:true,
     glowColor: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
-    href: '/auth/google',
-    cta: 'Become VIP',
+    href: '/dashboard',
+    cta: 'Get Normal',
     features: [
-      { label: '5 generations/day', included: true },
+      { label: '2 generations/day', included: true, tooltip: 'Upgrade for more generation' },
       { label: 'Auto Subtitles (+8 )', included: true },
       { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
       { label: 'Custom Blur & Mosaic', included: true },
-      { label: '2 min Video length max', included: true },
+      { label: '1 min Video Max', included: true, tooltip: 'Upgrade for longer durations' },
       { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'HD quality export', included: true },
-      { label: 'Fast processing', included: true },
-      { label: 'Custom Watermark Position', included: true },
+      { label: 'Standard quality export', included: true },
+      { label: 'Standard processing', included: true },
+      { label: 'Custom Watermark', included: false },
     ],
   },
+  // {
+  //   name: 'VIP',
+  //   icon: '👑',
+  //   price: 5000,
+  //   tagline: 'Top priority, unlimited power',
+  //   priorityLabel: '👑 Top Priority',
+  //   featured: false,
+  //   vip: true,
+  //   glowColor: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
+  //   href: '/auth/google',
+  //   cta: 'Become VIP',
+  //   features: [
+  //     { label: '5 generations/day', included: true },
+  //     { label: 'Auto Subtitles (+8 )', included: true },
+  //     { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
+  //     { label: 'Custom Blur & Mosaic', included: true },
+  //     { label: '2 min Video length max', included: true },
+  //     { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
+  //     { label: 'HD quality export', included: true },
+  //     { label: 'Standard processing', included: true },
+  //     { label: 'Custom Watermark Position', included: true },
+  //   ],
+  // },
 ];
 
 function cardShellClass(plan) {
