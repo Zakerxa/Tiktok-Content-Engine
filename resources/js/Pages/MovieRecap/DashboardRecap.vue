@@ -350,8 +350,7 @@ export default {
   name: 'MovieRecapShow',
 
   props: {
-    auth: Object,
-    user: Object
+    auth: Object
   },
 
   components:{
@@ -363,12 +362,7 @@ export default {
     return {
       baseUrl: '',
       baseUrlReady: false,
-      servers: {
-        v1: 'https://zakerxa-zakerxa-v1.hf.space',
-        v2: 'https://zakerxa-zakerxa-v1.hf.space',
-        v3: 'https://zakerxav2-zakerxav2-v2.hf.space',
-        recap: 'https://recap.zakerxa.com',
-      },
+      servers: [],
       activeMode:       'upload',
       isProcessing:     false,
       showErrorOverlay: false,
@@ -667,7 +661,7 @@ export default {
       this.resetSteps();
     },
 
-    async pollStatus(jobId) {
+    async pollStatus(jobId,jobBaseUrl) {
       try {
         const res = await fetch(`/jobs/status/${jobId}`);
         if (!res.ok) throw new Error('Status synchronization failed.');
@@ -683,7 +677,7 @@ export default {
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
             const link = document.createElement('a');
-            link.href = `${this.baseUrl}/download/${jobId}`;
+            link.href = `${jobBaseUrl}/download/${jobId}`;
             link.download = 'Recap_Ready.mp4';
             document.body.appendChild(link);
             link.click();
@@ -703,9 +697,9 @@ export default {
         // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
         this.stepCurrent = Number(data.step);
 
-        setTimeout(() => this.pollStatus(jobId), 3000);
+        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 3000);
       } catch (err) {
-        setTimeout(() => this.pollStatus(jobId), 5000);
+        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 5000);
       }
     },
 
@@ -731,7 +725,7 @@ export default {
         if (!res.ok) return false;
 
         const data = await res.json();
-        console.log(`[health] ${url} ->`, data.status, data.message);
+        // console.log(`[health] ${url} ->`, data.status, data.message);
 
         // TODO (later): queue/semaphore full check
         // if (data.queue_count >= 3) return false;
@@ -744,46 +738,62 @@ export default {
       }
     },
 
-    // Decide [primary, fallback] pair based on role
-    getServerPairForRole(roleName) {
-      switch (roleName) {
-        case 'tester':
-          return [this.servers.v1, this.servers.v3];
-        case 'normal':
-          return [this.servers.v2, this.servers.v3];
-        case 'pro':
-          return [this.servers.recap, this.servers.v3];
-        default:
-          return [this.servers.recap, this.servers.v3];
+    // Server list + busy/active status ကို Laravel ကနေယူမယ်
+    async fetchServers() {
+      try {
+        const res = await fetch('/server-status');
+        if (res.status === 401 || res.status === 419) {
+          this.showAlert('error', 'Session ကုန်သွားပါပြီ။ ပြန်ဝင်ပါ။');
+          window.location.href = '/login';
+          return [];
+        }
+        if (!res.ok) return [];
+        return await res.json();
+      } catch (err) {
+        console.warn('[servers] fetch failed:', err.message);
+        return [];
       }
     },
 
-    // Resolve baseUrl: try primary, fallback if primary fails
+    // role အလိုက် candidate server တွေကို filter + priority sort
+    getServersForRole(allServers, roleName) {
+      return allServers.filter(s => !s.role_access?.length || s.role_access.includes(roleName))
+        .sort((a, b) => a.priority - b.priority);  // priority နိမ့်စဉ်
+    },
+
+     // Resolve baseUrl: candidate list ကို priority order အတိုင်း တစ်ခုချင်းစမ်း
     async resolveBaseUrl() {
       const roleName = this.auth.user?.role_name;
-      const [primary, fallback] = this.getServerPairForRole(roleName);
-
-      const primaryOk = await this.checkHealth(primary);
-      if (primaryOk) {
-        this.baseUrl = primary;
+      const allServers = await this.fetchServers();
+      const candidates = this.getServersForRole(allServers, roleName);
+    
+      for (const server of candidates) {
+        // Busy ဆိုရင် skip (health check တောင် မလုပ်ဘဲ ကျော်)
+        if (server.is_busy) {
+          // console.log(`[resolveBaseUrl] ${server.name} is busy — skip`);
+          continue;
+        }
+    
+        // ✅ Health check — ဒါကသာ "တကယ်ရှိလား" ဆိုတာ verify လုပ်ပေးတာ
+        const healthy = await this.checkHealth(server.url);
+        if (!healthy) {
+          // console.warn(`[resolveBaseUrl] ${server.name} (${server.url}) unreachable — skip`);
+          continue;
+        }
+    
+        // Busy မဟုတ်၊ Health ok ဆိုရင်သာ သုံး
+        this.baseUrl = server.url;
         this.baseUrlReady = true;
-        // console.log(`[resolveBaseUrl] role=${roleName} -> primary (${primary})`);
-        return primary;
+        // console.log(`[resolveBaseUrl] role=${roleName} -> ${server.name}`);
+        return server.url;
       }
-
-      const fallbackOk = await this.checkHealth(fallback);
-      if (fallbackOk) {
-        this.baseUrl = fallback;
-        this.baseUrlReady = true;
-        // console.log(`[resolveBaseUrl] role=${roleName} -> fallback (${fallback})`);
-        return fallback;
-      }
-
-      // အကုန် fail ရင် primary ကိုပဲ ပြန်ပေးမယ် (startProcess() ထဲက try/catch က handle လုပ်ပေးလိမ့်မယ်)
-      // console.error(`[resolveBaseUrl] role=${roleName} -> both primary & fallback failed, defaulting to primary`);
-      this.baseUrl = primary;
-      this.baseUrlReady = true;
-      return primary;
+    
+      // candidate အကုန် (busy ဖြစ်ဖြစ်၊ unreachable ဖြစ်ဖြစ်) သုံးမရတော့ရင်
+      console.error(`[resolveBaseUrl] role=${roleName} -> no healthy server available`);
+      this.showAlert('error', 'လောလောဆယ် Server အားလုံး အလုပ်များနေပါသည်။ နောက်မှ ပြန်ကြိုးစားပါ။');
+      this.baseUrl = null;
+      this.baseUrlReady = false;
+      return null;
     },
 
     async startProcess() {
@@ -793,7 +803,13 @@ export default {
         return;
       }
 
-      await this.resolveBaseUrl();
+      const jobBaseUrl = await this.resolveBaseUrl(); // local variable
+
+      console.log(jobBaseUrl);
+      if (!jobBaseUrl) {
+        this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
+        return;
+      }
 
       const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
@@ -810,6 +826,8 @@ export default {
       if (this.auth.user.role_name != 'admin') {
 
         this.isProcessing = true;
+
+        console.log(this.auth.user)
 
         if (this.auth.user.total_recap_used >= this.auth.user.recap_limit) {
           this.showAlert('warning', `ဒီနေ့ limit (${this.auth.user.recap_limit}/day) ပြည့်သွားပြီ။ နောက်နေ့ ထပ်သုံးနိုင်သည်။`)
@@ -869,7 +887,7 @@ export default {
             chunkForm.append('sessionId', sessionId);
 
 
-            const chunkRes = await fetch(`${this.baseUrl}/upload-chunk`, {
+            const chunkRes = await fetch(`${jobBaseUrl}/upload-chunk`, {
               method: 'POST',
               body: chunkForm,
               headers: {
@@ -903,7 +921,7 @@ export default {
           }
 
 
-          response = await fetch(`${this.baseUrl}/upload-chunk-finalize`, {
+          response = await fetch(`${jobBaseUrl}/upload-chunk-finalize`, {
             method: 'POST',
             body: finalForm,
             headers: {
@@ -933,7 +951,7 @@ export default {
             formData.append('watermark_y', this.logoY.toFixed(2));
             if (logoFile) formData.append('watermark_file', logoFile);
           }
-          response = await fetch(`${this.baseUrl}/process-youtube`, {
+          response = await fetch(`${jobBaseUrl}/process-youtube`, {
             method: 'POST',
             body: formData,
             headers: {

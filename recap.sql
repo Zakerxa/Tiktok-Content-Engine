@@ -1,77 +1,110 @@
--- =============================================
--- 1. ROLES TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    daily_limit INT DEFAULT 0,
-    max_video_seconds INT DEFAULT 0,
-    can_watermark TINYINT(1) DEFAULT 0,
-    can_subtitle TINYINT(1) DEFAULT 0,
-    can_voiceover TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+Step 1 — origin/main အထိ soft reset ပါ (ဒါက code ကို မပျက်စီးပါ၊ commit history ကိုပဲ ပြန်ပြန်ဖန်တီးမှာပါ):
+bashgit reset --soft 9df6615
+Step 2 — Status ကို စစ်ပါ:
+bashgit status
+သင့် mail system အပြောင်းအလဲ အကုန် staged အနေနဲ့ ပြနေသင့်ပါတယ် (test.md ပါမှာ မဟုတ်ပါဘူး၊ ဖျက်ပြီးသားမို့)။
+Step 3 — test.md ဟန်တီးထားလား နောက်တစ်ကြိမ် confirm ပါ:
+bashls test.md
+ဖိုင် ရှိနေသေးရင် (No such file မပြရင်) ဖျက်ပါ:
+bashgit rm --cached test.md 2>/dev/null
+rm -f test.md
+Step 4 — Commit အသစ်တစ်ခု ပြန်ဖန်တီးပါ:
+bashgit add .
+git commit -m "Add mail system with Brevo SMTP integration"
+Step 5 — Push ပြန်လုပ်ပါ:
+bashgit push origin main
+ဒီတစ်ကြိမ် history ထဲမှာ secret ပါတဲ့ commit လုံးဝ ရှိမနေတော့ပါဘူး — GitHub push protection ကျော်သွားသင့်ပါတယ်။
 
-INSERT IGNORE INTO roles
-    (name, daily_limit, max_video_seconds, can_watermark, can_subtitle, can_voiceover)
-VALUES
-    ('tester', 1,   40,  0, 0, 1),
-    ('normal', 3,   120, 1, 1, 1),
-    ('pro',    3,   180, 1, 1, 1),
-    ('vip',    5,   300, 1, 1, 1),
-    ('admin',  999, 0,   1, 1, 1);
 
--- =============================================
--- 2. USERS TABLE ALTER
--- =============================================
-ALTER TABLE users
-ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE NULL,
-ADD COLUMN IF NOT EXISTS role_name VARCHAR(50) DEFAULT 'tester',
-ADD COLUMN IF NOT EXISTS is_active TINYINT(1) DEFAULT 1,
-ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS api_key VARCHAR(100) UNIQUE DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS google_id VARCHAR(100) UNIQUE DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS plan_expires_at DATETIME DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS recap_limit INT DEFAULT 0,
-ADD COLUMN IF NOT EXISTS total_recap_used INT DEFAULT 0,
-ADD COLUMN IF NOT EXISTS session_expires_at DATETIME DEFAULT NULL;
 
--- =============================================
--- 3. USAGE LOG TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS usage_log (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
-    used_date DATE NOT NULL,
-    run_count INT DEFAULT 0,
-    UNIQUE KEY uniq_user_date (user_id, used_date),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+here is database ,we have very important process , i want how many job currently procressing on server . in this photo every things is success and error that's mean finished . we can know status by name (processing)   is currently running on server but maybe it's can stuck so we can check with time how long it take if process is longer than 30min it's bug error but i havent' face like that i just tell you to know . here is database work at server=> 
 
--- =============================================
--- 4. PLAN HISTORY TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS plan_history (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
-    role_name VARCHAR(50) NOT NULL,
-    recap_limit INT DEFAULT 0,
-    plan_starts_at DATETIME NOT NULL,
-    plan_expires_at DATETIME NOT NULL,
-    renewed_by VARCHAR(100) DEFAULT 'admin',
-    note TEXT DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+def save_job(job_id: str, user_id: int, server_type: str = "normal"):
+    conn = get_db()
+    with conn.cursor() as cur:
+        cur.execute("""
+            INSERT INTO recap_jobs 
+                (id, user_id, status, step, progress, server, created_at, updated_at)
+            VALUES (%s, %s, 'processing', 1, 0, %s, NOW(), NOW())
+        """, (job_id, user_id, server_type))
+    conn.commit()
+    conn.close()
 
-CREATE TABLE IF NOT EXISTS recap_jobs (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending',
-    step INT DEFAULT 0,
-    progress LONGTEXT DEFAULT NULL,
-    error TEXT DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+if finish or error it's show success and error. here is the main part i want to do.i call from vue to know currently with server is busy ( processing ) with their server name, so i can see which server is currently busy and i can move to another server. 
+
+      servers: {
+        v1: 'https://zakerxa-zakerxa-v1.hf.space',
+        v2: 'https://zakerxav2-zakerxav2-v2.hf.space',
+        v3: 'https://zakerxav3-zakerxav3-v3.hf.space',
+        recap: 'https://recap.zakerxa.com',
+      },
+
+here is old vue code to check server down or not , firstly we check all server is active ? 
+
+
+    // Single endpoint health check with timeout
+    async checkHealth(url, timeoutMs = 4000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(`${url}/health`, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        console.log(`[health] ${url} ->`, data.status, data.message);
+
+        // TODO (later): queue/semaphore full check
+        // if (data.queue_count >= 3) return false;
+
+        return data.status === 'ok' || data.status === 'healthy';
+      } catch (err) {
+        clearTimeout(timer);
+        console.warn(`[health] ${url} unreachable:`, err.message);
+        return false;
+      }
+    },
+
+    // Decide [primary, fallback] pair based on role
+    getServerPairForRole(roleName) {
+      switch (roleName) {
+        case 'tester':
+          return [this.servers.v1, this.servers.v3];
+        case 'normal':
+          return [this.servers.v2, this.servers.v3];
+        case 'pro':
+          return [this.servers.recap, this.servers.v3];
+        default:
+          return [this.servers.recap, this.servers.v3];
+      }
+    },
+
+    // Resolve baseUrl: try primary, fallback if primary fails
+    async resolveBaseUrl() {
+      const roleName = this.auth.user?.role_name;
+      const [primary, fallback] = this.getServerPairForRole(roleName);
+
+      const primaryOk = await this.checkHealth(primary);
+      if (primaryOk) {
+        this.baseUrl = primary;
+        this.baseUrlReady = true;
+        // console.log(`[resolveBaseUrl] role=${roleName} -> primary (${primary})`);
+        return primary;
+      }
+
+      const fallbackOk = await this.checkHealth(fallback);
+      if (fallbackOk) {
+        this.baseUrl = fallback;
+        this.baseUrlReady = true;
+        // console.log(`[resolveBaseUrl] role=${roleName} -> fallback (${fallback})`);
+        return fallback;
+      }
+
+      // အကုန် fail ရင် primary ကိုပဲ ပြန်ပေးမယ် (startProcess() ထဲက try/catch က handle လုပ်ပေးလိမ့်မယ်)
+      // console.error(`[resolveBaseUrl] role=${roleName} -> both primary & fallback failed, defaulting to primary`);
+      this.baseUrl = primary;
+      this.baseUrlReady = true;
+      return primary;
+    },
+
+and then we will check busy server among them if server is busy we will switch to another also show user to switching server . explain as burmese

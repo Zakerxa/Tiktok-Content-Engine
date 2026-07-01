@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\UsageLog;
 use App\Models\PlanHistory;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -234,5 +235,76 @@ class AdminController extends Controller
             'user'    => $user,
             'history' => $history,
         ]);
+    }
+
+
+
+
+
+
+    //////////////////////////// SERVER MANAGEMENT   ////////////////////////////////
+
+    public function servers()
+    {
+        $servers = Server::orderBy('priority')->get();
+
+        // Busy/stuck status ပေါင်းထည့်မယ်
+        $loadRows = DB::table('recap_jobs')
+            ->select('server', DB::raw('COUNT(*) as processing_count'), DB::raw('MIN(created_at) as oldest_started'))
+            ->where('status', 'processing')
+            ->groupBy('server')
+            ->get()
+            ->keyBy('server');
+
+        $servers = $servers->map(function ($server) use ($loadRows) {
+            $load = $loadRows->get($server->name);
+            $processingCount = $load->processing_count ?? 0;
+            $ageMinutes = $load ? Carbon::parse($load->oldest_started)->diffInMinutes(now()) : 0;
+
+            $server->processing_count = $processingCount;
+            $server->is_busy = $processingCount > 0;
+            $server->is_stuck = $ageMinutes > 30;
+
+            return $server;
+        });
+
+        return Inertia::render('Admin/Servers', [
+            'servers' => $servers,
+        ]);
+    }
+
+    public function storeServer(Request $request)
+    {
+        $request->validate([
+            'name'        => 'required|string|unique:servers,name',
+            'url'         => 'required|url',
+            'role_access' => 'nullable|array',
+            'priority'    => 'required|integer',
+        ]);
+
+        Server::create($request->all());
+
+        return back()->with('success', 'Server ထည့်ပြီးပါပြီ။');
+    }
+
+    public function updateServer(Request $request, Server $server)
+    {
+        $request->validate([
+            'name'        => 'required|string|unique:servers,name,' . $server->id,
+            'url'         => 'required|url',
+            'role_access' => 'nullable|array',
+            'priority'    => 'required|integer',
+            'is_active'   => 'boolean',
+        ]);
+
+        $server->update($request->all());
+
+        return back()->with('success', 'Server update ပြီးပါပြီ။');
+    }
+
+    public function deleteServer(Server $server)
+    {
+        $server->delete();
+        return back()->with('success', 'Server ဖျက်ပြီးပါပြီ။');
     }
 }
