@@ -433,7 +433,7 @@ export default {
     pipelineSteps() {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
-      const STEP_LABELS = ['Preprocessing Input...', 'Extracting Audio...', 'Translating Speech (STT)', 'Generating Voice (TTS)', 'Producing Final Video ...'];
+      const STEP_LABELS = ['Processing Video . . .', 'Extracting Audio . . .', 'Translating Speech . . .', 'Generating Voice (TTS)', 'Producing Final Video ...'];
       const isWaitingInQueue = cur === 1 && (!prog[1] || prog[1] === 0);
 
       return [1, 2, 3, 4, 5].map(i => {
@@ -511,8 +511,8 @@ export default {
         b.style.display = 'block';
         b.style.width = '100%';
         b.style.left = '0px';
-        b.style.top = '85%';
-        b.style.height = '12%';
+        b.style.top     = '73%';
+        b.style.height  = '13%';
         setTimeout(() => this.updateBlurCoordinates(), 100);
       }
     },
@@ -714,7 +714,7 @@ export default {
     async pollStatus(jobId,jobBaseUrl) {
       try {
         
-        const res = await fetch(`/jobs/status/${jobId}`);
+        const res = await fetch(`/jobs/status/${jobId}`,{  headers: { 'Accept': 'application/json' }});
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
         if (data.error) { this.showError(data.error); return; }
@@ -748,9 +748,13 @@ export default {
         // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
         this.stepCurrent = Number(data.step);
 
-        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 3000);
+        // 🎯 Step 5 (render — ကြာနိုင်) ရောက်ရင် interval ရှည်စေမယ်
+        const nextDelay = this.stepCurrent >= 5 ? 5000 : 6000;
+        setTimeout(() => this.pollStatus(jobId, jobBaseUrl), nextDelay)
+
+        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 6000);
       } catch (err) {
-        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 5000);
+        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 8000);
       }
     },
 
