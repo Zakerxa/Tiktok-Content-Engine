@@ -726,10 +726,8 @@ export default {
         // 🎯 Step 5 (render — ကြာနိုင်) ရောက်ရင် interval ရှည်စေမယ်
         const nextDelay = this.stepCurrent >= 5 ? 5000 : 6000;
         setTimeout(() => this.pollStatus(jobId, jobBaseUrl), nextDelay);
-
-        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 6000);
       } catch (err) {
-        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 5000);
+        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 8000);
       }
     },
 
