@@ -33,14 +33,14 @@
         </p>
 
         <div class="flex gap-4 justify-center flex-wrap mb-14">
-          <a href="/movie-recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
+          <Link href="/dashboard/recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Start Movie Recap
-          </a>
-          <a href="/blogs" class="inline-flex items-center gap-2.5 bg-[rgba(255,255,255,0.06)] text-[#F1F5F9] no-underline text-base font-semibold px-8 py-4 rounded-[14px] border border-[rgba(255,255,255,0.12)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]">
+          </Link>
+          <Link href="/blogs" class="inline-flex items-center gap-2.5 bg-[rgba(255,255,255,0.06)] text-[#F1F5F9] no-underline text-base font-semibold px-8 py-4 rounded-[14px] border border-[rgba(255,255,255,0.12)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             Free TikTok Content
-          </a>
+          </Link>
         </div>
 
         <div class="flex items-center justify-center gap-8 flex-wrap">
@@ -147,6 +147,7 @@
 import AppNavbar from '@/Components/AppNavbar.vue';
 import AppFooter from '@/Components/AppFooter.vue';
 import PricingSection from '@/Components/PricingSection.vue';
+import { Link } from '@inertiajs/vue3';
 
 defineProps({
   auth: Object,

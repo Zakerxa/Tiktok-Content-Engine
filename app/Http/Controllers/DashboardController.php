@@ -92,6 +92,7 @@ class DashboardController extends Controller
                 'daily_limit'      => $dailyLimit,     // ← အသစ်ထည့်
                 'today_used'       => $todayUsed,
                 'recap_limit'      => $request->user()->recap_limit,
+                'recap_limit_total'  => $request->user()->recap_limit_total,
                 'total_recap_used' => $request->user()->total_recap_used,
                 'plan_expires_at'  => $request->user()->plan_expires_at,
                 'is_active'        => $request->user()->is_active,

@@ -23,7 +23,8 @@ class VerifyEmailController extends Controller
             $request->user()->update([
                 'role_name'   => 'tester',
                 'is_active'   => true,
-                'recap_limit' => 1,
+                'recap_limit'       => 1,
+                'recap_limit_total' => 1,
             ]);
         }
 

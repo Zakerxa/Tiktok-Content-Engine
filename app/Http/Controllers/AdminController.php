@@ -102,8 +102,14 @@ class AdminController extends Controller
             $user->update([
                 'role_name'       => $role->name,
                 'recap_limit'     => $recapLimit,
+                'recap_limit_total' => $recapLimit,
                 'plan_expires_at' => $expiresAt,
             ]);
+
+            // ★ Plan အသစ် fresh ဖြစ်အောင် ဒီနေ့ tester/old-plan usage ကို ဖျက်
+            UsageLog::where('user_id', $user->id)
+                ->where('used_date', Carbon::today()->toDateString())
+                ->delete();
 
             PlanHistory::create([
                 'username'         => $user->username,

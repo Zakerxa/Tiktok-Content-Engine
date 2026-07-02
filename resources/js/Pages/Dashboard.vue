@@ -404,8 +404,13 @@ const roleMeta = computed(() => {
 const roleClass = computed(() => roleMeta.value.cls);
 
 /* ───────── Usage ring ───────── */
-const total_recap_used = computed(() => Number(user.value.total_recap_used || 0));
-const total_recap_limit = computed(() => Number(user.value.recap_limit ?? 0));
+// ✅ ပြင်ပြီး
+const total_recap_limit = computed(() => Number(user.value.recap_limit_total ?? 0));
+const total_recap_used  = computed(() => {
+  const limit = total_recap_limit.value;
+  const remaining = Number(user.value.recap_limit ?? 0);
+  return limit > 0 ? Math.max(limit - remaining, 0) : 0;
+});
 const recapLimitDisplay = computed(() => total_recap_limit.value > 0 ? total_recap_limit.value : '∞');
 
 const today_used = computed(() => Number(user.value.today_used || 0));

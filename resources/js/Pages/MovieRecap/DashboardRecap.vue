@@ -191,7 +191,7 @@
               <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
               <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
               <div class="flex flex-wrap gap-2 items-center">
-                <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
+                <input type="range" id="blur-height" min="5" max="20" value="15" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing"/>
                 <div class="flex flex-wrap gap-2 mt-2">
                   <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">X: <span>{{ blurX.toFixed(2) }}</span>%</div>
                   <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
@@ -389,7 +389,7 @@ export default {
       logoY: 0,
       blurX: 0,
       blurY: 85,
-      blurH: 15,
+      blurH: 12,
 
       uploadProgress:   null,
       hasVideoSelected: false,
@@ -488,8 +488,8 @@ export default {
         b.style.display = 'block';
         b.style.width   = '100%';
         b.style.left    = '0px';
-        b.style.top     = '85%';
-        b.style.height  = '15%';
+        b.style.top     = '90%';
+        b.style.height  = '10%';
         setTimeout(() => this.updateBlurCoordinates(), 100);
       }
     },
@@ -507,7 +507,7 @@ export default {
 
     previewLogo(event) {
       const file = event.target.files[0];
-      const img  = this.$refs.watermarkLogo;      // ← Video preview draggable logo (ဟောင်း, မပြောင်း)
+      const img  = this.$refs.watermarkLogo;    
       if (!file || !img) return;
     
       const objectUrl = URL.createObjectURL(file);
@@ -957,8 +957,7 @@ export default {
               method: 'POST',
               body: chunkForm,
               headers: {
-                'X-Auth-Username': this.auth.user.username,
-                'X-Auth-Role': this.auth.user.role_name
+                'X-Session-ID': window.APP_SESSION_ID
               }
             });
             if (!chunkRes.ok) {
@@ -991,8 +990,7 @@ export default {
             method: 'POST',
             body: finalForm,
             headers: {
-              'X-Auth-Username': this.auth.user.username,
-              'X-Auth-Role': this.auth.user.role_name
+              'X-Session-ID': window.APP_SESSION_ID
             }
           });
 
@@ -1021,8 +1019,7 @@ export default {
             method: 'POST',
             body: formData,
             headers: {
-              'X-Auth-Username': this.auth.user.username,
-              'X-Auth-Role': this.auth.user.role_name
+              'X-Session-ID': window.APP_SESSION_ID
             }
           });
         }

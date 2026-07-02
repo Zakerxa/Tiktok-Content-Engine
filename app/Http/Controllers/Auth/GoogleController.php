@@ -53,7 +53,8 @@ class GoogleController extends Controller
                 'password'  => bcrypt(Str::random(32)),
                 'role_name' => 'tester',
                 'is_active' => true,
-                'recap_limit' => 1,
+                'recap_limit'       => 1,
+                'recap_limit_total' => 1,
                 'email_verified_at' => now(),
             ]);
         }

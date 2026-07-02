@@ -84,7 +84,7 @@
                     {{ u.is_active ? 'Active' : 'Disabled' }}
                   </span>
                 </td>
-                <td>{{ u.recap_limit > 0 ? u.recap_limit : '∞' }}</td>
+                <td>{{ u.role_name === 'admin' ? '∞' : u.recap_limit }}</td>
                 <td>{{ u.today_used }} / {{ u.daily_limit ?? '—' }}</td>
                 <td class="td-date">{{ formatDate(u.plan_expires_at) }}</td>
                 <td>{{ u.total_recap_used }}</td>
@@ -123,7 +123,7 @@
                 </span>
               </div>
               <div class="post-card-meta">
-                <span class="td-date">Limit: {{ u.recap_limit > 0 ? u.recap_limit : '∞' }}</span>
+                <span class="td-date">Limit: {{ u.role_name === 'admin' ? '∞' : u.recap_limit }}</span>
                 <span class="td-date">Today: {{ u.today_used }}/{{ u.daily_limit ?? '—' }}</span>
               </div>
               <div class="td-date" style="margin-bottom: 10px;">Expires: {{ formatDate(u.plan_expires_at) }}</div>

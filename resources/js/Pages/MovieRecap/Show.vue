@@ -145,7 +145,7 @@
 
                   <div ref="blurBoxEl"
                     class="absolute border-2 border-dashed border-amber-400 bg-yellow-200/20 cursor-move z-30 select-none"
-                    style="display:none; left:0; top:85%; width:100%; height:15%"><span
+                    style="display:none; left:0; top:90%; width:100%; height:10%"><span
                       class="absolute top-1 left-1 text-[9px] font-bold text-yellow-300 bg-black/40 px-1 py-px rounded">BLUR</span>
                   </div>
 
@@ -171,6 +171,28 @@
             <div
               class="bg-[rgba(255,255,255,0.02)] rounded-2xl p-4 sm:p-6 border border-[rgba(255,255,255,0.06)] shadow-sm flex flex-col gap-4">
 
+              <!-- Blur region -->
+              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+                <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
+                <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ
+                </p>
+                <div class="flex flex-wrap gap-2 items-center">
+                  <input type="range" id="blur-height" min="5" max="20" value="10" class="w-full accent-[#7C3AED]"
+                    @input="setBlurHeight($event.target.value)" :disabled="isProcessing" />
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    <div
+                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
+                      X: <span>{{ blurX.toFixed(2) }}</span>%</div>
+                    <div
+                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
+                      Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
+                    <div
+                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
+                      H: <span>{{ blurH.toFixed(2) }}</span>%</div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Voiceover toggle -->
               <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
                 <div class="flex justify-between items-center mb-3">
@@ -191,27 +213,6 @@
                 </div>
               </div>
 
-              <!-- Blur region -->
-              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
-                <label class="font-bold text-[#CBD5E1] text-sm block mb-2">🌀 Blur Region</label>
-                <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ
-                </p>
-                <div class="flex flex-wrap gap-2 items-center">
-                  <input type="range" id="blur-height" min="5" max="50" value="15" class="w-full accent-[#7C3AED]"
-                    @input="setBlurHeight($event.target.value)" :disabled="isProcessing" />
-                  <div class="flex flex-wrap gap-2 mt-2">
-                    <div
-                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
-                      X: <span>{{ blurX.toFixed(2) }}</span>%</div>
-                    <div
-                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
-                      Y: <span>{{ blurY.toFixed(2) }}</span>%</div>
-                    <div
-                      class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
-                      H: <span>{{ blurH.toFixed(2) }}</span>%</div>
-                  </div>
-                </div>
-              </div>
 
               <!-- Toggles grid -->
               <div class="grid grid-cols-2 gap-3">
@@ -259,31 +260,39 @@
                 class="mt-2 p-4 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm"
                 style="display:none">
                 <label class="block text-sm font-semibold text-[#CBD5E1] mb-3">Upload &amp; Drag Logo</label>
-                <div class="flex gap-4 items-center">
-                  <label
-                    class="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group">
-                    <div class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
-                      <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                      </svg>
-                      <span class="text-[10px] font-bold uppercase tracking-wide">Upload</span>
-                    </div>
-                    <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden"
-                      @change="previewLogo" :disabled="isProcessing" />
-                  </label>
-                  <div
-                    class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
-                    <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
-                    <p>Upload a logo, then drag it around the video player to set position.</p>
-                    <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
-                      <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2)
-                      }}</span>%</div>
-                      <div class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2)
-                      }}</span>%</div>
-                    </div>
+              <div class="flex gap-4 items-center">
+                <label class="relative flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group overflow-hidden">
+                
+                  <!-- Placeholder icon — logo upload ပြီးရင် ဖျောက်ပေးမည် -->
+                  <div ref="logoUploadPlaceholder" class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
+                    <svg class="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span class="text-[10px] font-bold uppercase tracking-wide">Upload</span>
+                  </div>
+                
+                  <!-- ✅ NEW — static thumbnail only, drag logic မပါ -->
+                  <img
+                    ref="uploadBoxThumbnail"
+                    src=""
+                    class="absolute inset-0 w-full h-full object-contain p-2"
+                    alt="Uploaded logo"
+                    draggable="false"
+                    style="display:none"
+                  />
+                
+                  <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="previewLogo" :disabled="isProcessing"/>
+                </label>
+                <div class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
+                  <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
+                  <p>Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
+                  <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
+                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
+                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
                   </div>
                 </div>
+              </div>
               </div>
 
             </div>
@@ -402,8 +411,8 @@ export default {
       logoX: 0,
       logoY: 0,
       blurX: 0,
-      blurY: 85,
-      blurH: 15,
+      blurY: 88,
+      blurH: 12,
 
       uploadProgress: null,
       hasVideoSelected: false,
@@ -503,7 +512,7 @@ export default {
         b.style.width = '100%';
         b.style.left = '0px';
         b.style.top = '85%';
-        b.style.height = '15%';
+        b.style.height = '12%';
         setTimeout(() => this.updateBlurCoordinates(), 100);
       }
     },
@@ -521,16 +530,27 @@ export default {
 
     previewLogo(event) {
       const file = event.target.files[0];
-      const img = this.$refs.watermarkLogo;
+      const img  = this.$refs.watermarkLogo;      // ← Video preview draggable logo (ဟောင်း, မပြောင်း)
       if (!file || !img) return;
-      img.src = URL.createObjectURL(file);
+    
+      const objectUrl = URL.createObjectURL(file);
+    
+      img.src           = objectUrl;
       img.style.display = 'block';
-      img.style.width = '60px';
-      img.style.left = '10px';
-      img.style.top = '10px';
+      img.style.width   = '60px';
+      img.style.left    = '10px';
+      img.style.top     = '10px';
       img.onload = () => this.updateLogoCoordinates();
       img.removeEventListener('touchstart', this.logoDragStart);
       img.addEventListener('touchstart', this.logoDragStart, { passive: false });
+    
+      const thumb = this.$refs.uploadBoxThumbnail;
+      const placeholder = this.$refs.logoUploadPlaceholder;
+      if (thumb) {
+        thumb.src = objectUrl;
+        thumb.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+      }
     },
 
     updateLogoCoordinates() {
@@ -612,6 +632,7 @@ export default {
 
     setBlurHeight(val) {
       this.blurH = parseFloat(val);
+      console.log('setBlurHeight', this.blurH);
       const box = this.$refs.blurBoxEl;
       const frame = this.$refs.previewFrame;
       if (!box || !frame) return;
@@ -870,6 +891,7 @@ export default {
         return;
       }
 
+
       const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
       const subtitles = this.$refs.enableSubtitles?.checked;
@@ -961,8 +983,7 @@ export default {
               method: 'POST',
               body: chunkForm,
               headers: {
-                'X-Auth-Username': this.auth.user.username,
-                'X-Auth-Role': this.auth.user.role_name
+                'X-Session-ID': window.APP_SESSION_ID
               }
             });
             if (!chunkRes.ok) {
@@ -995,8 +1016,7 @@ export default {
             method: 'POST',
             body: finalForm,
             headers: {
-              'X-Auth-Username': this.auth.user.username,
-              'X-Auth-Role': this.auth.user.role_name
+              'X-Session-ID': window.APP_SESSION_ID
             }
           });
 
@@ -1026,8 +1046,7 @@ export default {
             method: 'POST',
             body: formData,
             headers: {
-              'X-Auth-Username': this.auth.user.username,
-              'X-Auth-Role': this.auth.user.role_name
+              'X-Session-ID': window.APP_SESSION_ID
             }
           });
         }

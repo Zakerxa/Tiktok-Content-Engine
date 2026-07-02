@@ -113,7 +113,13 @@
 
     <!-- Avatar -->
     <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0" style="border:1px solid rgba(255,255,255,0.1);">
-      <img v-if="auth.user.avatar" :src="auth.user.avatar" class="w-full h-full object-cover" />
+      <Link v-if="auth.user.avatar" :href="route('profile.edit')">
+        <img
+          
+          :src="auth.user.avatar"
+          class="w-full h-full object-cover"
+        />
+      </Link>
       <div
         v-else
         class="w-full h-full flex items-center justify-center text-sm font-bold"
