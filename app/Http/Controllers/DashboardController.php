@@ -122,21 +122,27 @@ class DashboardController extends Controller
 
     public function homeRecap(Request $request)
     {
-        $userId = $request->user()->id;
-        $today  = Carbon::today()->toDateString();
-        // ✅ ဒီနေ့ တကယ်သုံးထားတဲ့ ဂဏန်း (usage_log — daily reset)
-        $todayUsed = DB::table('usage_log')
-            ->where('user_id', $userId)
-            ->where('used_date', $today)
-            ->value('run_count') ?? 0;
+        $todayUsed  = null;
+        $dailyLimit = null;
 
-        // ✅ Role ရဲ့ fixed daily cap (roles table)
-        $dailyLimit = DB::table('roles')
-            ->where('name', $request->user()->role_name)
-            ->value('daily_limit') ?? 0;
+        if ($request->user()) {
+            $userId = $request->user()->id;
+            $today  = Carbon::today()->toDateString();
+
+            // ✅ ဒီနေ့ တကယ်သုံးထားတဲ့ ဂဏန်း (usage_log — daily reset)
+            $todayUsed = DB::table('usage_log')
+                ->where('user_id', $userId)
+                ->where('used_date', $today)
+                ->value('run_count') ?? 0;
+
+            // ✅ Role ရဲ့ fixed daily cap (roles table)
+            $dailyLimit = DB::table('roles')
+                ->where('name', $request->user()->role_name)
+                ->value('daily_limit') ?? 0;
+        }
 
         return Inertia::render('MovieRecap/Show', [
-            'todayUsed' => $todayUsed,
+            'todayUsed'  => $todayUsed,
             'dailyLimit' => $dailyLimit,
         ]);
     }

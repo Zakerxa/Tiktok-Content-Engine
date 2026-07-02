@@ -49,7 +49,7 @@
           </Link>
         </div>
 
-        <div class="flex gap-2.5 overflow-x-auto pb-1.5 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.15)_transparent] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar-thumb]:bg-white/[0.15] [&::-webkit-scrollbar-thumb]:rounded-[10px]">
+        <div class="flex gap-2.5 overflow-x-auto pb-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <Link
             :href="route('blogs.index')"
             :class="['shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold no-underline whitespace-nowrap transition-colors',
@@ -59,7 +59,6 @@
           >
             <span>All Posts</span>
           </Link>
-
           <Link
             v-for="stat in stats"
             :key="stat.clean"
@@ -69,7 +68,7 @@
                 ? 'bg-gradient-to-br from-violet-600/25 to-cyan-500/20 border border-violet-600/50 text-slate-100'
                 : 'bg-white/[0.03] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] hover:text-slate-200']"
           >
-            <span>{{ stat.clean }}</span>
+            <span>{{ displayTopic(stat.clean) }}</span>
             <span :class="['text-[11px] font-bold px-[7px] py-px rounded-full', currentTopic === stat.clean ? 'bg-white/[0.18]' : 'bg-white/10']">{{ stat.total }}</span>
           </Link>
         </div>
@@ -135,6 +134,14 @@ const props = defineProps({
   stats: Array,
   currentTopic: String,
 });
+
+const topicLabels = {
+  HEALTH_KNOWLEDGE: 'LIFESTYLE', // ဒီနေရာမှာ သင့်တော်တဲ့ နာမည်ထည့်ပါ
+};
+
+function displayTopic(clean) {
+  return topicLabels[clean] || clean;
+}
 
 const searchQuery = ref('');
 

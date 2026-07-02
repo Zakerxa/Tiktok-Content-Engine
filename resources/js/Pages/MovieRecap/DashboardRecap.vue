@@ -820,23 +820,30 @@ export default {
       console.log(allServers, candidates);
     
       for (const server of candidates) {
-        // Busy ဆိုရင် skip (health check တောင် မလုပ်ဘဲ ကျော်)
-        if (server.is_busy) {
-          // console.log(`[resolveBaseUrl] ${server.name} is busy — skip`);
+        // ✅ is_busy ဖြစ်ပေမယ့် is_stuck လည်းဖြစ်နေရင် (45min ကျော်နေရင်)
+        // FastAPI ဘက်က job ကို timeout kill လုပ်ပြီးသားလို့ ယူဆပြီး
+        // "genuinely busy" လို့ မသတ်မှတ်ဘဲ health check ဆီဆက်ရဲရဲသွားမယ်
+        const isTrulyBusy = server.is_busy && !server.is_stuck;
+    
+        if (isTrulyBusy) {
+          // console.log(`[resolveBaseUrl] ${server.name} is genuinely busy — skip`);
           continue;
         }
     
-        // ✅ Health check — ဒါကသာ "တကယ်ရှိလား" ဆိုတာ verify လုပ်ပေးတာ
+        if (server.is_busy && server.is_stuck) {
+          console.warn(`[resolveBaseUrl] ${server.name} looks stuck (>45min) — verifying via health check before reuse`);
+        }
+    
+        // ✅ Health check — server တကယ်ရှင်လား confirm လုပ်တာ
+        // stuck job ဖြစ်နေတဲ့ server ဆိုရင်တောင် health check ok ရင် ပြန်သုံးလို့ရမယ်
         const healthy = await this.checkHealth(server.url);
         if (!healthy) {
-          // console.warn(`[resolveBaseUrl] ${server.name} (${server.url}) unreachable — skip`);
+          // console.warn(`[resolveBaseUrl] ${server.name} unreachable — skip`);
           continue;
         }
     
-        // Busy မဟုတ်၊ Health ok ဆိုရင်သာ သုံး
         this.baseUrl = server.url;
         this.baseUrlReady = true;
-        console.log("Using server: ",server.name);
         // console.log(`[resolveBaseUrl] role=${roleName} -> ${server.name}`);
         return server.url;
       }

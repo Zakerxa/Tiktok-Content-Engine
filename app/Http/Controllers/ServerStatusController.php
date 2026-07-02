@@ -37,7 +37,7 @@ class ServerStatusController extends Controller
                 'is_active'     => $server->is_active,
                 'processing_count' => $processingCount,
                 'is_busy'       => $processingCount > 0,
-                'is_stuck'      => $ageMinutes > 45,
+                'is_stuck'      => $ageMinutes > 25,
             ];
         });
 

@@ -22,7 +22,7 @@
 
         <!-- ═══════════ LEFT: Content ═══════════ -->
         <article class="order-2 md:order-1 bg-white/[0.035] border border-white/[0.08] rounded-3xl p-6 sm:p-9 backdrop-blur-xl">
-          <span class="inline-block text-[11.5px] font-bold uppercase tracking-wide bg-violet-600/15 border border-violet-600/35 text-violet-300 px-3 py-1.5 rounded-lg mb-4">{{ post.topic }}</span>
+          <span class="inline-block text-[11.5px] font-bold uppercase tracking-wide bg-violet-600/15 border border-violet-600/35 text-violet-300 px-3 py-1.5 rounded-lg mb-4">{{ displayTopic(post.topic) }}</span>
 
           <h1 class="text-[clamp(24px,3vw,32px)] font-extrabold tracking-tight leading-tight text-slate-100">{{ post.title }}</h1>
 
@@ -109,6 +109,15 @@ defineProps({
 const contentCopied = ref(false);
 const promptCopied = ref(false);
 
+const topicLabels = {
+  HEALTH_KNOWLEDGE: 'LIFESTYLE', // ဒီနေရာမှာ သင့်တော်တဲ့ နာမည်ထည့်ပါ
+};
+
+function displayTopic(clean) {
+  return topicLabels[clean] || clean;
+}
+
+
 const copyToClipboard = (text) => {
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => {
@@ -116,6 +125,7 @@ const copyToClipboard = (text) => {
     setTimeout(() => { contentCopied.value = false; }, 2000);
   });
 };
+
 
 const copyPromptToClipboard = (text) => {
   if (!text) return;
