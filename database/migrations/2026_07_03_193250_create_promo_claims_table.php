@@ -20,6 +20,7 @@ return new class extends Migration
 
             $table->index(['ip_address', 'claimed_at']);
             $table->index(['ua_hash', 'claimed_at']);
+             $table->timestamps();
         });
     }
 
