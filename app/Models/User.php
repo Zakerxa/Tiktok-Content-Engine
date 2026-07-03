@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'recap_limit',
         'email_verified_at',
         'total_recap_used',
+        'recap_limit_total',
         'plan_expires_at',
         'session_expires_at',
     ];
@@ -55,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'plan_expires_at'    => 'datetime',
             'session_expires_at' => 'datetime',
             'email_verified_at'  => 'datetime',
+            'recap_limit_total'  => 'integer',
             'password' => 'hashed',
         ];
     }
