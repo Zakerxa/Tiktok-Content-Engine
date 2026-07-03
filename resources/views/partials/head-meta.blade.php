@@ -59,6 +59,7 @@
      result (logo in search results, sitelinks search box,
      software application card, etc.)
      ═══════════════════════════════════════════════════ -->
+@verbatim
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -94,6 +95,7 @@
   }
 }
 </script>
+@endverbatim
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.bunny.net">
