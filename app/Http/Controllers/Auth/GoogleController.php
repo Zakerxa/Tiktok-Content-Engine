@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
-use app\Services\PlanService;
+use App\Services\PlanService;
 
 class GoogleController extends Controller
 {
@@ -44,10 +44,6 @@ class GoogleController extends Controller
             if (!$user->email_verified_at) {
                 $user->markEmailAsVerified();
             }
-
-            // ★ Email/password register ခဲ့ပြီး promo မရသေးတဲ့ user
-            //    ပထမဆုံးအကြိမ် Google နဲ့ login ဝင်ရင် — promo ရအောင် (1 email = 1 time ချည်း)
-            PlanService::grantPromoOnce($user);
         } else {
             // အသစ် — placeholder tester နဲ့ create, PlanService က ချက်ချင်း overwrite လုပ်ပေးမယ်
             $user = User::create([
