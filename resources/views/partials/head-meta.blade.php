@@ -2,9 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- ═══════════════════════════════════════════════════
-     Primary SEO meta — this is what was MISSING before.
-     og:description is for Facebook/Telegram previews only;
-     Google's search snippet reads name="description".
+     Primary SEO meta — helps Google and other search engines understand your website
      ═══════════════════════════════════════════════════ -->
 <title inertia>{{ config('app.name', 'Z.A.K.E.R.X.A') }} — AI-Powered Content Studio for TikTok</title>
 <meta name="description"

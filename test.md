@@ -16,3 +16,11 @@ JOIN (
              AND ph1.renewed_at = latest.max_renewed
 ) ph ON ph.username = u.username
 SET u.recap_limit_total = ph.recap_limit;
+
+
+
+mv /home/zzcwpszw/public_html/zakerxa.com /home/zzcwpszw/public_html/zakerxa.com.OLD_BACKUP
+
+ln -s /home/zzcwpszw/TikTok-Content-Engine/public /home/zzcwpszw/public_html/zakerxa.com
+
+ls -la /home/zzcwpszw/public_html/ | grep zakerxa.com
