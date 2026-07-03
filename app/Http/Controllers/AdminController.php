@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use App\Services\PlanService;
 
 class AdminController extends Controller
 {
@@ -86,42 +87,11 @@ class AdminController extends Controller
             'new_role' => 'required|in:normal,pro,vip',
             'days'     => 'required|integer|min:0',
         ]);
-
-        $user    = User::findOrFail($id);
-        $role    = Role::where('name', $request->new_role)->firstOrFail();
-        $days    = (int) $request->days;
-        $oldRole = $user->role_name;
-
-        // Mirror FastAPI admin_renew_plan() logic:
-        // recap_limit = days × daily_limit
-        // VIP with days=0 → expires = NULL
-        $recapLimit  = $days * $role->daily_limit;
-        $expiresAt   = $days > 0 ? Carbon::now()->addDays($days) : null;
-
-        DB::transaction(function () use ($user, $role, $oldRole, $recapLimit, $expiresAt, $request) {
-            $user->update([
-                'role_name'       => $role->name,
-                'recap_limit'     => $recapLimit,
-                'recap_limit_total' => $recapLimit,
-                'plan_expires_at' => $expiresAt,
-            ]);
-
-            // ★ Plan အသစ် fresh ဖြစ်အောင် ဒီနေ့ tester/old-plan usage ကို ဖျက်
-            UsageLog::where('user_id', $user->id)
-                ->where('used_date', Carbon::today()->toDateString())
-                ->delete();
-
-            PlanHistory::create([
-                'username'         => $user->username,
-                'old_role'       => $oldRole,
-                'new_role'       => $role->name,
-                'recap_limit'     => $recapLimit,
-                'renewed_at'      => Carbon::now(),
-                'plan_expires_at' => $expiresAt,
-                'renewed_by'      => Auth::user()->username,
-            ]);
-        });
-
+    
+        $user = User::findOrFail($id);
+    
+        PlanService::grant($user, $request->new_role, (int) $request->days, Auth::user()->username);
+    
         return back()->with('success', "Plan renewed for {$user->username}.");
     }
 

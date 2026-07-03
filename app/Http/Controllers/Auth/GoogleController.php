@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
+use app\Services\PlanService;
 
 class GoogleController extends Controller
 {
@@ -43,20 +44,25 @@ class GoogleController extends Controller
             if (!$user->email_verified_at) {
                 $user->markEmailAsVerified();
             }
+
+            // ★ Email/password register ခဲ့ပြီး promo မရသေးတဲ့ user
+            //    ပထမဆုံးအကြိမ် Google နဲ့ login ဝင်ရင် — promo ရအောင် (1 email = 1 time ချည်း)
+            PlanService::grantPromoOnce($user);
         } else {
-            // အသစ် — tester role နဲ့ create
+            // အသစ် — placeholder tester နဲ့ create, PlanService က ချက်ချင်း overwrite လုပ်ပေးမယ်
             $user = User::create([
-                'username'  => $this->makeUsername($googleUser->getName()),
-                'email'     => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
-                'avatar'    => $googleUser->getAvatar(),
-                'password'  => bcrypt(Str::random(32)),
-                'role_name' => 'tester',
-                'is_active' => true,
-                'recap_limit'       => 1,
-                'recap_limit_total' => 1,
+                'username'          => $this->makeUsername($googleUser->getName()),
+                'email'             => $googleUser->getEmail(),
+                'google_id'         => $googleUser->getId(),
+                'avatar'            => $googleUser->getAvatar(),
+                'password'          => bcrypt(Str::random(32)),
+                'role_name'         => 'tester',
+                'is_active'         => true,
                 'email_verified_at' => now(),
             ]);
+
+            // ★ Promo — user အသစ်တိုင်းကို Normal role, 1 day အခမဲ့ ပေး (1 email = 1 time ချည်း)
+            PlanService::grantPromoOnce($user);
         }
 
         if (!$user->is_active) {

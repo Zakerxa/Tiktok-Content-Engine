@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
+use App\Services\PlanService;
 
 class VerifyEmailController extends Controller
 {
@@ -20,12 +21,14 @@ class VerifyEmailController extends Controller
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
+
             $request->user()->update([
-                'role_name'   => 'tester',
-                'is_active'   => true,
-                'recap_limit'       => 1,
-                'recap_limit_total' => 1,
+                'role_name' => 'tester',
+                'is_active' => true,
             ]);
+
+            // ★ Promo — Google login flow အတိုင်းပဲ, 1 email = 1 time ချည်း
+            PlanService::grantPromoOnce($request->user());
         }
 
         return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');

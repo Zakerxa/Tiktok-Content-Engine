@@ -901,7 +901,7 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 40) {
+          if (secs > 45) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
@@ -910,7 +910,7 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် Pro Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 60) {
+          if (secs > 70) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Pro Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
@@ -1029,6 +1029,9 @@ export default {
           const err = await response.json().catch(() => null);
           throw new Error(err?.detail || 'Failed to start processing job on Server.');
         }
+
+        this.stepCurrent = 1;
+        this.stepProgress = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         this.hideUploadProgressState();
         const data = await response.json();

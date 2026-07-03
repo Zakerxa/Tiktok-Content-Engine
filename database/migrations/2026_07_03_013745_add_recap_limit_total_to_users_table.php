@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->integer('recap_limit_total')->default(0)->after('recap_limit');
+            $table->boolean('promo_claimed')->default(false)->after('recap_limit_total');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('recap_limit_total');
+            $table->dropColumn('promo_claimed');
         });
     }
 };
