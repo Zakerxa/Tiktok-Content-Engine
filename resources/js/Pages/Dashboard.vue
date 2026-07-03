@@ -211,18 +211,19 @@
         </div>
 
         <!-- Mobile cards -->
-        <div class="posts-cards">
+       <div class="posts-cards">
           <div v-for="job in jobs.data" :key="job.id" class="post-card">
             <div class="post-card-body">
-              <div class="post-card-meta">
+              <!-- Added justify-between class to push meta items to ends -->
+              <div class="post-card-meta" style="display: flex; justify-content: space-between; align-items: center;">
                 <span class="status-pill" :class="job.status === 'success' ? 'status-active' : 'status-inactive'">
                   <span class="status-dot"></span>
                   {{ job.status === 'success' ? 'Success' : 'Failed' }}
                 </span>
-                <span class="td-date">{{ job.step }}</span>
+                <!-- Moved created_at (assumed field) to the far right -->
                 <span class="td-date">{{ job.started_at }}</span>
-                <span class="td-date">{{ job.duration || '—' }}</span>
               </div>
+        
               <div class="progress-track">
                 <div
                   class="progress-fill"
@@ -230,7 +231,15 @@
                   :style="{ width: job.progress + '%' }"
                 ></div>
               </div>
-              <span class="progress-text">{{ job.progress }}%</span>
+        
+              <!-- Container for progress percentage and timer -->
+              <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                <span class="progress-text">{{ job.progress }}%</span>
+                <span class="job-timer" style="font-size: 0.85em; color: #666;">
+                  Duration: {{ job.duration || '—' }}
+                </span>
+              </div>
+        
               <p v-if="job.status === 'failed' && job.error" class="job-error">{{ job.error }}</p>
             </div>
           </div>

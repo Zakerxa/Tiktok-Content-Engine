@@ -56,9 +56,12 @@ class GoogleController extends Controller
                 'is_active'         => true,
                 'email_verified_at' => now(),
             ]);
-
             // ★ Promo — user အသစ်တိုင်းကို Normal role, 1 day အခမဲ့ ပေး (1 email = 1 time ချည်း)
-            PlanService::grantPromoOnce($user);
+            PlanService::grantPromoOnce(
+                $user,
+                request()->ip(),
+                request()->userAgent() ?? ''
+            );
         }
 
         if (!$user->is_active) {

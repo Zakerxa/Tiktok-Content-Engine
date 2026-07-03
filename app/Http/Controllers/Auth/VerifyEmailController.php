@@ -28,7 +28,12 @@ class VerifyEmailController extends Controller
             ]);
 
             // ★ Promo — Google login flow အတိုင်းပဲ, 1 email = 1 time ချည်း
-            PlanService::grantPromoOnce($request->user());
+            // ★ Promo — user အသစ်တိုင်းကို Normal role, 1 day အခမဲ့ ပေး (1 email = 1 time ချည်း)
+            PlanService::grantPromoOnce(
+                $request->user(),
+                request()->ip(),
+                request()->userAgent() ?? ''
+            );
         }
 
         return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');

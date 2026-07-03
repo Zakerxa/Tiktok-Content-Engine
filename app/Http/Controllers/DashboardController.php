@@ -64,7 +64,7 @@ class DashboardController extends Controller
                 'step'       => $job->step,
                 'progress'   => (int) $job->progress,
                 'error'      => $job->status === 'failed' ? $job->error : null,
-                'started_at' => $job->created_at ? Carbon::parse($job->created_at)->format('M d, Y') : null,
+               'started_at' => $job->created_at ? Carbon::parse($job->created_at)->diffForHumans() : null,
                 'duration'   => $this->formatDuration($job->created_at, $job->updated_at),
             ]);
 

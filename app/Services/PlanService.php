@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\UsageLog;
 use App\Models\PlanHistory;
+use App\Models\PromoClaim;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -63,17 +64,53 @@ class PlanService
      * ဘယ်နေရာက ဘယ်နှခေါ်ခေါ် (double-click, retry, race condition) —
      * user တစ်ယောက်ကို တစ်ကြိမ်ထက်ပိုပြီး promo ဘယ်တော့မှ ရနိုင်မှာမဟုတ်ပါ.
      *
-     * @return bool true = promo ရသွားပြီ, false = ရပြီးသားဖြစ်လို့ skip လုပ်လိုက်
+     * ထပ်ဖြည့်ထားတာက — Google account အများကြီးနဲ့ promo ထပ်ခံတာကို ကာကွယ်ဖို့
+     * IP address / User-Agent fingerprint ကို secondary guard အနေနဲ့ သုံးထားပါတယ်.
+     * (email/google_id အသစ်ပြန်ဖန်တီးလို့ရနေတာမို့ email guard တစ်ခုတည်းနဲ့ မလုံလောက်ပါ)
+     *
+     * @param  User    $user
+     * @param  string  $ip          Request IP (controller ကနေ $request->ip() ပို့ပေးရမည်)
+     * @param  string  $userAgent   Raw user-agent string ($request->userAgent())
+     * @param  int     $windowDays  ဒီရက်အတွင်း claim မှတ်တမ်းကို ပြန်စစ်မည့် window
+     * @param  int     $maxPerIp    window အတွင်း IP/UA တစ်ခုက claim ယူနိုင်မယ့် အများဆုံးအကြိမ်
+     *
+     * @return bool true = promo ရသွားပြီ, false = ရပြီးသား (သို့) abuse pattern ဖြစ်လို့ skip
      */
-    public static function grantPromoOnce(User $user): bool
+    public static function grantPromoOnce(User $user, string $ip, string $userAgent, int $windowDays = 30, int $maxPerIp = 1): bool
     {
-        if ($user->promo_claimed) {
-            return false;
-        }
+        return DB::transaction(function () use ($user, $ip, $userAgent, $windowDays, $maxPerIp) {
+            // row ကို lock ချပြီး fresh state ပြန်ဖတ်မယ် (stale $user object ကို မယုံ)
+            $locked = User::whereKey($user->id)->lockForUpdate()->first();
 
-        self::grant($user, 'normal', 1, 'promo-signup');
-        $user->update(['promo_claimed' => true]);
+            if ($locked->promo_claimed) {
+                return false;
+            }
 
-        return true;
+            $uaHash = hash('sha256', $userAgent);
+
+            $recentClaims = PromoClaim::where(function ($q) use ($ip, $uaHash) {
+                $q->where('ip_address', $ip)->orWhere('ua_hash', $uaHash);
+            })
+                ->where('claimed_at', '>=', Carbon::now()->subDays($windowDays))
+                ->lockForUpdate()
+                ->count();
+
+            if ($recentClaims >= $maxPerIp) {
+                $locked->update(['promo_claimed' => true]);
+                return false;
+            }
+
+            self::grant($locked, 'normal', 1, 'promo-signup');
+            $locked->update(['promo_claimed' => true]);
+
+            PromoClaim::create([
+                'user_id'    => $locked->id,
+                'ip_address' => $ip,
+                'ua_hash'    => $uaHash,
+                'claimed_at' => Carbon::now(),
+            ]);
+
+            return true;
+        });
     }
 }
