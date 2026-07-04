@@ -901,7 +901,7 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 45) {
+          if (secs > 60) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
@@ -910,13 +910,13 @@ export default {
           if (watermark) {
             this.showAlert('warning', 'WaterMark အသုံးပြုရန် Pro Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
           }
-          if (secs > 70) {
+          if (secs > 90) {
             this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Pro Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
 
         if (this.auth.user.role_name == 'pro') {
-          if (secs > 105) {
+          if (secs > 120) {
             this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
