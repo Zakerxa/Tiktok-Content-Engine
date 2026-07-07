@@ -13,7 +13,7 @@ router.on('navigate', () => {
 });
 
 createInertiaApp({
-    title: (title) => `${title} ${appName}`,
+    title: (title) => title ? `${title} - ${appName}` : `${appName} — AI-Powered Content Studio for TikTok`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`,import.meta.glob('./Pages/**/*.vue'),),
     setup({ el, App, props, plugin }) {
         const app = createApp({ render: () => h(GlobalBackground, null, {

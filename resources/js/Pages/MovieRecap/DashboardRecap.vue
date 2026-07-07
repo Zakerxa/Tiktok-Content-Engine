@@ -135,7 +135,7 @@
                 </svg>
                 <p ref="uploadPlaceholder" class="text-sm font-semibold">Click to upload or drag &amp; drop video</p>
               </div>
-              <p ref="uploadFormats" class="text-xs text-[#64748B] mt-1 opacity-70">MP4, MKV, MOV (Max 2GB)</p>
+              <p ref="uploadFormats" class="text-xs text-[#64748B] mt-1 opacity-70">MP4, MKV, MOV (Max 100MB)</p>
             </div>
 
             <!-- Video preview -->

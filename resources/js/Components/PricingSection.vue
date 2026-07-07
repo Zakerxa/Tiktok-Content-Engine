@@ -154,7 +154,7 @@ const plans = [
     href: '/dashboard',
     cta: 'Get Normal',
     features: [
-      { label: '3 generations/day', included: true, tooltip: 'Upgrade for more generation' },
+      { label: '2 generations/day', included: true, tooltip: 'Upgrade for more generation' },
       { label: 'Auto Subtitles (+8 )', included: true },
       { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
       { label: 'Custom Blur & Mosaic', included: true },

@@ -11,6 +11,7 @@
   Suggested route: /contact
 -->
 <template>
+  <Head title="Free TikTok Content Generator" />
   <div class="bg-[#080B14] text-[#F1F5F9] font-[Inter,_Segoe_UI,_sans-serif] min-h-screen overflow-x-hidden">
 
     <AppNavbar :auth="auth" />
