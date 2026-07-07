@@ -55,8 +55,8 @@ class DashboardController extends Controller
 
         $jobs = DB::table('recap_jobs')
             ->where('user_id', $userId)
-            ->orderBy('id', 'desc')
-            ->paginate(5, ['*'], 'jobs_page')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'jobs_page')
             ->withQueryString()
             ->through(fn($job) => [
                 'id'         => $job->id,

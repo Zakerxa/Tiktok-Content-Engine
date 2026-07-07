@@ -181,14 +181,16 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import AppSidebar from '@/Components/AppSidebar.vue'
 
 const props = defineProps({ servers: Array, stats: Object })
 
 const roleOptions = ['tester', 'normal', 'pro', 'admin']
-const localServers = reactive(props.servers.map(s => ({ ...s, role_access: s.role_access || [] })))
+const localServers = computed(() =>
+  props.servers.map(s => ({ ...s, role_access: s.role_access || [] }))
+)
 
 const showAddModal = ref(false)
 const editingServer = ref(null)
