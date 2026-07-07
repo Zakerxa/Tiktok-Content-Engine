@@ -886,6 +886,45 @@ export default {
       return fallback.url;
     },
 
+    async uploadChunkWithRetry(jobBaseUrl, chunkForm, chunkIndex, maxRetries = 3) {
+      let lastError;
+    
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const chunkRes = await fetch(`${jobBaseUrl}/upload-chunk`, {
+            method: 'POST',
+            body: chunkForm,
+            headers: {
+              'X-Session-ID': window.APP_SESSION_ID
+            }
+          });
+    
+          if (chunkRes.ok) {
+            return chunkRes; // ✅ အောင်မြင်ပါက ချက်ချင်း return
+          }
+    
+          const err = await chunkRes.json().catch(() => null);
+          lastError = new Error(err?.detail || 'Chunk upload failed.');
+    
+          // 4xx client error (auth fail, file too big) ဆိုရင် retry မလုပ်ဘဲ ချက်ချင်း fail
+          if (chunkRes.status >= 400 && chunkRes.status < 500) {
+            throw lastError;
+          }
+    
+        } catch (networkErr) {
+          lastError = networkErr;
+        }
+    
+        if (attempt < maxRetries) {
+          const delayMs = 1000 * Math.pow(2, attempt - 1); // 1s → 2s → 4s
+          console.warn(`⚠️ Chunk ${chunkIndex + 1} upload attempt ${attempt} failed, retrying in ${delayMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+    
+      throw lastError; // Retry အားလုံးကုန်သွားပြီး ဆက်fail ရင် error ပြန် throw
+    },
+
     async startProcess() {
 
       if (!this.auth.user) {
@@ -893,6 +932,7 @@ export default {
         return;
       }
 
+      this.isProcessing = true;
 
       const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
@@ -903,14 +943,10 @@ export default {
       const voice = this.selectedVoice;
       const logoFile = this.$refs.logoFileInput?.files[0];
 
-      this.isProcessing = true;
-
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
       if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
 
-      if (this.auth.user.role_name != 'admin') {
-
-        console.log(this.auth.user)
+      if (this.auth.user.role_name != 'admin') {       
 
         if (this.todayUsed >= this.dailyLimit) {
           let msg = '';
@@ -952,78 +988,76 @@ export default {
 
       }
 
+
       const jobBaseUrl = await this.resolveBaseUrl(); // local variable
 
+      console.log(jobBaseUrl);
       if (!jobBaseUrl) {
         this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
         return;
       }
 
+
       this.inlineError = '';
       this.resetSteps();
 
       try {
-        
         let response;
 
         if (this.activeMode === 'upload') {
-          const CHUNK_SIZE = 5 * 1024 * 1024;
-          const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-          const sessionId = crypto.randomUUID();
-          this.showUploadProgressState(0, totalChunks);
-
-          for (let i = 0; i < totalChunks; i++) {
-            const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-            const chunkForm = new FormData();
-            chunkForm.append('chunk', chunk, 'chunk');
-            chunkForm.append('chunkIndex', i);
-            chunkForm.append('totalChunks', totalChunks);
-            chunkForm.append('sessionId', sessionId);
-
-
-            const chunkRes = await fetch(`${jobBaseUrl}/upload-chunk`, {
+            const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB — chunk size ကို ဒီတစ်ခုတည်းနေရာမှာ ထားပြီး ထိန်းထားပါ
+            const MAX_RETRIES = 3;                   // chunk တစ်ခုချင်း ပြန်ကြိုးစားမည့် အကြိမ်ရေ
+          
+            const totalChunks = Math.ceil(file.size / MAX_CHUNK_SIZE);
+            const sessionId = crypto.randomUUID();
+            this.showUploadProgressState(0, totalChunks);
+          
+            for (let i = 0; i < totalChunks; i++) {
+              const chunk = file.slice(i * MAX_CHUNK_SIZE, (i + 1) * MAX_CHUNK_SIZE);
+              const chunkForm = new FormData();
+              chunkForm.append('chunk', chunk, 'chunk');
+              chunkForm.append('chunkIndex', i);
+              chunkForm.append('totalChunks', totalChunks);
+              chunkForm.append('sessionId', sessionId);
+          
+              try {
+                await this.uploadChunkWithRetry(jobBaseUrl, chunkForm, i, MAX_RETRIES);
+              } catch (chunkErr) {
+                // Retry အားလုံးကုန်သွားလို့ fail ရင် — outer catch ကို ပို့ပြီး upload process ရပ်
+                throw new Error(`Chunk ${i + 1}/${totalChunks} upload failed after ${MAX_RETRIES} attempts: ${chunkErr.message}`);
+              }
+          
+              this.showUploadProgressState(i + 1, totalChunks);
+            }
+          
+            this.showUploadFinalizingState();
+          
+            const finalForm = new FormData();
+            finalForm.append('sessionId', sessionId);
+            finalForm.append('originalFileName', file.name);
+            finalForm.append('voice_model', voice);
+            finalForm.append('blur_x', this.blurX.toFixed(2));
+            finalForm.append('blur_y', this.blurY.toFixed(2));
+            finalForm.append('blur_h', this.blurH.toFixed(2));
+            finalForm.append('enable_subtitles', subtitles);
+            finalForm.append('enable_flip', flip);
+            finalForm.append('enable_watermark', watermark);
+            finalForm.append('enable_voiceover', voiceover);
+            if (watermark) {
+              finalForm.append('watermark_x', this.logoX.toFixed(2));
+              finalForm.append('watermark_y', this.logoY.toFixed(2));
+              if (logoFile) finalForm.append('watermark_file', logoFile);
+            }
+          
+            response = await fetch(`${jobBaseUrl}/upload-chunk-finalize`, {
               method: 'POST',
-              body: chunkForm,
+              body: finalForm,
               headers: {
                 'X-Session-ID': window.APP_SESSION_ID
               }
             });
-            if (!chunkRes.ok) {
-              const err = await chunkRes.json().catch(() => null);
-              throw new Error(err?.detail || 'Chunk upload failed.');
-            }
-            this.showUploadProgressState(i + 1, totalChunks);
-          }
 
-          this.showUploadFinalizingState();
-
-          const finalForm = new FormData();
-          finalForm.append('sessionId', sessionId);
-          finalForm.append('voice_model', voice);
-          finalForm.append('blur_x', this.blurX.toFixed(2));
-          finalForm.append('blur_y', this.blurY.toFixed(2));
-          finalForm.append('blur_h', this.blurH.toFixed(2));
-          finalForm.append('enable_subtitles', subtitles);
-          finalForm.append('enable_flip', flip);
-          finalForm.append('enable_watermark', watermark);
-          finalForm.append('enable_voiceover', voiceover);
-          if (watermark) {
-            finalForm.append('watermark_x', this.logoX.toFixed(2));
-            finalForm.append('watermark_y', this.logoY.toFixed(2));
-            if (logoFile) finalForm.append('watermark_file', logoFile);
-          }
-
-
-          response = await fetch(`${jobBaseUrl}/upload-chunk-finalize`, {
-            method: 'POST',
-            body: finalForm,
-            headers: {
-              'X-Session-ID': window.APP_SESSION_ID
-            }
-          });
-
-        } 
-        else {
+        } else {
 
           if (this.auth.user.role_name == 'tester') {
             this.showAlert("warning", "Please upgrade your plan!");
@@ -1058,14 +1092,12 @@ export default {
           throw new Error(err?.detail || 'Failed to start processing job on Server.');
         }
 
-        // 🎯 Network response ကို လုံးဝ မစောင့်ဘဲ UI ကို ချက်ချင်း "Waiting in Queue" ပြ
         this.stepCurrent = 1;
         this.stepProgress = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
         this.hideUploadProgressState();
         const data = await response.json();
-        console.log(jobBaseUrl);
-        this.pollStatus(data.job_id,jobBaseUrl);
+        this.pollStatus(data.job_id, jobBaseUrl);
 
       } catch (error) {
         this.hideUploadProgressState();
