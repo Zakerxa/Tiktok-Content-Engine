@@ -34,6 +34,8 @@
       <NavItem :href="route('profile.edit')" icon="user" label="Profile" :active="isRoute('profile.edit')" />
       <!-- <NavItem :href="route('messages.index')" icon="message" label="Message Box" :active="isRoute('messages.*')" /> -->
 
+      <NavItem :href="route('plan')" icon="crown" label="Plan" :active="isRoute('plan')" />
+
       <!-- Admin section -->
       <template v-if="isAdmin">
         <div class="px-3 pt-5 pb-2">
@@ -170,7 +172,7 @@ const isRoute = (pattern) => {
 
 const ROLE_META = {
   tester: { label: 'Tester', icon: '🧪' },
-  normal: { label: 'Normal', icon: '⚡' },
+  normal: { label: 'Standard', icon: '⚡' },
   pro:    { label: 'Pro',    icon: '🔥' },
   vip:    { label: 'VIP',   icon: '👑' },
   admin:  { label: 'Admin', icon: '🛡️' },

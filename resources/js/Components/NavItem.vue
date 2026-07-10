@@ -64,6 +64,9 @@ const ICONS = {
   shield: () => h('svg', { width:16, height:16, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', 'stroke-width':'2', 'stroke-linecap':'round', 'stroke-linejoin':'round' }, [
     h('path', { d:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }),
   ]),
+  crown: () => h('svg', { width:16, height:16, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', 'stroke-width':'2', 'stroke-linecap':'round', 'stroke-linejoin':'round' }, [
+    h('path', { d:'M3 18h18M4 18l-1-9 5 4 4-6 4 6 5-4-1 9' }),
+  ]),
 };
 
 const iconComponent = computed(() => ICONS[props.icon] || ICONS.grid);

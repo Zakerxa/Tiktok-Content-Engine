@@ -36,6 +36,28 @@
           Bug report, billing question, copyright concern, or just an idea — reach out and a real
           person gets back to you, usually within a day.
         </p>
+
+
+         <div class="footer-socials mt-5 flex justify-center">
+            <a href="https://www.tiktok.com/@z.a.k.e.r.x.a" target="_blank" rel="noopener" class="social-icon" title="TikTok" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.1v13.86c0 1.6-1.3 2.9-2.9 2.9a2.9 2.9 0 0 1-2.9-2.9c0-1.6 1.3-2.9 2.9-2.9.3 0 .58.04.85.13V12.2a6.02 6.02 0 0 0-.85-.06 6.02 6.02 0 0 0-6.02 6.02A6.02 6.02 0 0 0 9.2 24.18a6.02 6.02 0 0 0 6.02-6.02V9.7a9.1 9.1 0 0 0 5.3 1.7V8.28a5.9 5.9 0 0 1-3.92-2.46z" transform="translate(0 -2.18)"/>
+              </svg>
+              <span class="social-label">TikTok</span>
+            </a>
+            <a href="https://t.me/+PgQX0UwLGIRhYTU1" target="_blank" rel="noopener" class="social-icon" title="Telegram Channel" aria-label="Telegram Channel">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M21.94 4.5c.27-1.13-.86-2.03-1.9-1.58L2.4 10.36c-1.16.5-1.14 2.16.03 2.63l4.4 1.77 1.98 6.14c.24.76 1.2.98 1.77.42l2.55-2.48 4.6 3.4c.83.6 2.02.16 2.24-.85L21.94 4.5zM8.53 13.6l9.1-5.7c.34-.2.66.23.36.48l-7.6 6.72a1 1 0 0 0-.32.6l-.2 2.02-1.34-4.12z"/>
+              </svg>
+              <span class="social-label">Channel</span>
+            </a>
+            <a href="https://t.me/+6hc4y3AceQJmNTQ1" target="_blank" rel="noopener" class="social-icon" title="Telegram Group" aria-label="Telegram Group">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M21.94 4.5c.27-1.13-.86-2.03-1.9-1.58L2.4 10.36c-1.16.5-1.14 2.16.03 2.63l4.4 1.77 1.98 6.14c.24.76 1.2.98 1.77.42l2.55-2.48 4.6 3.4c.83.6 2.02.16 2.24-.85L21.94 4.5zM8.53 13.6l9.1-5.7c.34-.2.66.23.36.48l-7.6 6.72a1 1 0 0 0-.32.6l-.2 2.02-1.34-4.12z"/>
+              </svg>
+              <span class="social-label">Group</span>
+            </a>
+          </div>
       </div>
     
       <div class="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-5 gap-10 mt-40">

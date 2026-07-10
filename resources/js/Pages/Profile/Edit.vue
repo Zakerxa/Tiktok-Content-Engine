@@ -22,6 +22,11 @@
   4. avatar is rendered as <img :src="user.avatar">, assuming it's already a
      full/storage URL. If it's a raw filename, you'll want to prefix it with
      your storage path first.
+
+  5. roleLabel now reads from a display-name map (same one used in
+     AppSidebar/Dashboard/Plan) instead of naively capitalizing role_name.
+     That map is the single place to edit if you rename a tier again —
+     role_name itself (the DB value) is untouched.
 -->
 <script setup>
 import { computed } from 'vue';
@@ -51,10 +56,20 @@ const initials = computed(() => {
     return name.slice(0, 2).toUpperCase() || '?';
 });
 
+// Display names only — role_name in the DB stays tester / normal / pro / vip / admin.
+// Keep this in sync with the label maps in AppSidebar.vue, Dashboard.vue, and Plan.vue.
+const ROLE_LABELS = {
+    tester: 'Tester',
+    normal: 'Standard',
+    pro: 'Pro',
+    vip: 'VIP',
+    admin: 'Admin',
+};
+
 const roleLabel = computed(() => {
     const role = user.value?.role_name;
     if (!role) return 'Member';
-    return role.charAt(0).toUpperCase() + role.slice(1);
+    return ROLE_LABELS[role.toLowerCase()] || (role.charAt(0).toUpperCase() + role.slice(1));
 });
 
 const formattedPlanExpiry = computed(() => {
@@ -185,9 +200,9 @@ function resendVerification() {
                     </div>
 
                     <!-- Delete account -->
-                    <div class="bg-[rgba(239,68,68,0.04)] border border-red-500/20 rounded-2xl p-6 sm:p-8">
+                    <!-- <div class="bg-[rgba(239,68,68,0.04)] border border-red-500/20 rounded-2xl p-6 sm:p-8">
                         <DeleteUserForm class="max-w-xl" />
-                    </div>
+                    </div> -->
 
                 </div>
             </div>

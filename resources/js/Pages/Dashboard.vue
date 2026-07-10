@@ -400,7 +400,7 @@ const avatarInitial = computed(() => {
 
 const ROLE_META = {
   tester: { label: 'Tester', icon: '🧪', cls: 'role-tester' },
-  normal: { label: 'Normal', icon: '⚡', cls: 'role-normal' },
+  normal: { label: 'Standard', icon: '⚡', cls: 'role-normal' },
   pro:    { label: 'Pro',    icon: '🔥', cls: 'role-pro' },
   vip:    { label: 'VIP',    icon: '👑', cls: 'role-vip' },
 };

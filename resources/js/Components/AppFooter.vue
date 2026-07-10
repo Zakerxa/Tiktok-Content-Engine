@@ -10,9 +10,24 @@
           </a>
           <p class="footer-tagline">The AI content studio built for Myanmar TikTok creators.</p>
           <div class="footer-socials">
-            <a href="https://www.tiktok.com/@z.a.k.e.r.x.a" class="social-link">TikTok</a>
-            <a href="https://t.me/+PgQX0UwLGIRhYTU1" target="_blank" class="social-link">Telegram Channel</a>
-            <a href="https://t.me/+6hc4y3AceQJmNTQ1" target="_blank" class="social-link">Telegram Group</a>
+            <a href="https://www.tiktok.com/@z.a.k.e.r.x.a" target="_blank" rel="noopener" class="social-icon" title="TikTok" aria-label="TikTok">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.6h-3.1v13.86c0 1.6-1.3 2.9-2.9 2.9a2.9 2.9 0 0 1-2.9-2.9c0-1.6 1.3-2.9 2.9-2.9.3 0 .58.04.85.13V12.2a6.02 6.02 0 0 0-.85-.06 6.02 6.02 0 0 0-6.02 6.02A6.02 6.02 0 0 0 9.2 24.18a6.02 6.02 0 0 0 6.02-6.02V9.7a9.1 9.1 0 0 0 5.3 1.7V8.28a5.9 5.9 0 0 1-3.92-2.46z" transform="translate(0 -2.18)"/>
+              </svg>
+              <span class="social-label">TikTok</span>
+            </a>
+            <a href="https://t.me/+PgQX0UwLGIRhYTU1" target="_blank" rel="noopener" class="social-icon" title="Telegram Channel" aria-label="Telegram Channel">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M21.94 4.5c.27-1.13-.86-2.03-1.9-1.58L2.4 10.36c-1.16.5-1.14 2.16.03 2.63l4.4 1.77 1.98 6.14c.24.76 1.2.98 1.77.42l2.55-2.48 4.6 3.4c.83.6 2.02.16 2.24-.85L21.94 4.5zM8.53 13.6l9.1-5.7c.34-.2.66.23.36.48l-7.6 6.72a1 1 0 0 0-.32.6l-.2 2.02-1.34-4.12z"/>
+              </svg>
+              <span class="social-label">Channel</span>
+            </a>
+            <a href="https://t.me/+6hc4y3AceQJmNTQ1" target="_blank" rel="noopener" class="social-icon" title="Telegram Group" aria-label="Telegram Group">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="social-svg">
+                <path d="M21.94 4.5c.27-1.13-.86-2.03-1.9-1.58L2.4 10.36c-1.16.5-1.14 2.16.03 2.63l4.4 1.77 1.98 6.14c.24.76 1.2.98 1.77.42l2.55-2.48 4.6 3.4c.83.6 2.02.16 2.24-.85L21.94 4.5zM8.53 13.6l9.1-5.7c.34-.2.66.23.36.48l-7.6 6.72a1 1 0 0 0-.32.6l-.2 2.02-1.34-4.12z"/>
+              </svg>
+              <span class="social-label">Group</span>
+            </a>
           </div>
         </div>
 
@@ -51,7 +66,7 @@
 const year = new Date().getFullYear();
 </script>
 
-<style scoped>
+<style >
 .site-footer {
   background: #060810;
   border-top: 1px solid rgba(255,255,255,0.06);
@@ -93,17 +108,34 @@ const year = new Date().getFullYear();
   gap: 10px;
   flex-wrap: wrap;
 }
-.social-link {
+.social-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: #94A3B8;
   text-decoration: none;
-  padding: 6px 12px;
-  border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  transition: color 0.2s, border-color 0.2s;
+  background: rgba(255,255,255,0.02);
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
 }
-.social-link:hover { color: #F1F5F9; border-color: rgba(255,255,255,0.2); }
+.social-icon:hover {
+  color: #F1F5F9;
+  border-color: #7C3AED;
+  background: rgba(124,58,237,0.12);
+  transform: translateY(-1px);
+}
+.social-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.social-label {
+  white-space: nowrap;
+}
 .footer-links-group {
   display: flex;
   flex-direction: column;

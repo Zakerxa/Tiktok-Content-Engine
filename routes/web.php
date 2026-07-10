@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ServerStatusController;
 use App\Http\Controllers\JobController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // ─── Home ───
 Route::inertia('/', 'Home')->name('home');
@@ -35,7 +36,7 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['verified'])->name('dashboard');
     Route::get('/dashboard/posts', [TikTokPostController::class, 'dashboardIndex'])->name('blogs.dashboardshow');
     Route::get('/dashboard/recap', [DashboardController::class, 'dashboardRecap'])->name('recap.dashboardrecap');
-
+    Route::get('/plan', fn () => Inertia::render('Plan'))->name('plan');
 });
 
 

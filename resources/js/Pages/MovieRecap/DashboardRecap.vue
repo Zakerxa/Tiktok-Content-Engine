@@ -1101,7 +1101,7 @@ export default {
         }
 
         if (this.auth.user.role_name == 'pro') {
-          if (secs > 120) {
+          if (secs > 160) {
             this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }

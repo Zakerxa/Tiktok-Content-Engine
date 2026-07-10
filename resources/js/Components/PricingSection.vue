@@ -123,7 +123,7 @@ const plans = [
   {
     name: 'Pro',
     icon: '👑',
-    price: 1500,
+    price: 1750,
     tagline: 'Priority rendering, built to scale',
     priorityLabel: '⚡ Priority Queue',
     featured: true,
@@ -143,7 +143,7 @@ const plans = [
     ],
   },
     {
-    name: 'Normal',
+    name: 'Standard',
     icon: '⚡',
     price: 1000,
     tagline: 'Reliable, steady daily output',
@@ -152,7 +152,7 @@ const plans = [
     vip:true,
     glowColor: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
     href: '/dashboard',
-    cta: 'Get Normal',
+    cta: 'Get Standard',
     features: [
       { label: '3 generations/day', included: true, tooltip: 'Upgrade for more generation' },
       { label: 'Auto Subtitles (+8 )', included: true },
@@ -205,7 +205,7 @@ function cardShellClass(plan) {
 function liftClass(plan) {
   if (plan.featured) return 'xl:-translate-y-5 xl:scale-[1.04]';
   if (plan.vip) return 'xl:-translate-y-2';
-  if (plan.name === 'Normal') return 'xl:translate-y-1';
+  if (plan.name === 'Standard') return 'xl:translate-y-1';
   return 'xl:translate-y-3'; // Tester
 }
 
