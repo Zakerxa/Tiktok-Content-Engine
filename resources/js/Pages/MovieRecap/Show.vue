@@ -213,34 +213,70 @@
                 </div>
               </div>
 
-
-              <!-- Toggles grid -->
-              <div class="grid grid-cols-2 gap-3">
-                <label class="inline-flex items-center cursor-pointer gap-3">
-                  <div class="relative inline-flex items-center">
-                    <input ref="enableSubtitles" type="checkbox" class="sr-only peer" :disabled="isProcessing" />
-                    <div
-                      class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors">
-                    </div>
-                    <div
-                      class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
-                    </div>
-                  </div>
-                  <span class="text-sm font-medium text-[#CBD5E1]">Auto Subtitles</span>
-                </label>
-                <label class="inline-flex items-center cursor-pointer gap-3">
-                  <div class="relative inline-flex items-center">
-                    <input ref="enableFlip" type="checkbox" class="sr-only peer" :disabled="isProcessing" />
-                    <div
-                      class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors">
-                    </div>
-                    <div
-                      class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
-                    </div>
-                  </div>
+              <!-- Mirror Mode row — တစ်ခုထဲသီးသန့် -->
+              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+                <label class="flex items-center justify-between cursor-pointer gap-3">
                   <span class="text-sm font-medium text-[#CBD5E1]">Mirror Mode</span>
+                  <div class="relative inline-flex items-center">
+                    <input ref="enableFlip" type="checkbox" class="sr-only peer" v-model="mirrorModeEnabled" :disabled="isProcessing" />
+                    <div
+                      class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors">
+                    </div>
+                    <div
+                      class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
+                    </div>
+                  </div>
                 </label>
-                <label class="inline-flex items-center cursor-pointer gap-3 col-span-2">
+              </div>
+
+
+              <!-- Auto Subtitles row — toggle + selector တစ်ခုတည်း box ထဲမှာ -->
+              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+                <label class="flex items-center justify-between cursor-pointer gap-3">
+                  <span class="text-sm font-medium text-[#CBD5E1]">Auto Subtitles</span>
+                  <div class="relative inline-flex items-center">
+                    <input ref="enableSubtitles" type="checkbox" class="sr-only peer" v-model="subtitlesEnabled"
+                      :disabled="isProcessing" />
+                    <div
+                      class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors">
+                    </div>
+                    <div
+                      class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Subtitle Text Color selector — subtitle enable ဖြစ်မှသာ ပြမည် -->
+                <div v-if="subtitlesEnabled" class="mt-4 pt-4 border-t border-[rgba(255,255,255,0.08)]">
+                  <label class="font-bold text-[#CBD5E1] text-sm block mb-3">🎨 Subtitle Text Color</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" @click="selectedSubtitleColor = 'yellow'" :disabled="isProcessing"
+                      :class="['flex flex-col items-center gap-1.5 py-2.5 rounded-xl border-2 cursor-pointer transition-all bg-[rgba(255,255,255,0.02)]',
+                        selectedSubtitleColor === 'yellow' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)]' : 'border-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span class="w-6 h-6 rounded-full border border-black/30" style="background:#FFEB3B"></span>
+                      <span class="text-xs font-semibold text-[#CBD5E1]">Yellow</span>
+                    </button>
+                    <button type="button" @click="selectedSubtitleColor = 'white'" :disabled="isProcessing"
+                      :class="['flex flex-col items-center gap-1.5 py-2.5 rounded-xl border-2 cursor-pointer transition-all bg-[rgba(255,255,255,0.02)]',
+                        selectedSubtitleColor === 'white' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)]' : 'border-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span class="w-6 h-6 rounded-full border border-black/30" style="background:#FFFFFF"></span>
+                      <span class="text-xs font-semibold text-[#CBD5E1]">White</span>
+                    </button>
+                    <button type="button" @click="selectedSubtitleColor = 'netflix'" :disabled="isProcessing"
+                      :class="['flex flex-col items-center gap-1.5 py-2.5 rounded-xl border-2 cursor-pointer transition-all bg-[rgba(255,255,255,0.02)]',
+                        selectedSubtitleColor === 'netflix' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)]' : 'border-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span class="w-6 h-6 rounded-full border border-black/30"
+                        style="background:#FFFFFF; box-shadow: inset 0 -10px 0 0 rgba(0,0,0,0.65)"></span>
+                      <span class="text-xs font-semibold text-[#CBD5E1]">Netflix</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Watermark row — toggle + upload selector တစ်ခုတည်း box ထဲမှာ -->
+              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+                <label class="flex items-center justify-between cursor-pointer gap-3">
+                  <span class="text-sm font-medium text-[#CBD5E1]">Enable Watermark Logo</span>
                   <div class="relative inline-flex items-center">
                     <input ref="enableWatermark" type="checkbox" class="sr-only peer" @change="waterMarkToggle"
                       :disabled="isProcessing" />
@@ -251,48 +287,92 @@
                       class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
                     </div>
                   </div>
-                  <span class="text-sm font-medium text-[#CBD5E1]">Enable Watermark Logo</span>
                 </label>
-              </div>
 
-              <!-- Watermark upload -->
-              <div ref="watermarkUploadSection"
-                class="mt-2 p-4 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm"
-                style="display:none">
-                <label class="block text-sm font-semibold text-[#CBD5E1] mb-3">Upload &amp; Drag Logo</label>
-              <div class="flex gap-4 items-center">
-                <label class="relative flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group overflow-hidden">
-                
-                  <!-- Placeholder icon — logo upload ပြီးရင် ဖျောက်ပေးမည် -->
-                  <div ref="logoUploadPlaceholder" class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
-                    <svg class="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                    </svg>
-                    <span class="text-[10px] font-bold uppercase tracking-wide">Upload</span>
-                  </div>
-                
-                  <!-- ✅ NEW — static thumbnail only, drag logic မပါ -->
-                  <img
-                    ref="uploadBoxThumbnail"
-                    src=""
-                    class="absolute inset-0 w-full h-full object-contain p-2"
-                    alt="Uploaded logo"
-                    draggable="false"
-                    style="display:none"
-                  />
-                
-                  <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="previewLogo" :disabled="isProcessing"/>
-                </label>
-                <div class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
-                  <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
-                  <p>Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
-                  <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
-                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
-                    <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
+                <!-- Watermark upload -->
+                <div ref="watermarkUploadSection" class="mt-4 pt-4 border-t border-[rgba(255,255,255,0.08)]"
+                  style="display:none">
+                  <label class="block text-sm font-semibold text-[#CBD5E1] mb-3">Upload &amp; Drag Logo</label>
+                  <div class="flex gap-4 items-center">
+                    <label class="relative flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-[rgba(255,255,255,0.15)] hover:border-[#7C3AED] hover:bg-[rgba(124,58,237,0.08)] rounded-xl cursor-pointer transition-all group overflow-hidden">
+
+                      <!-- Placeholder icon — logo upload ပြီးရင် ဖျောက်ပေးမည် -->
+                      <div ref="logoUploadPlaceholder" class="flex flex-col items-center text-[#64748B] group-hover:text-[#A78BFA]">
+                        <svg class="w-7 h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        <span class="text-[10px] font-bold uppercase tracking-wide">Upload</span>
+                      </div>
+
+                      <!-- ✅ NEW — static thumbnail only, drag logic မပါ -->
+                      <img
+                        ref="uploadBoxThumbnail"
+                        src=""
+                        class="absolute inset-0 w-full h-full object-contain p-2"
+                        alt="Uploaded logo"
+                        draggable="false"
+                        style="display:none"
+                      />
+
+                      <input ref="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="previewLogo" :disabled="isProcessing"/>
+                    </label>
+                    <div class="flex-1 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-lg p-3 text-xs text-[#64748B]">
+                      <p class="font-semibold text-[#CBD5E1] mb-1">Logo Position</p>
+                      <p>Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ</p>
+                      <div class="flex gap-3 font-mono text-[#A78BFA] font-bold mt-2">
+                        <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">X: <span>{{ logoX.toFixed(2) }}</span>%</div>
+                        <div class="bg-[rgba(124,58,237,0.12)] px-1 py-1 rounded-md text-xs">Y: <span>{{ logoY.toFixed(2) }}</span>%</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+
+              <!-- Background Music toggle + selector -->
+              <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="font-bold text-[#CBD5E1] text-sm">🎵 Background Music</label>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input ref="enableBgMusic" type="checkbox" class="sr-only peer" v-model="bgMusicEnabled"
+                      :disabled="isProcessing" />
+                    <div
+                      class="w-11 h-6 bg-[rgba(255,255,255,0.12)] peer-checked:bg-[#7C3AED] rounded-full transition-colors">
+                    </div>
+                    <div
+                      class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform peer-checked:translate-x-5 shadow-sm">
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Enable ဖြစ်မှသာ Selector ကို အောက်ဘက်မှာ ပြသမည် -->
+                <div v-show="bgMusicEnabled" class="mt-3">
+                  <p class="text-xs text-[#64748B] mb-3">Music ကို ရွေးချယ်ပါ — 🔊 ကိုနှိပ်ပြီး Preview နားထောင်ကြည့်နိုင်ပါသည်</p>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button type="button" @click="selectBgMusic('Epic-Spectrum-Wandering.mp3')" :disabled="isProcessing"
+                      :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
+                        selectedBgMusic === 'Epic-Spectrum-Wandering.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span>{{ playingMusic === 'Epic-Spectrum-Wandering.mp3' ? '⏸️' : '🔊' }}</span>
+                      <span>🎬 Epic Spectrum</span>
+                    </button>
+                    <button type="button" @click="selectBgMusic('Aylex-Colossal.mp3')" :disabled="isProcessing"
+                      :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
+                        selectedBgMusic === 'Aylex-Colossal.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span>{{ playingMusic === 'Aylex-Colossal.mp3' ? '⏸️' : '🔊' }}</span>
+                      <span>🌩️ Colossal</span>
+                    </button>
+                    <button type="button" @click="selectBgMusic('Pufino-Legend.mp3')" :disabled="isProcessing"
+                      :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
+                        selectedBgMusic === 'Pufino-Legend.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span>{{ playingMusic === 'Pufino-Legend.mp3' ? '⏸️' : '🔊' }}</span>
+                      <span>🗺️ Legend</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Preview audio element (invisible) — Laravel public folder ထဲက music file ကို ဖွင့်ပြသမည် -->
+                <audio ref="bgMusicPreviewAudio" class="hidden" @ended="playingMusic = null"></audio>
               </div>
 
             </div>
@@ -408,6 +488,13 @@ export default {
       alertType: 'error',
       inlineError: '',
       selectedVoice: 'my-MM-ThihaNeural',
+      subtitlesEnabled: false,
+      selectedSubtitleColor: 'yellow',
+      selectedBgMusic: 'Epic-Spectrum-Wandering.mp3',
+      bgMusicEnabled: false,
+      mirrorModeEnabled: false,
+      playingMusic: null,
+      musicPreviewBaseUrl: '/music/', // 👉 Laravel public folder ထဲက music file တွေ ရှိတဲ့ path (public/music/xxx.mp3)
       logoX: 0,
       logoY: 0,
       blurX: 0,
@@ -653,6 +740,33 @@ export default {
       }
     },
 
+    // 🎵 Background Music ရွေးချယ်ခြင်း + Preview ဖွင့်/ရပ်ခြင်း
+    selectBgMusic(filename) {
+      this.selectedBgMusic = filename;
+      console.log(this.selectedBgMusic, filename);
+      const audio = this.$refs.bgMusicPreviewAudio;
+      if (!audio) return;
+
+      // ဒီတခုကိုကလိမ့် Play နေရင် → Pause လုပ်လိုက်မည် (Toggle)
+      if (this.playingMusic === filename && !audio.paused) {
+        audio.pause();
+        this.playingMusic = null;
+        return;
+      }
+
+      // Laravel public folder ထဲက music file ကို ဖွင့်ခြင်း (public/music/xxx.mp3 → /music/xxx.mp3)
+      audio.src = `${this.musicPreviewBaseUrl}${filename}`;
+      audio.currentTime = 0;
+      audio.play().catch(err => console.warn('🎵 Preview play failed:', err));
+      this.playingMusic = filename;
+    },
+
+    stopBgMusicPreview() {
+      const audio = this.$refs.bgMusicPreviewAudio;
+      if (audio) audio.pause();
+      this.playingMusic = null;
+    },
+
     waterMarkToggle() {
       const isEnabled = this.$refs.enableWatermark?.checked;
       const section = this.$refs.watermarkUploadSection;
@@ -700,8 +814,11 @@ export default {
       this.blurX = 0; this.blurY = 85; this.blurH = 15;
       if (this.$refs.urlInput) this.$refs.urlInput.value = '';
       if (this.$refs.enableSubtitles) this.$refs.enableSubtitles.checked = false;
+      this.subtitlesEnabled = false;
       if (this.$refs.enableFlip) this.$refs.enableFlip.checked = false;
       if (this.$refs.enableWatermark) this.$refs.enableWatermark.checked = false;
+      this.bgMusicEnabled = false;
+      this.stopBgMusicPreview();
       if (this.$refs.logoFileInput) this.$refs.logoFileInput.value = '';
       if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.src = '';
       if (this.$refs.voiceModel) this.$refs.voiceModel.value = 'my-MM-ThihaNeural';
@@ -933,6 +1050,7 @@ export default {
       }
 
       this.isProcessing = true;
+      this.stopBgMusicPreview();
 
       const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
@@ -942,6 +1060,10 @@ export default {
       const voiceover = this.$refs.enableVoiceover?.checked;
       const voice = this.selectedVoice;
       const logoFile = this.$refs.logoFileInput?.files[0];
+      const subtitleColor = this.selectedSubtitleColor;
+      const bgMusic = this.selectedBgMusic;
+
+      this.showAlert('warning', 'Just kidding');
 
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
       if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
@@ -1043,6 +1165,8 @@ export default {
             finalForm.append('enable_flip', flip);
             finalForm.append('enable_watermark', watermark);
             finalForm.append('enable_voiceover', voiceover);
+            finalForm.append('subtitle_style', subtitleColor);
+            finalForm.append('bg_music', bgMusic);
             if (watermark) {
               finalForm.append('watermark_x', this.logoX.toFixed(2));
               finalForm.append('watermark_y', this.logoY.toFixed(2));
@@ -1073,6 +1197,8 @@ export default {
           formData.append('enable_flip', flip);
           formData.append('enable_watermark', watermark);
           formData.append('enable_voiceover', voiceover);
+          formData.append('subtitle_style', subtitleColor);
+          formData.append('bg_music', bgMusic);
           if (watermark) {
             formData.append('watermark_x', this.logoX.toFixed(2));
             formData.append('watermark_y', this.logoY.toFixed(2));
@@ -1128,6 +1254,7 @@ export default {
   },
 
   beforeUnmount() {
+    this.stopBgMusicPreview();
     document.removeEventListener('mousemove', this.logoDrag);
     document.removeEventListener('mouseup', this.logoDragEnd);
     document.removeEventListener('touchmove', this.logoDrag);

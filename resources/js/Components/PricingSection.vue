@@ -123,7 +123,7 @@ const plans = [
   {
     name: 'Pro',
     icon: '👑',
-    price: 3000,
+    price: 1500,
     tagline: 'Priority rendering, built to scale',
     priorityLabel: '⚡ Priority Queue',
     featured: true,
@@ -135,7 +135,7 @@ const plans = [
       { label: 'Auto Subtitles (+8 )', included: true },
       { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
       { label: 'Custom Blur & Mosaic', included: true },
-      { label: '2 min Video Max', included: true, tooltip: 'Upgrade for longer durations' },
+      { label: '2 min 30s Video Max', included: true, tooltip: 'Upgrade for longer durations' },
       { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
       { label: 'High quality export', included: true },
       { label: 'Standard processing', included: true },
@@ -145,7 +145,7 @@ const plans = [
     {
     name: 'Normal',
     icon: '⚡',
-    price: 2000,
+    price: 1000,
     tagline: 'Reliable, steady daily output',
     priorityLabel: null,
     featured: false,
@@ -154,7 +154,7 @@ const plans = [
     href: '/dashboard',
     cta: 'Get Normal',
     features: [
-      { label: '2 generations/day', included: true, tooltip: 'Upgrade for more generation' },
+      { label: '3 generations/day', included: true, tooltip: 'Upgrade for more generation' },
       { label: 'Auto Subtitles (+8 )', included: true },
       { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
       { label: 'Custom Blur & Mosaic', included: true },
