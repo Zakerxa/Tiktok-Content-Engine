@@ -50,9 +50,9 @@
               class="w-full bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] hover:opacity-90 text-white font-semibold py-2.5 rounded-xl border-none cursor-pointer transition-opacity">
               နားလည်ပါပြီ
             </button>
-            <a v-if="alertType === 'error'" href="/logout"
+            <a v-if="alertType === 'warning'" :href="telegramUrl" target="_blank" rel="noopener"
               class="block text-center w-full bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-[#94A3B8] text-sm font-medium py-2.5 rounded-xl no-underline transition-colors">
-              Logout လုပ်မည်
+              Telegram Group ကို ဝင်ရောက်ရန်
             </a>
           </div>
         </div>
@@ -62,7 +62,32 @@
     <!-- ══════════════ MAIN CARD ══════════════ -->
     <main class="flex-1 flex items-start justify-center px-3 py-6 mt-12 sm:px-4 sm:py-10">
       <div
-        class="w-full max-w-6xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-3xl shadow-2xl border border-[rgba(255,255,255,0.08)] px-4 py-5 sm:px-6 sm:py-6 md:px-8">
+        class="relative w-full max-w-6xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl rounded-3xl shadow-2xl border border-[rgba(255,255,255,0.08)] px-4 py-5 sm:px-6 sm:py-6 md:px-8">
+
+        <!-- Plan status badge (top-right corner) -->
+        <div class="absolute top-4 right-4 sm:top-5 sm:right-6 z-10" ref="planBadgeWrap">
+          <button
+            type="button"
+            @click="showPlanTooltip = !showPlanTooltip"
+            class="flex items-center gap-1.5 rounded-full border px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-bold backdrop-blur-md transition-colors"
+            :class="planBadge.pillClass"
+          >
+            <span>{{ planBadge.icon }}</span>
+            <span>{{ planBadge.shortLabel }}</span>
+          </button>
+
+          <transition name="alert-fade">
+            <div
+              v-if="showPlanTooltip"
+              class="absolute right-0 mt-2 w-56 sm:w-64 rounded-xl border p-3.5 text-xs shadow-2xl backdrop-blur-xl"
+              :class="planBadge.popoverClass"
+            >
+              <p class="font-semibold text-[#F1F5F9] mb-1 leading-snug">{{ planBadge.fullLabel }}</p>
+              <p class="text-[#94A3B8] leading-relaxed">{{ planBadge.hint }}</p>
+              <a href="/plan" class="mt-2 inline-block text-[#A78BFA] font-semibold no-underline hover:underline">Plan အသေးစိတ်ကြည့်ရန် →</a>
+            </div>
+          </transition>
+        </div>
 
         <!-- Header -->
         <div
@@ -216,7 +241,7 @@
               <!-- Mirror Mode row — တစ်ခုထဲသီးသန့် -->
               <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
                 <label class="flex items-center justify-between cursor-pointer gap-3">
-                  <span class="text-sm font-medium text-[#CBD5E1]">Mirror Mode</span>
+                  <span class="text-sm font-medium text-[#CBD5E1]">🪞 Mirror Mode</span>
                   <div class="relative inline-flex items-center">
                     <input ref="enableFlip" type="checkbox" class="sr-only peer" v-model="mirrorModeEnabled" :disabled="isProcessing" />
                     <div
@@ -233,7 +258,7 @@
               <!-- Auto Subtitles row — toggle + selector တစ်ခုတည်း box ထဲမှာ -->
               <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
                 <label class="flex items-center justify-between cursor-pointer gap-3">
-                  <span class="text-sm font-medium text-[#CBD5E1]">Auto Subtitles</span>
+                  <span class="text-sm font-medium text-[#CBD5E1]">💬 Auto Subtitles</span>
                   <div class="relative inline-flex items-center">
                     <input ref="enableSubtitles" type="checkbox" class="sr-only peer" v-model="subtitlesEnabled"
                       :disabled="isProcessing" />
@@ -276,7 +301,7 @@
               <!-- Watermark row — toggle + upload selector တစ်ခုတည်း box ထဲမှာ -->
               <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm">
                 <label class="flex items-center justify-between cursor-pointer gap-3">
-                  <span class="text-sm font-medium text-[#CBD5E1]">Enable Watermark Logo</span>
+                  <span class="text-sm font-medium text-[#CBD5E1]">🖼️ Custom Logo</span>
                   <div class="relative inline-flex items-center">
                     <input ref="enableWatermark" type="checkbox" class="sr-only peer" @change="waterMarkToggle"
                       :disabled="isProcessing" />
@@ -487,6 +512,8 @@ export default {
       errorPopupMsg: '',
       alertType: 'error',
       inlineError: '',
+      showPlanTooltip: false,
+      telegramUrl: 'https://t.me/+6hc4y3AceQJmNTQ1',
       selectedVoice: 'my-MM-ThihaNeural',
       subtitlesEnabled: false,
       selectedSubtitleColor: 'yellow',
@@ -517,6 +544,53 @@ export default {
   },
 
   computed: {
+    planBadge() {
+      const role = (this.auth.user?.role_name || 'tester').toLowerCase();
+      const MAP = {
+        tester: {
+          icon: '🔥',
+          shortLabel: 'Free',
+          fullLabel: 'အခမဲ့ (Free) Plan အသုံးပြုနေပါသည်',
+          hint: 'Video 1 min max ၊ watermark ပါဝင်သည်။ ပိုမိုကောင်းမွန်သော feature များအတွက် Plan အဆင့်မြှင့်ပါ။',
+          pillClass: 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+          popoverClass: 'border-slate-500/25 bg-[#0D1120]',
+        },
+        normal: {
+          icon: '⚡',
+          shortLabel: 'Standard',
+          fullLabel: 'Standard Plan အသုံးပြုနေပါသည်',
+          hint: 'Video 1.5 min max ၊ watermark ပါဝင်သည်။ Pro Plan သို့ မြှင့်တင်ရန် Telegram မှ ဆက်သွယ်ပါ။',
+          pillClass: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+          popoverClass: 'border-amber-500/25 bg-[#0D1120]',
+        },
+        pro: {
+          icon: '👑',
+          shortLabel: 'Pro',
+          fullLabel: 'Pro Plan အသုံးပြုနေပါသည်',
+          hint: 'High quality export ၊ watermark မပါ ၊ video 2.5 min max ။',
+          pillClass: 'border-[#7C3AED]/40 bg-[#7C3AED]/10 text-[#C4B5FD]',
+          popoverClass: 'border-[#7C3AED]/30 bg-[#0D1120]',
+        },
+        vip: {
+          icon: '💎',
+          shortLabel: 'VIP',
+          fullLabel: 'VIP Plan အသုံးပြုနေပါသည်',
+          hint: 'Feature အားလုံး အကန့်အသတ်နည်းစွာဖြင့် အသုံးပြုနိုင်ပါသည်။',
+          pillClass: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
+          popoverClass: 'border-cyan-500/25 bg-[#0D1120]',
+        },
+        admin: {
+          icon: '🛡️',
+          shortLabel: 'Admin',
+          fullLabel: 'Admin အနေဖြင့် အကန့်အသတ်မရှိ အသုံးပြုနေပါသည်',
+          hint: 'Internal access — Plan restrictions do not apply to this account.',
+          pillClass: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+          popoverClass: 'border-emerald-500/25 bg-[#0D1120]',
+        },
+      };
+      return MAP[role] || MAP.tester;
+    },
+
     pipelineSteps() {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
@@ -564,6 +638,14 @@ export default {
   },
 
   methods: {
+
+    handleOutsideClickForPlanTooltip(event) {
+      if (!this.showPlanTooltip) return;
+      const el = this.$refs.planBadgeWrap;
+      if (el && !el.contains(event.target)) {
+        this.showPlanTooltip = false;
+      }
+    },
 
     switchTab(mode) {
       if (this.isProcessing) return;
@@ -1251,6 +1333,8 @@ export default {
     document.addEventListener('touchmove', this.blurDrag, { passive: false });
     document.addEventListener('touchend', this.blurDragEnd);
     document.addEventListener('touchcancel', this.blurDragEnd);
+
+    document.addEventListener('click', this.handleOutsideClickForPlanTooltip);
   },
 
   beforeUnmount() {
@@ -1266,6 +1350,8 @@ export default {
     document.removeEventListener('touchmove', this.blurDrag);
     document.removeEventListener('touchend', this.blurDragEnd);
     document.removeEventListener('touchcancel', this.blurDragEnd);
+
+    document.removeEventListener('click', this.handleOutsideClickForPlanTooltip);
   },
 };
 </script>

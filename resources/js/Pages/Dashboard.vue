@@ -1,6 +1,8 @@
 <template>
   <Head title="Dashboard" />
 
+  <OnboardingGuideModal />
+
   <AppSidebar :auth="$page.props.auth">
 
   <div class="dash-root">
@@ -26,10 +28,20 @@
         </div>
 
         <div class="profile-right">
-          <span class="role-badge" :class="roleClass">
-            <span class="role-icon">{{ roleMeta.icon }}</span>
-            {{ roleMeta.label }}
-          </span>
+          <div class="role-badge-wrap" ref="roleBadgeWrap">
+            <button type="button" class="role-badge" :class="roleClass" @click="showPlanTooltip = !showPlanTooltip">
+              <span class="role-icon">{{ roleMeta.icon }}</span>
+              {{ roleMeta.label }}
+            </button>
+
+            <transition name="fade-pop">
+              <div v-if="showPlanTooltip" class="role-tooltip">
+                <p class="role-tooltip-title">{{ planHint.title }}</p>
+                <p class="role-tooltip-text">{{ planHint.text }}</p>
+                <Link href="/plan" class="role-tooltip-link">Plan အသေးစိတ်ကြည့်ရန် →</Link>
+              </div>
+            </transition>
+          </div>
           <span class="status-pill" :class="user.is_active ? 'status-active' : 'status-inactive'">
             <span class="status-dot"></span>
             {{ user.is_active ? 'Active' : 'Suspended' }}
@@ -355,6 +367,7 @@
 
 <script setup>
 import AppSidebar from '@/Components/AppSidebar.vue';
+import OnboardingGuideModal from '@/Components/OnboardingGuideModal.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
@@ -403,6 +416,7 @@ const ROLE_META = {
   normal: { label: 'Standard', icon: '⚡', cls: 'role-normal' },
   pro:    { label: 'Pro',    icon: '🔥', cls: 'role-pro' },
   vip:    { label: 'VIP',    icon: '👑', cls: 'role-vip' },
+  admin:  { label: 'Admin',  icon: '🛡️', cls: 'role-admin' },
 };
 
 const roleMeta = computed(() => {
@@ -411,6 +425,30 @@ const roleMeta = computed(() => {
 });
 
 const roleClass = computed(() => roleMeta.value.cls);
+
+/* ───────── Plan tooltip (matches the badge on Show.vue / DashboardRecap.vue) ───────── */
+const showPlanTooltip = ref(false);
+const roleBadgeWrap = ref(null);
+
+const PLAN_HINTS = {
+  tester: { title: 'အခမဲ့ (Free) Plan အသုံးပြုနေပါသည်', text: 'Video 1 min max ၊ watermark ပါဝင်သည်။ ပိုမိုကောင်းမွန်သော feature များအတွက် Plan အဆင့်မြှင့်ပါ။' },
+  normal: { title: 'Standard Plan အသုံးပြုနေပါသည်', text: 'Video 1.5 min max ၊ watermark ပါဝင်သည်။ Pro Plan သို့ မြှင့်တင်ရန် Telegram မှ ဆက်သွယ်ပါ။' },
+  pro:    { title: 'Pro Plan အသုံးပြုနေပါသည်', text: 'High quality export ၊ watermark မပါ ၊ video 2.5 min max ။' },
+  vip:    { title: 'VIP Plan အသုံးပြုနေပါသည်', text: 'Feature အားလုံး အကန့်အသတ်နည်းစွာဖြင့် အသုံးပြုနိုင်ပါသည်။' },
+  admin:  { title: 'Admin အနေဖြင့် အကန့်အသတ်မရှိ အသုံးပြုနေပါသည်', text: 'Internal access — Plan restrictions do not apply to this account.' },
+};
+
+const planHint = computed(() => {
+  const key = (user.value.role_name || 'tester').toLowerCase();
+  return PLAN_HINTS[key] || PLAN_HINTS.tester;
+});
+
+function handleOutsideClickForPlanTooltip(event) {
+  if (!showPlanTooltip.value) return;
+  if (roleBadgeWrap.value && !roleBadgeWrap.value.contains(event.target)) {
+    showPlanTooltip.value = false;
+  }
+}
 
 /* ───────── Usage ring ───────── */
 // ✅ ပြင်ပြီး
@@ -462,9 +500,11 @@ let tickHandle = null;
 
 onMounted(() => {
   tickHandle = setInterval(() => { now.value = new Date(); }, 1000);
+  document.addEventListener('click', handleOutsideClickForPlanTooltip);
 });
 onUnmounted(() => {
   if (tickHandle) clearInterval(tickHandle);
+  document.removeEventListener('click', handleOutsideClickForPlanTooltip);
 });
 
 const expiresAt = computed(() => {
@@ -561,16 +601,41 @@ const formattedExpiry = computed(() => {
 .profile-email { font-size: 13px; color: #64748B; margin-top: 2px; }
 
 .profile-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.role-badge-wrap { position: relative; display: inline-flex; }
 .role-badge {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 13px; font-weight: 700; padding: 7px 14px; border-radius: 100px;
   border: 1px solid transparent;
+  cursor: pointer; font-family: inherit; appearance: none; -webkit-appearance: none;
 }
 .role-icon { font-size: 14px; }
 .role-tester { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.35); color: #CBD5E1; }
 .role-normal { background: rgba(6,182,212,0.15); border-color: rgba(6,182,212,0.35); color: #67E8F9; }
 .role-pro    { background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.4); color: #C4B5FD; }
 .role-vip    { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #FCD34D; }
+.role-admin  { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.4); color: #6EE7B7; }
+
+.role-tooltip {
+  position: absolute; top: calc(100% + 10px); left: 0; z-index: 30;
+  width: 240px; padding: 14px; border-radius: 14px;
+  background: #0D1120; border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6);
+}
+.role-tooltip-title { font-size: 13px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px; line-height: 1.4; }
+.role-tooltip-text { font-size: 12px; color: #94A3B8; line-height: 1.55; }
+.role-tooltip-link {
+  display: inline-block; margin-top: 8px; font-size: 12.5px; font-weight: 700;
+  color: #A78BFA; text-decoration: none;
+}
+.role-tooltip-link:hover { text-decoration: underline; }
+
+.fade-pop-enter-active, .fade-pop-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
+.fade-pop-enter-from, .fade-pop-leave-to { opacity: 0; transform: translateY(-4px) scale(0.97); }
+
+@media (max-width: 480px) {
+  .role-tooltip { left: auto; right: 0; width: 220px; }
+}
+
 
 .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 100px; }
 .status-active   { background: rgba(52,211,153,0.12); color: #34D399; }
