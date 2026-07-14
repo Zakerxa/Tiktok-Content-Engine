@@ -42,6 +42,7 @@
           <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">
             <span v-if="alertType === 'error'">လုပ်ဆောင်မှု မအောင်မြင်ပါ</span>
             <span v-else-if="alertType === 'warning'">သတိပေးချက်</span>
+            <span v-else-if="alertType === 'queue'">လုပ်ဆောင်နေသည်</span>
             <span v-else>Login လိုအပ်သည်</span>
           </h3>
           <p class="text-center text-sm text-[#94A3B8] mb-6 leading-relaxed">{{ errorPopupMsg }}</p>
@@ -530,6 +531,7 @@ export default {
 
       uploadProgress: null,
       hasVideoSelected: false,
+      queueNoticeShown: false,
 
       stepCurrent: 0,
       stepProgress: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
@@ -541,6 +543,14 @@ export default {
       _blurStartX: 0, _blurStartY: 0,
       _blurInitialX: 0, _blurInitialY: 0,
     };
+  },
+  watch: {
+    isWaitingInQueue(nowWaiting) {
+      if (nowWaiting && !this.queueNoticeShown && this.role_name !== 'tester') {
+        this.queueNoticeShown = true;
+        this.showAlert('queue','ဤ Video ကို Queue ထဲ ထားရှိပြီးပါပြီ။ ဤစာမျက်နှာကို ပိတ်ထား/ထွက်သွားနိုင်ပါသည် — ၁၀ မိနစ်ခန့်အကြာတွင် Job History စာမျက်နှာမှ ပြန်ဝင်ပြီး Video ကို Download ဆွဲနိုင်ပါသည်။');
+      }
+    },
   },
 
   computed: {
@@ -591,11 +601,15 @@ export default {
       return MAP[role] || MAP.tester;
     },
 
+    isWaitingInQueue() {
+      return this.stepCurrent === 1 && (!this.stepProgress[1] || this.stepProgress[1] === 0);
+    },
+
     pipelineSteps() {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
       const STEP_LABELS = ['Processing Video . . .', 'Extracting Audio . . .', 'Translating Speech . . .', 'Generating Voice (TTS)', 'Producing Final Video ...'];
-      const isWaitingInQueue = cur === 1 && (!prog[1] || prog[1] === 0);
+      const isWaitingInQueue = this.isWaitingInQueue;
 
       return [1, 2, 3, 4, 5].map(i => {
         const pct = prog[i] || 0;
@@ -636,6 +650,8 @@ export default {
       });
     },
   },
+
+  
 
   methods: {
 
@@ -863,6 +879,7 @@ export default {
       this.alertType = type;
       this.errorPopupMsg = msg;
       this.showErrorOverlay = true;
+      if(type == 'queue') return;
       this.isProcessing = false;
     },
     showError(msg) {
@@ -905,6 +922,7 @@ export default {
       if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.src = '';
       if (this.$refs.voiceModel) this.$refs.voiceModel.value = 'my-MM-ThihaNeural';
       window._downloadTriggered = false;
+      this.queueNoticeShown = false;
       this.waterMarkToggle();
       this.removeSelectedVideo();
       this.resetSteps();
@@ -926,12 +944,7 @@ export default {
 
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
-            const link = document.createElement('a');
-            link.href = `${jobBaseUrl}/download/${jobId}`;
-            link.download = 'Recap_Ready.mp4';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            this.autoDownload(jobId);
           }
 
           this.isProcessing = false;
@@ -955,6 +968,40 @@ export default {
       }
     },
 
+    async autoDownload(jobId) {
+      try {
+        const res = await fetch(route('jobs.download', jobId), {
+          headers: { 'Accept': 'application/json', 'X-Session-ID': window.APP_SESSION_ID },
+          credentials: 'same-origin',
+        });
+    
+        if (!res.ok) {
+          console.warn('Download failed, status:', res.status, 'session id was:', window.APP_SESSION_ID);
+          this.showError(this.friendlyDownloadError(res.status));
+          return;
+        }
+    
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url; link.download = 'Recap_Ready.mp4';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.warn('Download network error:', e);
+        this.showError('Internet ချိတ်ဆက်မှု ပြဿနာ ဖြစ်နေပါသည်။');
+      }
+    },
+
+    friendlyDownloadError(status) {
+      switch (status) {
+        case 401: return 'Login သက်တမ်း ကုန်သွားပါပြီ။ ပြန်လည် Login ဝင်ပြီး ထပ်ကြိုးစားပါ။';
+        case 403: return 'ဤဖိုင်ကို Download ဆွဲရန် ခွင့်ပြုချက် မရှိပါ။';
+        case 404: return 'ဖိုင်ကို ရှာမတွေ့ပါ။';
+        case 410: return 'Download link သက်တမ်း ကုန်သွားပါပြီ။';
+        default:  return 'Download လုပ်ဆောင်မှု မအောင်မြင်ပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။';
+      }
+    },
 
     async getVideoDuration(file) {
       return new Promise((resolve) => {

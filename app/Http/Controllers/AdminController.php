@@ -87,11 +87,11 @@ class AdminController extends Controller
             'new_role' => 'required|in:normal,pro,vip',
             'days'     => 'required|integer|min:0',
         ]);
-    
+
         $user = User::findOrFail($id);
-    
+
         PlanService::grant($user, $request->new_role, (int) $request->days, Auth::user()->username);
-    
+
         return back()->with('success', "Plan renewed for {$user->username}.");
     }
 
@@ -159,7 +159,7 @@ class AdminController extends Controller
     // ─────────────────────────────────────────────
     public function roles()
     {
-        $roles = Role::orderBy('daily_limit')->get();
+        $roles = Role::all();
 
         return Inertia::render('Admin/Roles', compact('roles'));
     }
@@ -169,17 +169,25 @@ class AdminController extends Controller
     // ─────────────────────────────────────────────
     public function updateRole(Request $request, $name)
     {
-        // Protect admin role from edits
         if ($name === 'admin') {
             return back()->with('error', 'Admin role cannot be modified.');
         }
 
         $request->validate([
-            'daily_limit'       => 'required|integer|min:0',
-            'max_video_seconds' => 'required|integer|min:0',
-            'can_watermark'     => 'required|boolean',
-            'can_subtitle'      => 'required|boolean',
-            'can_voiceover'     => 'required|boolean',
+            'daily_limit'           => 'required|integer|min:0',
+            'max_video_seconds'     => 'required|integer|min:0',
+            'can_watermark'         => 'required|boolean',
+            'can_subtitle'          => 'required|boolean',
+            'can_voiceover'         => 'required|boolean',
+            'price'                 => 'required|integer|min:0',
+            'tagline'               => 'nullable|string|max:255',
+            'subtitle_limit'        => 'required|integer|min:0',
+            'voiceover_limit'       => 'required|integer|min:0',
+            'copyright_protection'  => 'required|integer|min:0|max:100',
+            'video_quality'         => 'required|string|in:low,standard,high',
+            'processing_speed'      => 'required|string|in:low,standard,priority',
+            'sort_order'            => 'required|integer|min:0',
+            'show_in_pricing'       => 'required|boolean',
         ]);
 
         $role = Role::where('name', $name)->firstOrFail();
@@ -190,10 +198,20 @@ class AdminController extends Controller
             'can_watermark',
             'can_subtitle',
             'can_voiceover',
+            'price',
+            'tagline',
+            'subtitle_limit',
+            'voiceover_limit',
+            'copyright_protection',
+            'video_quality',
+            'processing_speed',
+            'sort_order',
+            'show_in_pricing',
         ]));
 
         return back()->with('success', "Role [{$name}] updated.");
     }
+
 
     // ─────────────────────────────────────────────
     // GET /admin/history/{username}  — Plan history

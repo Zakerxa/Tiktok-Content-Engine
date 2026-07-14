@@ -926,12 +926,7 @@ export default {
 
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
-            const link = document.createElement('a');
-            link.href = `${jobBaseUrl}/download/${jobId}`;
-            link.download = 'Recap_Ready.mp4';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            this.autoDownload(jobId);
           }
 
           this.isProcessing = false;
@@ -952,6 +947,41 @@ export default {
         setTimeout(() => this.pollStatus(jobId, jobBaseUrl), nextDelay)
       } catch (err) {
         setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 8000);
+      }
+    },
+
+    async autoDownload(jobId) {
+      try {
+        const res = await fetch(route('jobs.download', jobId), {
+          headers: { 'Accept': 'application/json', 'X-Session-ID': window.APP_SESSION_ID },
+          credentials: 'same-origin',
+        });
+    
+        if (!res.ok) {
+          console.warn('Download failed, status:', res.status, 'session id was:', window.APP_SESSION_ID);
+          this.showError(this.friendlyDownloadError(res.status));
+          return;
+        }
+    
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url; link.download = 'Recap_Ready.mp4';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.warn('Download network error:', e);
+        this.showError('Internet ချိတ်ဆက်မှု ပြဿနာ ဖြစ်နေပါသည်။');
+      }
+    },
+
+    friendlyDownloadError(status) {
+      switch (status) {
+        case 401: return 'Login သက်တမ်း ကုန်သွားပါပြီ။ ပြန်လည် Login ဝင်ပြီး ထပ်ကြိုးစားပါ။';
+        case 403: return 'ဤဖိုင်ကို Download ဆွဲရန် ခွင့်ပြုချက် မရှိပါ။';
+        case 404: return 'ဖိုင်ကို ရှာမတွေ့ပါ။';
+        case 410: return 'Download link သက်တမ်း ကုန်သွားပါပြီ။';
+        default:  return 'Download လုပ်ဆောင်မှု မအောင်မြင်ပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။';
       }
     },
 

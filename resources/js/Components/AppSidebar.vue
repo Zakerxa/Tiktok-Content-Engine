@@ -30,6 +30,7 @@
       <!-- Main nav items -->
       <NavItem :href="route('dashboard')" icon="grid" label="Dashboard" :active="isRoute('dashboard')" />
       <NavItem :href="route('recap.dashboardrecap')" icon="zap" label="Recap Studio" :active="isRoute('recap.*')" />
+      <NavItem :href="route('jobs.history')" icon="clock" label="Job History" :active="isRoute('jobs.history')" />
       <NavItem :href="route('blogs.dashboardshow')" icon="tiktok" label="TikTok Post" :active="isRoute('tiktok.*')" />
       <NavItem :href="route('profile.edit')" icon="user" label="Profile" :active="isRoute('profile.edit')" />
       <!-- <NavItem :href="route('messages.index')" icon="message" label="Message Box" :active="isRoute('messages.*')" /> -->

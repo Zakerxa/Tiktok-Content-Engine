@@ -21,7 +21,7 @@
         <div
           v-for="plan in plans"
           :key="plan.name"
-          class="group relative flex flex-col rounded-3xl border p-7 transition-all duration-300 hover:-translate-y-1.5 sm:p-8"
+          class="group relative flex flex-col rounded-3xl border p-7 transition-all duration-300 sm:p-8"
           :class="[cardShellClass(plan), liftClass(plan)]"
         >
           <!-- Popular ribbon -->
@@ -40,28 +40,38 @@
 
           <!-- Header -->
           <div class="relative">
-            <span class="block text-[28px] leading-none">{{ plan.icon }}</span>
-            <h3 class="mt-3 text-xl font-extrabold text-slate-50">{{ plan.name }}</h3>
+            <span class="block text-[28px] leading-none">{{ plan.icon }}</span> 
+            <h3 class="mt-3 text-xl font-extrabold text-slate-50 capitalize">{{ (plan.name == 'normal') ? 'Standard' : plan.name }}
+            </h3>
 
             <div class="mt-3 flex items-baseline gap-1.5">
               <span v-if="plan.price === 0" class="text-[32px] font-black tracking-tight text-cyan-400">Free</span>
               <template v-else>
-                <span class="text-[32px] font-black tracking-tight text-slate-50">{{ plan.price.toLocaleString() }}</span>
-                <span class="text-[13px] font-medium text-slate-500">MMK<small class="text-[11px]">/day</small></span>
+                <span class="text-[15px] line-through tracking-tight font-medium text-slate-300">{{ plan.price.toLocaleString() }}MMK/day</span>
               </template>
             </div>
+            <!-- Best-deal discount strip -->
+            <div v-if="plan.price > 0" class="mt-2  flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span class="text-[20px] font-extrabold text-emerald-400">{{ discountedPerDay(plan).toLocaleString() }} MMK/day</span>
+              <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300">
+                 {{ bestDeal.label }} · {{ bestDeal.discountPercent }}% Off
+              </span>
+              <span v-if="plan.priorityLabel" class=" inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold" :class="plan.vip ? 'bg-amber-500/15 text-amber-300' : 'bg-violet-500/15 text-violet-300'">
+                {{ plan.priorityLabel }}
+              </span>              
+            </div>
+
+            <!-- CTA -->
+            <a :href="plan.href" class="relative mt-5 mb-5 block rounded-xl py-3.5 text-center text-sm font-bold transition-all duration-200 active:scale-[0.98]" :class="ctaClass(plan)">
+              {{ plan.cta }}
+            </a>
+
             <p class="mt-1.5 text-[15px] text-slate-500">{{ plan.tagline }}</p>
-            <span
-              v-if="plan.priorityLabel"
-              class="mt-3 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
-              :class="plan.vip ? 'bg-amber-500/15 text-amber-300' : 'bg-violet-500/15 text-violet-300'"
-            >
-              {{ plan.priorityLabel }}
-            </span>
+
           </div>
 
           <!-- Divider -->
-          <div class="my-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+          <div class="my-5 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
           <!-- Features -->
           <ul class="flex flex-1 flex-col gap-2.5">
@@ -86,10 +96,7 @@
             </li>
           </ul>
 
-          <!-- CTA -->
-          <a :href="plan.href" class="relative mt-8 block rounded-xl py-3.5 text-center text-sm font-bold transition-all duration-200 active:scale-[0.98]" :class="ctaClass(plan)">
-            {{ plan.cta }}
-          </a>
+          
         </div>
       </div>
     </div>
@@ -97,98 +104,87 @@
 </template>
 
 <script setup>
-const plans = [
-  {
-    name: 'Tester',
+import { ref, onMounted } from 'vue'
+
+// Design/visual data — code ထဲမှာပဲ ထိန်းချုပ်မယ် (role name ကို key အနေနဲ့သုံးမယ်)
+const visualConfig = {
+  tester: {
     icon: '🔥',
-    price: 0,
-    tagline: 'Try before you commit',
-    priorityLabel: null,
     featured: false,
+    vip: false,
+    priorityLabel: null,
     glowColor: 'radial-gradient(circle, rgba(148,163,184,0.18) 0%, transparent 70%)',
     href: '/dashboard',
     cta: 'Start Free',
-    features: [
-      { label: '1 free generation/day', included: true, tooltip: 'Upgrade for more generation' },
-      { label: 'Auto Subtitles (+1 )', included: true },
-      { label: 'AI Voice Over (+2 )', included: true, tooltip: 'Upgrade for more AI Voice' },
-      { label: 'Custom Blur & Mosaic', included: true },
-      { label: '1 min Video Max', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Copyright Protection (40%)', included: true, type: 'warning', tooltip: 'Upgrade for longer durations' },
-      { label: 'Low quality export', included: true, type: 'warning' },
-      { label: 'Low processing', included: true, type: 'warning' },
-      { label: 'Custom Watermark', included: false },
-    ],
   },
-  {
-    name: 'Pro',
-    icon: '👑',
-    price: 1750,
-    tagline: 'Priority rendering, built to scale',
-    priorityLabel: '⚡ Priority Queue',
-    featured: true,
-    glowColor: 'radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)',
-    href: '/dashboard',
-    cta: 'Go Pro',
-    features: [
-      { label: '3 generations/day', included: true, tooltip: 'Upgrade for more generation' },
-      { label: 'Auto Subtitles (+8 )', included: true },
-      { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
-      { label: 'Custom Blur & Mosaic', included: true },
-      { label: '2 min 30s Video Max', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'High quality export', included: true },
-      { label: 'Standard processing', included: true },
-      { label: 'Custom Watermark', included: true },
-    ],
-  },
-    {
-    name: 'Standard',
+  normal: {
     icon: '⚡',
-    price: 1000,
-    tagline: 'Reliable, steady daily output',
-    priorityLabel: null,
     featured: false,
-    vip:true,
+    vip: true,
+    priorityLabel: null,
     glowColor: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
     href: '/dashboard',
     cta: 'Get Standard',
-    features: [
-      { label: '3 generations/day', included: true, tooltip: 'Upgrade for more generation' },
-      { label: 'Auto Subtitles (+8 )', included: true },
-      { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
-      { label: 'Custom Blur & Mosaic', included: true },
-      { label: '1 min 30s Video Max', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
-      { label: 'Standard quality export', included: true },
-      { label: 'Standard processing', included: true },
-      { label: 'Custom Watermark', included: false },
-    ],
   },
-  // {
-  //   name: 'VIP',
-  //   icon: '👑',
-  //   price: 5000,
-  //   tagline: 'Top priority, unlimited power',
-  //   priorityLabel: '👑 Top Priority',
-  //   featured: false,
-  //   vip: true,
-  //   glowColor: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, transparent 70%)',
-  //   href: '/auth/google',
-  //   cta: 'Become VIP',
-  //   features: [
-  //     { label: '5 generations/day', included: true },
-  //     { label: 'Auto Subtitles (+8 )', included: true },
-  //     { label: 'AI Voice Over (+16 )', included: true, tooltip: 'Upgrade for more AI Voice' },
-  //     { label: 'Custom Blur & Mosaic', included: true },
-  //     { label: '2 min Video length max', included: true },
-  //     { label: 'Copyright Protection (70%)', included: true, tooltip: 'Upgrade for longer durations' },
-  //     { label: 'HD quality export', included: true },
-  //     { label: 'Standard processing', included: true },
-  //     { label: 'Custom Watermark Position', included: true },
-  //   ],
-  // },
-];
+  pro: {
+    icon: '👑',
+    featured: true,
+    vip: false,
+    priorityLabel: '⚡ Priority Queue',
+    glowColor: 'radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)',
+    href: '/dashboard',
+    cta: 'Go Pro',
+  },
+}
+const plans = ref([])
+const loading = ref(true)
+const error = ref(null)
+
+// Best-deal duration shown on every card (matches plan_durations table: 30day / 40% off)
+// TODO: once /api/pricing-plans returns plan_durations data, replace this
+// static config with the actual duration row (label, days, discount_percent)
+// from the backend so it stays in sync with the admin-editable table.
+const bestDeal = {
+  label: '30-Day Plan',
+  days: 30,
+  discountPercent: 40,
+}
+
+function regularTotal(plan) {
+  if (!plan.price) return 0
+  return Math.round(plan.price * bestDeal.days)
+}
+
+function discountedTotal(plan) {
+  if (!plan.price) return 0
+  return Math.round(regularTotal(plan) * (1 - bestDeal.discountPercent / 100))
+}
+
+
+
+function discountedPerDay(plan) {
+  if (!plan.price) return 0
+  return Math.round(discountedTotal(plan) / bestDeal.days)
+}
+
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/pricing-plans')
+    if (!res.ok) throw new Error('Failed to load pricing plans')
+    const data = await res.json()
+
+    // Backend limit/price data + frontend visual config ကို merge လုပ်တာ
+    plans.value = data.map(plan => ({
+      ...plan,
+      ...(visualConfig[plan.name] ?? {}),
+    }))
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+})
 
 function cardShellClass(plan) {
   if (plan.featured) {
@@ -200,13 +196,11 @@ function cardShellClass(plan) {
   return 'border-white/10 bg-white/[0.025] hover:border-white/20';
 }
 
-// Podium-style elevation: Pro sits highest (top priority), VIP just under it,
-// Normal and Tester step down further — only applied from xl: up so mobile/tablet stay flush.
 function liftClass(plan) {
   if (plan.featured) return 'xl:-translate-y-5 xl:scale-[1.04]';
   if (plan.vip) return 'xl:-translate-y-2';
   if (plan.name === 'Standard') return 'xl:translate-y-1';
-  return 'xl:translate-y-3'; // Tester
+  return 'xl:translate-y-3';
 }
 
 function featIconClass(feat) {

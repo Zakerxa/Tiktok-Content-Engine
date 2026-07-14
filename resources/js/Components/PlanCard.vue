@@ -30,10 +30,19 @@
       <div class="mt-3 flex items-baseline gap-1.5">
         <span v-if="plan.price === 0" class="text-[32px] font-black tracking-tight text-cyan-400">Free</span>
         <template v-else>
-          <span class="text-[32px] font-black tracking-tight text-slate-50">{{ plan.price.toLocaleString() }}</span>
-          <span class="text-[13px] font-medium text-slate-500">MMK<small class="text-[11px]">/day</small></span>
+          <span class="text-[15px] line-through tracking-tight font-medium text-slate-500">{{ plan.price.toLocaleString() }} MMK/day</span>
         </template>
       </div>
+
+      <!-- Discount label (best-deal duration, e.g. 30-Day Plan · 40% Off) -->
+      <div v-if="plan.price > 0 && bestDeal" class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span class="text-[24px] font-black tracking-tight text-slate-50">{{ discountedPerDay.toLocaleString() }}</span>
+        <span class="text-[13px] font-medium text-slate-500">MMK<small class="text-[11px]">/day</small></span>
+        <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-300">
+          {{ bestDeal.label }} · {{ bestDeal.discountPercent }}% Off
+        </span>
+      </div>
+
       <p class="mt-1.5 text-[15px] text-slate-500">{{ plan.tagline }}</p>
     </div>
 
@@ -80,6 +89,8 @@ import { computed } from 'vue';
 const props = defineProps({
   plan: { type: Object, required: true },
   isCurrent: { type: Boolean, default: false },
+  bestDeal: { type: Object, default: null },
+  discountedPerDay: { type: Number, default: 0 },
 });
 
 defineEmits(['upgrade']);

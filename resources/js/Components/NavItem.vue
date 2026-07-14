@@ -39,6 +39,10 @@ const ICONS = {
     h('rect', { x:3, y:14, width:7, height:7 }),
     h('rect', { x:14, y:14, width:7, height:7 }),
   ]),
+  clock: () => h('svg', { width:16, height:16, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', 'stroke-width':'2', 'stroke-linecap':'round', 'stroke-linejoin':'round' }, [
+  h('circle', { cx:12, cy:12, r:9 }),
+  h('path', { d:'M12 7v5l3 2' }),
+]),
   user: () => h('svg', { width:16, height:16, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', 'stroke-width':'2', 'stroke-linecap':'round', 'stroke-linejoin':'round' }, [
     h('path', { d:'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2' }),
     h('circle', { cx:12, cy:7, r:4 }),

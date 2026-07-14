@@ -112,12 +112,12 @@
       <h2 class="text-[clamp(26px,4vw,38px)] font-extrabold text-[#F1F5F9] tracking-[-0.5px] mb-3">Ready to put your channel on autopilot?</h2>
       <p class="text-[#94A3B8] mb-8">Start with a free generation — no card required.</p>
       <div class="flex gap-4 justify-center flex-wrap">
-        <a href="/recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
+        <Link href="/movie-recap" class="inline-flex items-center gap-2.5 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] text-white no-underline text-base font-bold px-8 py-4 rounded-[14px] shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(124,58,237,0.6)]">
           Start Movie Recap
-        </a>
-        <a href="/blogs" class="inline-flex items-center gap-2.5 bg-[rgba(255,255,255,0.06)] text-[#F1F5F9] no-underline text-base font-semibold px-8 py-4 rounded-[14px] border border-[rgba(255,255,255,0.12)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]">
+        </Link>
+        <Link href="/blogs" class="inline-flex items-center gap-2.5 bg-[rgba(255,255,255,0.06)] text-[#F1F5F9] no-underline text-base font-semibold px-8 py-4 rounded-[14px] border border-[rgba(255,255,255,0.12)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.1)] hover:border-[rgba(255,255,255,0.25)]">
           Free TikTok Content
-        </a>
+        </Link>
       </div>
     </section>
 
@@ -128,7 +128,7 @@
 <script setup>
 import AppNavbar from '@/Components/AppNavbar.vue';
 import AppFooter from '@/Components/AppFooter.vue';
-
+import { Link } from '@inertiajs/vue3';
 defineProps({
   auth: Object,
 });

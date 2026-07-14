@@ -42,7 +42,7 @@
               :disabled="r.name === 'admin'"
             />
           </div>
-
+          
           <div class="role-field">
             <label class="role-label">Max Video Seconds <span class="role-hint">(0 = unlimited)</span></label>
             <input
@@ -51,7 +51,93 @@
               :disabled="r.name === 'admin'"
             />
           </div>
+          
+          <!-- ═══ Pricing fields အသစ် ═══ -->
+          <div class="role-field">
+            <label class="role-label">Price <span class="role-hint">(MMK/day)</span></label>
+            <input
+              type="number" min="0" class="filter-input"
+              v-model.number="r.price"
+              :disabled="r.name === 'admin'"
+            />
+          </div>
+          
+          <div class="role-field">
+            <label class="role-label">Tagline</label>
+            <input
+              type="text" class="filter-input"
+              v-model="r.tagline"
+              :disabled="r.name === 'admin'"
+              placeholder="e.g. Priority rendering, built to scale"
+            />
+          </div>
+          
+          <div class="role-field-row">
+            <div class="role-field">
+              <label class="role-label">Subtitle Limit</label>
+              <input
+                type="number" min="0" class="filter-input"
+                v-model.number="r.subtitle_limit"
+                :disabled="r.name === 'admin'"
+              />
+            </div>
+            <div class="role-field">
+              <label class="role-label">Voiceover Limit</label>
+              <input
+                type="number" min="0" class="filter-input"
+                v-model.number="r.voiceover_limit"
+                :disabled="r.name === 'admin'"
+              />
+            </div>
+          </div>
+          
+          <div class="role-field">
+            <label class="role-label">Copyright Protection <span class="role-hint">(%)</span></label>
+            <input
+              type="number" min="0" max="100" class="filter-input"
+              v-model.number="r.copyright_protection"
+              :disabled="r.name === 'admin'"
+            />
+          </div>
 
+          <div class="role-field-row">
+            <div class="role-field">
+              <label class="role-label">Sort Order</label>
+              <input
+                type="number" min="0" class="filter-input"
+                v-model.number="r.sort_order"
+                :disabled="r.name === 'admin'"
+              />
+            </div>
+            <div class="role-field role-field-toggle">
+              <label class="role-label">Show in Pricing</label>
+              <label class="toggle-row">
+                <input type="checkbox" v-model="r.show_in_pricing" :disabled="r.name === 'admin'" />
+                <span>{{ r.show_in_pricing ? 'Visible' : 'Hidden' }}</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="role-field-row">
+            <div class="role-field">
+              <label class="role-label">Video Quality</label>
+              <select class="filter-input" v-model="r.video_quality" :disabled="r.name === 'admin'">
+                <option value="low">Low</option>
+                <option value="standard">Standard</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div class="role-field">
+              <label class="role-label">Processing Speed</label>
+              <select class="filter-input" v-model="r.processing_speed" :disabled="r.name === 'admin'">
+                <option value="low">Low</option>
+                <option value="standard">Standard</option>
+                <option value="priority">Priority</option>
+              </select>
+            </div>
+          </div>
+          <!-- ═══ Pricing fields အဆုံး ═══ -->
+          
           <div class="role-toggles">
             <label class="toggle-row">
               <input type="checkbox" v-model="r.can_watermark" :disabled="r.name === 'admin'" />
@@ -66,7 +152,7 @@
               <span>Voiceover</span>
             </label>
           </div>
-
+          
           <button
             v-if="r.name !== 'admin'"
             class="btn-primary btn-block"
@@ -98,7 +184,6 @@ const page = usePage();
 const flashMessage = computed(() => page.props.flash?.success || page.props.flash?.error || '');
 const flashType = computed(() => page.props.flash?.error ? 'flash-error' : 'flash-success');
 
-// Local editable copy so unsaved edits don't get lost on flash re-render
 const localRoles = ref(props.roles.map((r) => ({
   name: r.name,
   daily_limit: r.daily_limit,
@@ -106,7 +191,17 @@ const localRoles = ref(props.roles.map((r) => ({
   can_watermark: !!r.can_watermark,
   can_subtitle: !!r.can_subtitle,
   can_voiceover: !!r.can_voiceover,
+  price: r.price,
+  tagline: r.tagline,
+  subtitle_limit: r.subtitle_limit,
+  voiceover_limit: r.voiceover_limit,
+  copyright_protection: r.copyright_protection,
+  video_quality: r.video_quality,
+  processing_speed: r.processing_speed,
+  sort_order: r.sort_order,
+  show_in_pricing: !!r.show_in_pricing,
 })));
+
 
 const ROLE_CLASS = {
   tester: 'role-tester', normal: 'role-normal', pro: 'role-pro', vip: 'role-vip', admin: 'role-admin',
@@ -123,6 +218,15 @@ const saveRole = (r) => {
     can_watermark: r.can_watermark,
     can_subtitle: r.can_subtitle,
     can_voiceover: r.can_voiceover,
+    price: r.price,
+    tagline: r.tagline,
+    subtitle_limit: r.subtitle_limit,
+    voiceover_limit: r.voiceover_limit,
+    copyright_protection: r.copyright_protection,
+    video_quality: r.video_quality,
+    processing_speed: r.processing_speed,
+    sort_order: r.sort_order,
+    show_in_pricing: r.show_in_pricing,
   }, {
     preserveScroll: true,
     onFinish: () => { savingRole.value = null; },
@@ -131,6 +235,25 @@ const saveRole = (r) => {
 </script>
 
 <style scoped>
+
+
+
+.role-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+select.filter-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748B' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 32px;
+}
+select.filter-input:disabled { cursor: not-allowed; }
+
 .dash-root {
   background: #080B14;
   color: #F1F5F9;

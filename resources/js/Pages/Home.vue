@@ -70,53 +70,52 @@
     </section>
 
     <!-- ═══════════════ PRODUCTS ═══════════════ -->
-    <section class="py-[120px] bg-gradient-to-b from-[#080B14] via-[#0D1120] to-[#080B14]">
-      <div class="max-w-[1200px] mx-auto px-6 lg:max-w-[1080px]">
-        <div class="text-center text-xs font-bold uppercase tracking-[2px] text-[#7C3AED] mb-3">Two Powerful Tools</div>
-        <h2 class="text-center text-[clamp(28px,4vw,44px)] font-extrabold text-[#F1F5F9] tracking-[-1px] mb-4">Everything Your Channel Needs</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-[6em] mt-16">
-          <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
-            <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(124,58,237,0.4)]"></div>
-            <div class="w-20 h-20 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[40px] mb-5">🎬</div>
-            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">Movie Recap Studio</h3>
-            <p class="text-[17px] text-[#64748B] leading-[1.7] mb-7">
-              Turn any movie into a viral TikTok recap in seconds. Our AI handles copyright protection automatically so you can focus on growing your audience.
-            </p>
-            <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
-              <li v-for="feat in recapFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
-                <span
-                  class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                  :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
-                >{{ feat.available ? '✓' : '○' }}</span>
-                <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
-                <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)]">{{ feat.badge }}</span>
-              </li>
-            </ul>
-            <a href="/dashboard/recap" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white">Launch Recap Studio →</a>
-          </div>
-
-          <div class="relative bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-3xl p-10 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
-            <div class="absolute -top-[60px] -right-[60px] w-[200px] h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(6,182,212,0.35)]"></div>
-            <div class="w-20 h-20 bg-[rgba(255,255,255,0.06)] rounded-2xl flex items-center justify-center text-[40px] mb-5">✍️</div>
-            <h3 class="text-2xl font-extrabold text-[#F1F5F9] mb-3 tracking-[-0.5px]">TikTok Post Generator</h3>
-            <p class="text-[17px] text-[#64748B] leading-[1.7] mb-7">
-              Generate scroll-stopping TikTok content with matching image prompts. Add your own API key for fully custom content tailored to your niche.
-            </p>
-            <ul class="list-none p-0 m-0 mb-8 flex flex-col gap-2.5">
-              <li v-for="feat in blogFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
-                <span
-                  class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                  :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
-                >{{ feat.available ? '✓' : '○' }}</span>
-                <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
-                <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)]">{{ feat.badge }}</span>
-              </li>
-            </ul>
-            <a href="/blogs" class="inline-block no-underline text-[15px] font-bold py-3.5 px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#0891B2] to-[#06B6D4] text-white">Explore Free Blogs →</a>
-          </div>
-        </div>
-      </div>
+     <section class="py-16 sm:py-20 lg:py-[120px] bg-gradient-to-b from-[#080B14] via-[#0D1120] to-[#080B14]">
+           <div class="max-w-[1000px] mx-auto px-5 sm:px-6">
+             <div class="text-center text-xs font-bold uppercase tracking-[2px] text-[#7C3AED] mb-3">Two Powerful Tools</div>
+             <h2 class="text-center text-[clamp(24px,4vw,44px)] font-extrabold text-[#F1F5F9] tracking-[-1px] mb-4">Everything Your Channel Needs</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mt-10 sm:mt-14 lg:mt-16">
+               <div class="relative w-full max-w-[400px] mx-auto md:max-w-none bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-2xl sm:rounded-3xl p-6 sm:p-7 lg:p-8 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
+                 <div class="absolute -top-10 -right-10 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] lg:w-[200px] lg:h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(124,58,237,0.4)]"></div>
+                 <div class="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-[rgba(255,255,255,0.06)] rounded-xl sm:rounded-2xl flex items-center justify-center text-[28px] sm:text-[32px] lg:text-[40px] mb-4 sm:mb-5">🎬</div>
+                 <h3 class="text-xl sm:text-2xl font-extrabold text-[#F1F5F9] mb-2.5 sm:mb-3 tracking-[-0.5px]">Movie Recap Studio</h3>
+                 <p class="text-sm sm:text-base lg:text-[17px] text-[#64748B] leading-[1.6] lg:leading-[1.7] mb-5 sm:mb-6 lg:mb-7">
+                   Turn any movie into a viral TikTok recap in seconds. Our AI handles copyright protection automatically so you can focus on growing your audience.
+                 </p>
+                 <ul class="list-none p-0 m-0 mb-6 sm:mb-7 lg:mb-8 flex flex-col gap-2 sm:gap-2.5">
+                   <li v-for="feat in recapFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
+                     <span
+                       class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                       :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
+                     >{{ feat.available ? '✓' : '○' }}</span>
+                     <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
+                     <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)] whitespace-nowrap">{{ feat.badge }}</span>
+                   </li>
+                 </ul>
+                 <a href="/dashboard/recap" class="inline-block no-underline text-sm sm:text-[15px] font-bold py-3 px-5 sm:py-3.5 sm:px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white">Launch Recap Studio →</a>
+               </div>
+     
+               <div class="relative w-full max-w-[400px] mx-auto md:max-w-none bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-2xl sm:rounded-3xl p-6 sm:p-7 lg:p-8 overflow-hidden transition-all duration-300 hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-1">
+                 <div class="absolute -top-10 -right-10 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] lg:w-[200px] lg:h-[200px] rounded-full blur-[50px] pointer-events-none bg-[rgba(6,182,212,0.35)]"></div>
+                 <div class="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-[rgba(255,255,255,0.06)] rounded-xl sm:rounded-2xl flex items-center justify-center text-[28px] sm:text-[32px] lg:text-[40px] mb-4 sm:mb-5">✍️</div>
+                 <h3 class="text-xl sm:text-2xl font-extrabold text-[#F1F5F9] mb-2.5 sm:mb-3 tracking-[-0.5px]">TikTok Post Generator</h3>
+                 <p class="text-sm sm:text-base lg:text-[17px] text-[#64748B] leading-[1.6] lg:leading-[1.7] mb-5 sm:mb-6 lg:mb-7">
+                   Generate scroll-stopping TikTok content with matching image prompts. Add your own API key for fully custom content tailored to your niche.
+                 </p>
+                 <ul class="list-none p-0 m-0 mb-6 sm:mb-7 lg:mb-8 flex flex-col gap-2 sm:gap-2.5">
+                   <li v-for="feat in blogFeatures" :key="feat.label" class="flex items-center gap-2.5 text-sm">
+                     <span
+                       class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                       :class="feat.available ? 'bg-[rgba(6,182,212,0.15)] text-[#06B6D4]' : 'bg-[rgba(255,255,255,0.05)] text-[#475569]'"
+                     >{{ feat.available ? '✓' : '○' }}</span>
+                     <span class="text-[#CBD5E1] flex-1">{{ feat.label }}</span>
+                     <span v-if="feat.badge" class="text-[10px] font-bold bg-[rgba(245,158,11,0.15)] text-[#F59E0B] px-2 py-0.5 rounded-full border border-[rgba(245,158,11,0.3)] whitespace-nowrap">{{ feat.badge }}</span>
+                   </li>
+                 </ul>
+                 <a href="/blogs" class="inline-block no-underline text-sm sm:text-[15px] font-bold py-3 px-5 sm:py-3.5 sm:px-7 rounded-xl transition-all duration-200 hover:opacity-85 hover:-translate-y-px bg-gradient-to-br from-[#0891B2] to-[#06B6D4] text-white">Explore Free Blogs →</a>
+               </div>
+             </div>
+           </div>
     </section>
 
     <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
