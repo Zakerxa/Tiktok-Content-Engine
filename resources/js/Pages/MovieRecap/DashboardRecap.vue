@@ -14,6 +14,7 @@
           'bg-[#0D1120] border-red-500/25': alertType === 'error',
           'bg-[#0D1120] border-amber-500/25': alertType === 'warning',
           'bg-[#0D1120] border-[#7C3AED]/25': alertType === 'info',
+          'bg-[#0D1120] border-[#7C3AED]/25': alertType === 'queue',
         }">
           <!-- Icon -->
           <div class="flex justify-center mb-4">
@@ -27,6 +28,13 @@
             <div v-else-if="alertType === 'warning'"
               class="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
               <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <div v-else-if="alertType === 'queue'"
+              class="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
@@ -546,7 +554,7 @@ export default {
   },
   watch: {
     isWaitingInQueue(nowWaiting) {
-      if (nowWaiting && !this.queueNoticeShown && this.role_name !== 'tester') {
+      if (nowWaiting && !this.queueNoticeShown && this.auth.user.role_name !== 'tester') {
         this.queueNoticeShown = true;
         this.showAlert('queue','ဤ Video ကို Queue ထဲ ထားရှိပြီးပါပြီ။ ဤစာမျက်နှာကို ပိတ်ထား/ထွက်သွားနိုင်ပါသည် — ၁၀ မိနစ်ခန့်အကြာတွင် Job History စာမျက်နှာမှ ပြန်ဝင်ပြီး Video ကို Download ဆွဲနိုင်ပါသည်။');
       }
