@@ -74,10 +74,17 @@ class JobController extends Controller
      */
     public function download($jobId)
     {
+        if (!Auth::check()) {
+            abort(401, 'Login required');
+        }
+
         $job = DB::table('recap_jobs')->where('id', $jobId)->first();
 
         if (!$job) abort(404, 'Job not found');
-        if ($job->user_id !== Auth::id()) abort(403);
+
+        if ((int) $job->user_id !== (int) Auth::id()) {
+            abort(403, 'Not your job');
+        }
         if ($job->status !== 'success') abort(404, 'Job not ready');
         if ($job->expires_at && now()->greaterThan($job->expires_at)) abort(410, 'Download link expired');
 

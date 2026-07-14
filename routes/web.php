@@ -38,9 +38,9 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/dashboard/recap', [DashboardController::class, 'dashboardRecap'])->name('recap.dashboardrecap');
     Route::get('/plan', fn () => Inertia::render('Plan'))->name('plan');
     Route::get('/jobs/history', [JobController::class, 'history'])->name('jobs.history');
-    Route::get('/jobs/{jobId}/download', [JobController::class, 'download'])->name('jobs.download');
 });
 
+Route::middleware(['auth', 'throttle:downloads']) ->get('/jobs/{jobId}/download', [JobController::class, 'download'])->name('jobs.download');
 
 
 // ─── Google OAuth ───
