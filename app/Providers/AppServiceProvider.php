@@ -35,11 +35,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('downloads', function (Request $request) {
+            $userId = $request->user()?->id ?: $request->ip();
+            $jobId  = $request->route('jobId');
+
             return Limit::perDay(2)
-                ->by($request->user()?->id ?: $request->ip())
+                ->by("{$userId}:{$jobId}")
                 ->response(function () {
                     return response()->json([
-                        'message' => 'ဒီနေ့အတွက် Download limit (2 ကြိမ်) ပြည့်သွားပါပြီ။ မနက်ဖြန် ထပ်ကြိုးစားပါ။'
+                        'message' => 'ဒီ Video ကို ဒီနေ့အတွက် Download limit (2 ကြိမ်) ပြည့်သွားပါပြီ။'
                     ], 429);
                 });
         });

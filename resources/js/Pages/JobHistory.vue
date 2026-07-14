@@ -302,7 +302,7 @@ function friendlyDownloadError(status) {
     case 410:
       return { msg: 'Download link သက်တမ်း ကုန်သွားပါပြီ။', type: 'warning' };
     case 429:
-      return { msg: 'ဒီနေ့အတွက် Download limit ပြည့်သွားပါပြီ။ မနက်ဖြန် ထပ်ကြိုးစားပါ။', type: 'warning' };
+      return { msg: 'ဒီ Video ကို ဒီနေ့အတွက် Download limit ပြည့်သွားပါပြီ။ မနက်ဖြန် ထပ်ကြိုးစားပါ။', type: 'warning' };
     case 502:
     case 503:
     case 504:
