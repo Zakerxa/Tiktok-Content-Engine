@@ -3,7 +3,7 @@
 
   <AppSidebar :auth="$page.props.auth">
 
-  <div class="dash-root">
+  <div class="dash-root mt-5 pt-5">
     <!-- Ambient brand orbs (same as Dashboard) -->
     <div class="orb orb-violet"></div>
     <div class="orb orb-cyan"></div>

@@ -1278,27 +1278,15 @@ export default {
         const secs = Math.floor(duration % 60);
         console.log(`Video Duration: ${duration} seconds`, secs, mins);
         if (this.auth.user.role_name == 'tester') {
-          if (watermark) {
-            this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
-          }
-          if (secs > 60) {
-            this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
-          }
+          if (watermark) return this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။');
+          if (secs > 60) return this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`);
         }
-
         if (this.auth.user.role_name == 'normal') {
-          if (watermark) {
-            this.showAlert('warning', 'WaterMark အသုံးပြုရန် Pro Plan ကိုအဆင့်မြင်‌တင်ပါ။'); return;
-          }
-          if (secs > 90) {
-            this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Pro Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
-          }
+          if (watermark) return this.showAlert('warning', 'WaterMark အသုံးပြုရန် Pro Plan ကိုအဆင့်မြင်‌တင်ပါ။');
+          if (secs > 90) return this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Pro Plan ကိုအဆင့်မြင့်တင်ပါ။`);
         }
-
         if (this.auth.user.role_name == 'pro') {
-          if (secs > 120) {
-            this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
-          }
+          if (secs > 150) return this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`);
         }
 
       }
