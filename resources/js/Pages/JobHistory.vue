@@ -65,8 +65,8 @@
                 <th class="th-right">Download</th>
               </tr>
             </thead>
-            <tbody v-if="jobs.data && jobs.data.length">
-              <tr v-for="job in jobs.data" :key="job.id">
+            <tbody v-if="localJobs && localJobs.length">
+              <tr v-for="job in localJobs" :key="job.id">
                 <td>
                   <span class="status-pill" :class="statusPillClass(job.status)">
                     <span class="status-dot"></span>
@@ -77,7 +77,20 @@
 
                 <td class="td-date">{{ job.started_at || formatDate(job.created_at) }}</td>
 
-                <td class="td-date">{{ job.duration || (job.status !== 'success' && job.status !== 'failed' ? 'Running…' : '—') }}</td>
+                <td class="td-date">
+                  <div v-if="isProcessing(job)" class="w-full max-w-[170px]">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                      <span class="text-[11px] font-semibold text-cyan-300 truncate">{{ currentStepLabel(job) }}</span>
+                      <span class="text-[11px] font-bold text-cyan-300 shrink-0">{{ currentStepPercent(job) }}%</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                      <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 transition-all duration-500 ease-out"
+                           :style="{ width: currentStepPercent(job) + '%' }"></div>
+                    </div>
+                    <div class="mt-1 text-[10px] text-slate-500">Step {{ currentStep(job) }}/5</div>
+                  </div>
+                  <span v-else>{{ job.duration || '—' }}</span>
+                </td>
 
                 <td class="td-date">
                   <span v-if="job.expires_at" :class="job.is_expired ? 'expiry-expired' : 'expiry-active'">
@@ -96,12 +109,13 @@
                 <td colspan="5" class="empty-row">No job history yet.</td>
               </tr>
             </tbody>
+            <!-- localJobs replaces jobs.data so we can live-patch status/step as polling updates arrive -->
           </table>
         </div>
 
         <!-- Mobile cards -->
         <div class="posts-cards">
-          <div v-for="job in jobs.data" :key="job.id" class="post-card">
+          <div v-for="job in localJobs" :key="job.id" class="post-card">
             <div class="post-card-body w-full">
               <div class="post-card-meta" style="display:flex; justify-content:space-between; align-items:center;">
                 <span class="status-pill" :class="statusPillClass(job.status)">
@@ -111,8 +125,21 @@
                 <span class="td-date">{{ job.started_at || formatDate(job.created_at) }}</span>
               </div>
 
-              <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                <span class="progress-text">{{ job.duration || (job.status !== 'success' && job.status !== 'failed' ? 'Running…' : '—') }}</span>
+              <!-- Live progress (only rendered while this job is still processing) -->
+              <div v-if="isProcessing(job)" class="w-full mt-2">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="text-[11px] font-semibold text-cyan-300 truncate">{{ currentStepLabel(job) }}</span>
+                  <span class="text-[11px] font-bold text-cyan-300 shrink-0">{{ currentStepPercent(job) }}%</span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 transition-all duration-500 ease-out"
+                       :style="{ width: currentStepPercent(job) + '%' }"></div>
+                </div>
+                <div class="mt-1 text-[10px] text-slate-500">Step {{ currentStep(job) }}/5</div>
+              </div>
+
+              <div v-else style="display:flex; justify-content:space-between; margin-top:4px;">
+                <span class="progress-text">{{ job.duration || '—' }}</span>
                 <span class="td-date">
                   <span v-if="job.expires_at" :class="job.is_expired ? 'expiry-expired' : 'expiry-active'">
                     {{ timeLeftLabel(job.expires_at, job.is_expired) }}
@@ -127,7 +154,7 @@
               </div>
             </div>
           </div>
-          <p v-if="!jobs.data || jobs.data.length === 0" class="empty-row empty-row-mobile">No job history yet.</p>
+          <p v-if="!localJobs || localJobs.length === 0" class="empty-row empty-row-mobile">No job history yet.</p>
         </div>
 
         <div class="pagination-wrap">
@@ -137,6 +164,33 @@
 
     </main>
   </div>
+
+  <!-- ═══════════════ DOWNLOADING OVERLAY ═══════════════ -->
+  <!-- close button မထည့်ဘူး — beforeUnloadGuard နဲ့ တွဲအလုပ်လုပ်နေတာမို့
+       user ကို "ဆက်စောင့်ပါ" ဆိုတဲ့ hint ချည်း ပေးရုံ, dismiss မလုပ်နိုင်ဘူး -->
+  <transition name="alert-fade">
+    <div v-if="isAnyDownloading"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div class="w-full max-w-sm rounded-2xl shadow-2xl p-6 border bg-[#0D1120] border-[#7C3AED]/25">
+        <div class="flex justify-center mb-4">
+          <div class="w-16 h-16 rounded-full bg-[#7C3AED]/10 flex items-center justify-center">
+            <svg class="w-8 h-8 text-[#A78BFA] dl-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <circle cx="12" cy="12" r="9" stroke-opacity="0.25" />
+              <path d="M21 12a9 9 0 00-9-9" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">
+          Video ကို Download ဆွဲနေပါသည်
+        </h3>
+        <p class="text-center text-sm text-[#94A3B8] mb-2 leading-relaxed">
+          ဤစာမျက်နှာကို မပိတ်ပါနှင့် / Refresh မလုပ်ပါနှင့်။<br>
+          ပြီးသည်အထိ ခဏစောင့်ပေးပါ။
+        </p>
+        <p class="text-center text-xs text-[#64748B]">{{ activeDownloadElapsed || 0 }}s</p>
+      </div>
+    </div>
+  </transition>
 
   <!-- ═══════════════ ERROR / WARNING / INFO DIALOG ═══════════════ -->
   <transition name="alert-fade">
@@ -230,6 +284,110 @@ onMounted(() => {
 });
 onUnmounted(() => clearInterval(tickTimer));
 
+/* ─────────────────────────────────────────────────────────────
+   Live job-progress polling
+   - jobs.data ကို တိုက်ရိုက် mutate မလုပ်ဘဲ localJobs အနေနဲ့ copy ယူထားတယ်
+     (status/step update လာရင် ဒီ copy ကိုပဲ ပြင်မယ်, props ကို မထိဘူး)
+   - Route ပေါ်ရောက်လာချိန်မှာ status "success"/"failed" မဟုတ်တဲ့
+     (=processing) job အနည်းဆုံး တစ်ခုရှိမှ 10s interval ကို စတင်တယ်
+   - Processing job လုံးဝ မရှိတော့ရင် (initial load ကတည်းက ဒါမှမဟုတ် poll
+     လုပ်ရင်း success/failed ဖြစ်သွားလို့) interval ကို ချက်ချင်း ရပ်တယ်
+   - Component ကို ထွက်သွားရင် (leave route) onUnmounted မှာ ရပ်တယ်
+───────────────────────────────────────────────────────────────*/
+const localJobs = ref(props.jobs.data ? props.jobs.data.map(j => ({ ...j })) : []);
+
+// buildProgressBreakdown() က step 1..5 ပြန်ပေးလို့ label တွေကို အဲဒီအစီအစဉ်နဲ့ ချိတ်ထား
+const STEP_LABELS = [
+  'ဖိုင်ကို စတင်ပြင်ဆင်နေသည်',
+  'ဒေတာများ စုစည်းနေသည်',
+  'ဗီဒီယို ဖန်တီးနေသည်',
+  'အသံနှင့် ဗီဒီယို ပေါင်းစပ်နေသည်',
+  'နောက်ဆုံးအဆင့် စစ်ဆေးနေသည်',
+];
+
+function isProcessing(job) {
+  return job.status !== 'success' && job.status !== 'failed';
+}
+// job.step / job.progressBreakdown ကို localJobs item ပေါ်မှာ တိုက်ရိုက် ထားတာမို့
+// (jobProgress ဆိုတဲ့ သီးခြား map object ကနေ id နဲ့ ပြန်ရှာစရာ မလိုတော့ဘူး —
+// ဒီနည်းက Vue reactivity ကို ပိုတိကျစွာ trigger ဖြစ်စေတယ်)
+function currentStep(job) {
+  return job.step || 1;
+}
+function currentStepPercent(job) {
+  if (!job.progressBreakdown) return 0;
+  return job.progressBreakdown[String(job.step || 1)] ?? 0;
+}
+function currentStepLabel(job) {
+  const step = currentStep(job);
+  return STEP_LABELS[step - 1] || 'လုပ်ဆောင်နေသည်...';
+}
+
+let pollTimer = null;
+
+async function fetchJobStatus(job) {
+  try {
+    const res = await fetch(route('jobs.status', job.id), {
+      headers: { 'Accept': 'application/json' },
+      credentials: 'same-origin',
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const target = localJobs.value.find(j => String(j.id) === String(job.id));
+    if (!target) return;
+
+    target.step = data.step;
+    target.progressBreakdown = data.progress;
+
+    if (data.done) {
+      target.status = data.error ? 'failed' : 'success';
+      target.error = data.error;
+
+      // ✅ Download button ကို correctly update ဖြစ်ဖို့ ဒီ ၂ field လိုအပ်ပါတယ်
+      target.expires_at = data.expires_at;
+      target.is_expired = false; // အသစ် done ဖြစ်တာမို့ expired မဖြစ်သေးဘူး
+    }
+  } catch (err) {
+    console.warn('Job status poll failed:', job.id, err);
+  }
+}
+
+async function pollProcessingJobs() {
+  const processing = localJobs.value.filter(isProcessing);
+  if (processing.length === 0) {
+    stopPolling();
+    return;
+  }
+  await Promise.all(processing.map(fetchJobStatus));
+
+  // poll ပြီးတဲ့အခါ processing job လုံးဝ မကျန်တော့ရင် interval ကို ရပ်လိုက်
+  if (!localJobs.value.some(isProcessing)) {
+    stopPolling();
+  }
+}
+
+function startPolling() {
+  if (pollTimer) return; // အရင်ကတည်းက run နေရင် ထပ်မ start ဘူး
+  pollTimer = setInterval(pollProcessingJobs, 10000);
+}
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+onMounted(() => {
+  if (localJobs.value.some(isProcessing)) {
+    pollProcessingJobs();
+    startPolling();
+  }
+});
+onUnmounted(() => {
+  stopPolling();
+});
+
 function timeLeftLabel(expiresAt, isExpired) {
   if (!expiresAt) return '—';
   if (isExpired) return 'Expired';
@@ -275,7 +433,7 @@ function formatDate(value) {
 const showErrorOverlay = ref(false);
 const alertType = ref('error'); // 'error' | 'warning' | 'info'
 const errorPopupMsg = ref('');
-const telegramUrl = 'https://t.me/your_support_group'; // TODO: replace with your real group link
+const telegramUrl = 'https://t.me/+6hc4y3AceQJmNTQ1'; // TODO: replace with your real group link
 
 function showError(msg, type = 'error') {
   errorPopupMsg.value = msg;
@@ -317,9 +475,52 @@ function friendlyDownloadError(status) {
 ───────────────────────────────────────────────────────────────*/
 const downloadingIds = ref(new Set());
 
+// Per-job elapsed-seconds counter, so the button visibly ticks
+// 1, 2, 3, 4... instead of a static "ဆွဲနေသည်..." label that
+// looks frozen on slower downloads and tempts users to refresh.
+const downloadElapsed = ref({});
+const downloadTimers = {}; // plain object, not reactive — just interval handles
+
+function startDownloadTimer(jobId) {
+  downloadElapsed.value = { ...downloadElapsed.value, [jobId]: 0 };
+  downloadTimers[jobId] = setInterval(() => {
+    downloadElapsed.value = {
+      ...downloadElapsed.value,
+      [jobId]: (downloadElapsed.value[jobId] || 0) + 1,
+    };
+  }, 1300);
+}
+function stopDownloadTimer(jobId) {
+  clearInterval(downloadTimers[jobId]);
+  delete downloadTimers[jobId];
+  const next = { ...downloadElapsed.value };
+  delete next[jobId];
+  downloadElapsed.value = next;
+}
+
+// Warn before the user closes/refreshes the tab while a download is
+// still in flight — refreshing kills the fetch mid-way, but the
+// daily download quota was likely already consumed server-side for
+// that attempt, so an accidental refresh silently burns the user's
+// limit for nothing.
+function beforeUnloadGuard(e) {
+  e.preventDefault();
+  e.returnValue = '';
+  return '';
+}
+function updateUnloadGuard() {
+  if (downloadingIds.value.size > 0) {
+    window.addEventListener('beforeunload', beforeUnloadGuard);
+  } else {
+    window.removeEventListener('beforeunload', beforeUnloadGuard);
+  }
+}
+
 async function downloadJob(job) {
   if (downloadingIds.value.has(job.id)) return;
   downloadingIds.value.add(job.id);
+  startDownloadTimer(job.id);
+  updateUnloadGuard();
 
   try {
     const res = await fetch(route('jobs.download', job.id), {
@@ -357,8 +558,17 @@ async function downloadJob(job) {
     showError('Internet ချိတ်ဆက်မှု ပြဿနာ ဖြစ်နေပါသည်။ ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်ကြိုးစားပါ။', 'error');
   } finally {
     downloadingIds.value.delete(job.id);
+    stopDownloadTimer(job.id);
+    updateUnloadGuard();
   }
 }
+
+const activeDownloadElapsed = computed(() => {
+  const ids = Array.from(downloadingIds.value);
+  if (ids.length === 0) return null;
+  return downloadElapsed.value[ids[0]] || 0;
+});
+const isAnyDownloading = computed(() => downloadingIds.value.size > 0);
 
 /* ─────────────────────────────────────────────────────────────
    Inline DownloadButton
@@ -395,12 +605,17 @@ const DownloadButton = defineComponent({
       const isDownloading = downloadingIds.value.has(p.job.id);
 
       if (canDownload) {
+        const elapsed = downloadElapsed.value[p.job.id];
+
         return h('button', {
           type: 'button',
           disabled: isDownloading,
           class: ['dl-btn', 'dl-btn-active', p.fullWidth ? 'w-full justify-center' : ''],
           onClick: () => downloadJob(p.job),
-        }, [dlIcon(), ' ' + (isDownloading ? 'ဆွဲနေသည်...' : 'Download')]);
+        }, isDownloading
+          ? [spinnerIcon(), ` ဆွဲနေသည်... ${elapsed || 0}s`]
+          : [dlIcon(), ' Download']
+        );
       }
 
       // ── Download မရနိုင်တဲ့ path (canDownload=false) — ဘာလို့လဲ label ခွဲပြပါ ──
@@ -444,9 +659,28 @@ function dlIcon() {
     h('path', { d: 'M5 19h14', 'stroke-linecap': 'round' }),
   ]);
 }
+
+function spinnerIcon() {
+  return h('svg', {
+    width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none',
+    stroke: 'currentColor', 'stroke-width': 2.5,
+    class: 'dl-spin',
+  }, [
+    h('circle', { cx: 12, cy: 12, r: 9, 'stroke-opacity': 0.25 }),
+    h('path', { d: 'M21 12a9 9 0 00-9-9', 'stroke-linecap': 'round' }),
+  ]);
+}
 </script>
 
 <style scoped>
+
+.dl-spin {
+  animation: dl-spin-anim 1s linear infinite;
+}
+@keyframes dl-spin-anim {
+  to { transform: rotate(360deg); }
+}
+
 /* ─── Reuse Dashboard.vue tokens ─── */
 .card-eyebrow {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
@@ -509,6 +743,8 @@ function dlIcon() {
 }
 .dl-btn-active:hover { background: rgba(124,58,237,0.25); }
 .dl-btn-active:disabled { opacity: 0.6; cursor: wait; }
+.dl-spin { animation: dl-spin-rotate 0.8s linear infinite; }
+@keyframes dl-spin-rotate { to { transform: rotate(360deg); } }
 .dl-btn-disabled {
   background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #475569;
   cursor: not-allowed;

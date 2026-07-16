@@ -33,11 +33,12 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/jobs/status/{jobId}', [JobController::class, 'status']);
     Route::get('/server-status', [ServerStatusController::class, 'index']); 
     // ─── Dashboard ───
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['verified'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/posts', [TikTokPostController::class, 'dashboardIndex'])->name('blogs.dashboardshow');
     Route::get('/dashboard/recap', [DashboardController::class, 'dashboardRecap'])->name('recap.dashboardrecap');
     Route::get('/plan', fn () => Inertia::render('Plan'))->name('plan');
     Route::get('/jobs/history', [JobController::class, 'history'])->name('jobs.history');
+    Route::get('/jobs/{job}/status', [JobController::class, 'status'])->name('jobs.status');
 });
 
 Route::middleware(['auth', 'throttle:downloads']) ->get('/jobs/{jobId}/download', [JobController::class, 'download'])->name('jobs.download');

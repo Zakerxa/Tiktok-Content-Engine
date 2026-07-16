@@ -68,6 +68,32 @@
       </div>
     </transition>
 
+    <!-- Download progress overlay — user ရဲ့ page reload/leave ကို guard ထားပြီးဖြစ်လို့
+     ဒီ overlay ကို close လို့မရအောင် intentionally ချန်ထားတယ် -->
+    <transition name="alert-fade">
+      <div v-if="isDownloading"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+        <div class="w-full max-w-sm rounded-2xl shadow-2xl p-6 border bg-[#0D1120] border-[#7C3AED]/25">
+          <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 rounded-full bg-[#7C3AED]/10 flex items-center justify-center">
+              <svg class="w-8 h-8 text-[#A78BFA] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" stroke-opacity="0.25" stroke-width="2.5" />
+                <path d="M21 12a9 9 0 00-9-9" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-center text-lg font-bold text-[#F1F5F9] mb-2">
+            Video ကို Download ဆွဲနေပါသည်
+          </h3>
+          <p class="text-center text-sm text-[#94A3B8] mb-2 leading-relaxed">
+            ဤစာမျက်နှာကို မပိတ်ပါနှင့် / Refresh မလုပ်ပါနှင့်။<br>
+            ပြီးသည်အထိ ခဏစောင့်ပေးပါ။
+          </p>
+          <p class="text-center text-xs text-[#64748B]">{{ downloadElapsed }}s</p>
+        </div>
+      </div>
+    </transition>
+
     <!-- ══════════════ MAIN CARD ══════════════ -->
     <main class="flex-1 flex items-start justify-center px-3 py-6 mt-12 sm:px-4 sm:py-10">
       <div
@@ -550,9 +576,15 @@ export default {
       _blurIsDragging: false,
       _blurStartX: 0, _blurStartY: 0,
       _blurInitialX: 0, _blurInitialY: 0,
+
+      _pollActive: false,
+     _pollTimeoutId: null,
+
+     isDownloading: false,
+     downloadElapsed: 0,
+    _downloadTimer: null,
     };
   },
-
   watch: {
     isWaitingInQueue(nowWaiting) {
       if (nowWaiting && !this.queueNoticeShown && this.auth.user.role_name !== 'tester') {
@@ -577,7 +609,7 @@ export default {
           icon: '⚡',
           shortLabel: 'Standard',
           fullLabel: 'Standard Plan အသုံးပြုနေပါသည်',
-          hint: 'Video 1.5 min max ၊ watermark ပါဝင်သည်။ Pro Plan သို့ မြှင့်တင်ရန် Telegram မှ ဆက်သွယ်ပါ။',
+          hint: 'Video 1.5 min max ၊ watermark မပါ။ Pro Plan သို့ မြှင့်တင်ရန် Telegram မှ ဆက်သွယ်ပါ။',
           pillClass: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
           popoverClass: 'border-amber-500/25 bg-[#0D1120]',
         },
@@ -617,7 +649,7 @@ export default {
       const cur = this.stepCurrent;
       const prog = this.stepProgress;
       const STEP_LABELS = ['Processing Video . . .', 'Extracting Audio . . .', 'Translating Speech . . .', 'Generating Voice (TTS)', 'Producing Final Video ...'];
-      const isWaitingInQueue = cur === 1 && (!prog[1] || prog[1] === 0);
+      const isWaitingInQueue = this.isWaitingInQueue;
 
       return [1, 2, 3, 4, 5].map(i => {
         const pct = prog[i] || 0;
@@ -658,8 +690,25 @@ export default {
       });
     },
   },
-
   methods: {
+    beforeUnloadGuard(e) {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    },
+
+    startDownloadTimer() {
+      this.downloadElapsed = 0;
+      this._downloadTimer = setInterval(() => {
+        this.downloadElapsed += 1;
+      }, 1300);
+    },
+  
+    stopDownloadTimer() {
+      clearInterval(this._downloadTimer);
+      this._downloadTimer = null;
+      this.downloadElapsed = 0;
+    },
 
     handleOutsideClickForPlanTooltip(event) {
       if (!this.showPlanTooltip) return;
@@ -928,52 +977,60 @@ export default {
       if (this.$refs.watermarkLogo) this.$refs.watermarkLogo.src = '';
       if (this.$refs.voiceModel) this.$refs.voiceModel.value = 'my-MM-ThihaNeural';
       window._downloadTriggered = false;
+      this.queueNoticeShown = false;
       this.waterMarkToggle();
       this.removeSelectedVideo();
       this.resetSteps();
     },
 
-    async pollStatus(jobId,jobBaseUrl) {
+    async pollStatus(jobId, jobBaseUrl) {
+  
+      if (!this._pollActive) return;
+    
       try {
-        
-        const res = await fetch(`/jobs/status/${jobId}`,{  headers: { 'Accept': 'application/json' }});
+        const res = await fetch(`/jobs/status/${jobId}`, { headers: { 'Accept': 'application/json' } });
         if (!res.ok) throw new Error('Status synchronization failed.');
         const data = await res.json();
+    
+        // fetch ကြာနေတုန်း route ပြောင်းသွားနိုင်လို့ response ရောက်ချိန်မှာ ထပ်စစ်
+        if (!this._pollActive) return;
+    
         if (data.error) { this.showError(data.error); return; }
-
+    
         this.stepProgress = data.progress || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
+    
         if (data.done) {
-          // ✅ step ကို 6 အဖြစ် တင်လိုက်လို့ Step 5 ဟာ "done" condition (i < cur) ကို ဖြတ်ပြီး green ပြောင်းမယ်
           this.stepCurrent = 6;
-
+    
           if (!window._downloadTriggered) {
             window._downloadTriggered = true;
             this.autoDownload(jobId);
           }
-
+    
           this.isProcessing = false;
-
-          // ✅ Green bar ကို ၁.၅ စက္ကန့်လောက် ပြပြီးမှ UI ကို clean ပြန်လုပ်မယ်
+    
           setTimeout(() => {
-            this.cleanDashboardPreview();
+            if (this._pollActive) this.cleanDashboardPreview();
           }, 1500);
-
+    
           return;
         }
-
-        // done မဖြစ်သေးရင်သာ stepCurrent ကို update (done ဖြစ်ပြီးရင် 6 အတိုင်း ထားမယ်)
+    
         this.stepCurrent = Number(data.step);
-
-        // 🎯 Step 5 (render — ကြာနိုင်) ရောက်ရင် interval ရှည်စေမယ်
+    
         const nextDelay = this.stepCurrent >= 5 ? 5000 : 6000;
-        setTimeout(() => this.pollStatus(jobId, jobBaseUrl), nextDelay)
+        this._pollTimeoutId = setTimeout(() => this.pollStatus(jobId, jobBaseUrl), nextDelay);
       } catch (err) {
-        setTimeout(() => this.pollStatus(jobId,jobBaseUrl), 8000);
+        if (!this._pollActive) return;
+        this._pollTimeoutId = setTimeout(() => this.pollStatus(jobId, jobBaseUrl), 8000);
       }
     },
 
     async autoDownload(jobId) {
+      this.isDownloading = true;
+      this.startDownloadTimer();
+      window.addEventListener('beforeunload', this.beforeUnloadGuard);
+    
       try {
         const res = await fetch(route('jobs.download', jobId), {
           headers: { 'Accept': 'application/json', 'X-Session-ID': window.APP_SESSION_ID },
@@ -995,6 +1052,10 @@ export default {
       } catch (e) {
         console.warn('Download network error:', e);
         this.showError('Internet ချိတ်ဆက်မှု ပြဿနာ ဖြစ်နေပါသည်။');
+      } finally {
+        this.isDownloading = false;
+        this.stopDownloadTimer();
+        window.removeEventListener('beforeunload', this.beforeUnloadGuard);
       }
     },
 
@@ -1007,7 +1068,6 @@ export default {
         default:  return 'Download လုပ်ဆောင်မှု မအောင်မြင်ပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။';
       }
     },
-
 
     async getVideoDuration(file) {
       return new Promise((resolve) => {
@@ -1198,8 +1258,6 @@ export default {
       const subtitleColor = this.selectedSubtitleColor;
       const bgMusic = this.selectedBgMusic;
 
-      this.showAlert('warning', 'Just kidding');
-
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
       if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
 
@@ -1238,7 +1296,7 @@ export default {
         }
 
         if (this.auth.user.role_name == 'pro') {
-          if (secs > 160) {
+          if (secs > 120) {
             this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`); return;
           }
         }
@@ -1358,6 +1416,7 @@ export default {
 
         this.hideUploadProgressState();
         const data = await response.json();
+        this._pollActive = true;
         this.pollStatus(data.job_id, jobBaseUrl);
 
       } catch (error) {
@@ -1366,7 +1425,6 @@ export default {
       }
     },
   },
-
   mounted() {
     if (this.$refs.watermarkLogo) {
       this.$refs.watermarkLogo.addEventListener('mousedown', this.logoDragStart);
@@ -1389,8 +1447,13 @@ export default {
 
     document.addEventListener('click', this.handleOutsideClickForPlanTooltip);
   },
-
   beforeUnmount() {
+    this._pollActive = false;
+    if (this._pollTimeoutId) {
+      clearTimeout(this._pollTimeoutId);
+      this._pollTimeoutId = null;
+    }
+    
     this.stopBgMusicPreview();
     document.removeEventListener('mousemove', this.logoDrag);
     document.removeEventListener('mouseup', this.logoDragEnd);

@@ -114,7 +114,7 @@ const ctaClass = computed(() => {
 
 function featIconClass(feat) {
   if (!feat.included) return 'bg-white/[0.04] text-slate-700';
-  if (feat.warn) return 'bg-amber-500/15 text-amber-400';
+  if (feat.type === 'warning') return 'bg-amber-500/15 text-amber-400';
   return 'bg-cyan-500/15 text-cyan-400';
 }
 </script>

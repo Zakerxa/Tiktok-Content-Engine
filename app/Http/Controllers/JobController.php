@@ -93,17 +93,34 @@ class JobController extends Controller
 
         $downloadUrl = rtrim($server->url, '/') . '/download/' . $job->id;
 
-        try {
-            $upstream = Http::withHeaders([
-                'X-Session-ID' => request()->header('X-Session-ID'),
-            ])->withOptions(['stream' => true])->timeout(120)->get($downloadUrl);
-        } catch (\Throwable $e) {
+        // ✅ v5 server ဟာ job success mark ဖြစ်ပြီးချင်းနဲ့ file ready မဖြစ်သေးတာကြောင့်
+        //    530/connection error တွေ့ရင် short wait ပြီး retry လုပ်ပေးမယ်
+        $maxRetries = 3;
+        $upstream = null;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $upstream = Http::withHeaders([
+                    'X-Session-ID' => request()->header('X-Session-ID'),
+                ])->withOptions(['stream' => true])->timeout(120)->get($downloadUrl);
+
+                if ($upstream->successful()) {
+                    break; // ✅ ရပြီ
+                }
+            } catch (\Throwable $e) {
+                $upstream = null;
+            }
+
+            if ($attempt < $maxRetries) {
+                usleep(1000000); // 1s စောင့်ပြီး ထပ်ကြိုးစား
+            }
+        }
+
+        if (!$upstream) {
             return response()->json(['detail' => 'Upstream connection failed'], 502);
         }
 
         if (!$upstream->successful()) {
-            // Pass status through; don't leak upstream body verbatim to logs-facing users,
-            // but the frontend maps by status code anyway, not by this text.
             return response()->json(['detail' => 'Download failed'], $upstream->status());
         }
 
@@ -139,12 +156,17 @@ class JobController extends Controller
             return response()->json(['error' => 'Job not found'], 404);
         }
 
+        $done = in_array($job->status, ['success', 'failed']);
+
         return response()->json([
             'step'         => (int)$job->step,
             'progress'     => $this->buildProgressBreakdown($job->step, $job->progress),
-            'done'         => in_array($job->status, ['success', 'failed']),
+            'done'         => $done,
             'error'        => $job->status === 'failed' ? $job->error : null,
             'download_url' => $jobId,
+            'expires_at'   => $done && $job->status === 'success' && $job->expires_at
+                ? Carbon::parse($job->expires_at)->toIso8601String()
+                : null,
         ]);
     }
 

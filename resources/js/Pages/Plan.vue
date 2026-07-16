@@ -348,13 +348,13 @@ const orderedPlans = computed(() => {
 // TODO: once /api/pricing-plans (or a /api/plan-durations endpoint) returns
 // these tiers from the backend, replace this static list with the live data.
 const durationOptions = [
-  { key: 'day', label: '၁ ရက်စာ (Base)', days: 1, discountPercent: 0 },
+  { key: 'day', label: '၃ ရက်စာ (Base)', days: 3, discountPercent: 10 },
   { key: 'week', label: '၁ ပတ်စာ (Weekly Pass)', days: 7, discountPercent: 20 },
-  { key: 'twoPlusOne', label: '၂ ပတ်ဝယ် ၁ ပတ်ရ (2+1 Pass)', days: 21, discountPercent: 33.3 },
+  { key: 'twoPlusOne', label: '၂ ပတ်ဝယ် + ၁ ပတ်ရ (2+1 Pass)', days: 21, discountPercent: 33.3 },
   { key: 'month', label: '၃၀ ရက်စာ (Monthly Pass)', days: 30, discountPercent: 40 },
 ];
 
-const selectedDurationKey = ref('month');
+const selectedDurationKey = ref('week');
 const selectedDuration = computed(
   () => durationOptions.find(d => d.key === selectedDurationKey.value) ?? durationOptions[0]
 );
