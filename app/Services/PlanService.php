@@ -79,21 +79,27 @@ class PlanService
     public static function grantPromoOnce(User $user, string $ip, string $userAgent, int $windowDays = 30, int $maxPerIp = 1): bool
     {
         return DB::transaction(function () use ($user, $ip, $userAgent, $windowDays, $maxPerIp) {
-            // row ကို lock ချပြီး fresh state ပြန်ဖတ်မယ် (stale $user object ကို မယုံ)
             $locked = User::whereKey($user->id)->lockForUpdate()->first();
 
             if ($locked->promo_claimed) {
                 return false;
             }
 
-            $uaHash = hash('sha256', $userAgent);
+            $uaHash    = hash('sha256', $userAgent);
+            $hasRealUa = trim($userAgent) !== '';
 
-            $recentClaims = PromoClaim::where(function ($q) use ($ip, $uaHash) {
-                $q->where('ip_address', $ip)->orWhere('ua_hash', $uaHash);
-            })
-                ->where('claimed_at', '>=', Carbon::now()->subDays($windowDays))
-                ->lockForUpdate()
-                ->count();
+            $query = PromoClaim::where('ip_address', $ip)
+                ->where('claimed_at', '>=', Carbon::now()->subDays($windowDays));
+
+            if ($hasRealUa) {
+                // UA header ရှိတဲ့ request — IP ရော UA ရော အတူတူဖြစ်မှသာ
+                // "တစ်ယောက်တည်းက ပြန်လာနေတာ" လို့ယူဆ (fingerprint ပိုတိကျ)
+                $query->where('ua_hash', $uaHash);
+            }
+            // UA မရှိရင် (webview/empty) — IP ချည်းသာ အားကိုးမယ်, ua_hash collision
+            // ကြောင့် မတူတဲ့ user တွေ block မဖြစ်အောင်
+
+            $recentClaims = $query->lockForUpdate()->count();
 
             if ($recentClaims >= $maxPerIp) {
                 $locked->update(['promo_claimed' => true]);

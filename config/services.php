@@ -14,6 +14,15 @@ return [
     |
     */
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+    
+    'telegram' => [
+        'token'          => env('TELEGRAM_BOT_TOKEN'),
+        'admin_chat_id'  => env('TELEGRAM_ADMIN_CHAT_ID'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],
@@ -34,7 +43,6 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
 
     'google' => [
         'client_id'     => env('GOOGLE_CLIENT_ID'),

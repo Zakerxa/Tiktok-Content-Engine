@@ -3,7 +3,7 @@
 
   <AppSidebar :auth="$page.props.auth">
 
-  <div class="dash-root mt-5 pt-5">
+  <div class="dash-root pt-5">
     <!-- Ambient brand orbs (same as Dashboard) -->
     <div class="orb orb-violet"></div>
     <div class="orb orb-cyan"></div>
@@ -13,7 +13,7 @@
 
       <!-- ═══════════════ PAGE HEADER ═══════════════ -->
       <section
-        class="flex flex-wrap items-center justify-between gap-4 rounded-[24px] px-6 py-6 sm:px-8"
+        class="flex flex-wrap items-center justify-between gap-4 rounded-[24px] px-6 py-6 sm:px-8 mt-5"
         style="background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(18px);"
       >
         <div>

@@ -6,11 +6,14 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\UsageLog;
 use App\Models\PlanHistory;
+use App\Models\Payment;
 use App\Models\Server;
+use App\Services\PaymentScreenshotMover;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -23,6 +26,7 @@ class AdminController extends Controller
     // ─────────────────────────────────────────────
     public function index()
     {
+
         $today = Carbon::today()->toDateString();
 
         $stats = [
@@ -34,6 +38,15 @@ class AdminController extends Controller
                 ->groupBy('role_name')
                 ->pluck('count', 'role_name'),
             'new_users_today'    => User::whereDate('created_at', $today)->count(),
+
+            // Payments
+            'payments_awaiting_review' => Payment::where('status', Payment::STATUS_MANUAL_REVIEW)->count(),
+            'payments_success_today'   => Payment::where('status', Payment::STATUS_SUCCESS)
+                ->whereDate('updated_at', $today)
+                ->count(),
+            'revenue_today' => (int) Payment::where('status', Payment::STATUS_SUCCESS)
+                ->whereDate('updated_at', $today)
+                ->sum('amount'),
         ];
 
         return Inertia::render('Admin/Index', compact('stats'));
@@ -232,8 +245,103 @@ class AdminController extends Controller
     }
 
 
+    //////////////////////////// PAYMENT VERIFICATION QUEUE ////////////////////////////////
 
+    // ─────────────────────────────────────────────
+    // GET /admin/payments  — Payments awaiting manual review (default),
+    // or filtered by any other status via ?status=
+    // ─────────────────────────────────────────────
+    public function payments(Request $request)
+    {
+        $status = $request->input('status', Payment::STATUS_MANUAL_REVIEW);
 
+        $query = Payment::with('user:id,username,email')->latest();
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $payments = $query->paginate(20)->withQueryString();
+
+        return Inertia::render('Admin/Payments', [
+            'payments' => $payments,
+            'filters'  => ['status' => $status],
+        ]);
+    }
+
+    // ─────────────────────────────────────────────
+    // POST /admin/payments/{id}/approve  — Manually approve a payment
+    // Gemini flagged for review (mismatched note/amount/bank, or the OCR
+    // call itself failed) — admin looks at the screenshot and decides.
+    // ─────────────────────────────────────────────
+    public function approvePayment($id, PaymentScreenshotMover $mover)
+    {
+        $payment = Payment::findOrFail($id);
+
+        if (!in_array($payment->status, [Payment::STATUS_MANUAL_REVIEW, Payment::STATUS_PROCESSING], true)) {
+            return back()->with('error', 'This payment is not awaiting review.');
+        }
+
+        if (!$payment->user) {
+            return back()->with('error', 'This payment has no linked user — cannot grant a plan.');
+        }
+
+        PlanService::grant($payment->user, $payment->plan_key, $payment->duration_days, Auth::user()->username);
+
+        $newPath = $mover->move($payment, 'approve');
+
+        $payment->update([
+            'status'          => Payment::STATUS_SUCCESS,
+            'screenshot_path' => $newPath ?? $payment->screenshot_path,
+            'last_error'      => 'Approved manually by ' . Auth::user()->username,
+        ]);
+
+        return back()->with('success', "Payment {$payment->ref_code} approved and plan granted.");
+    }
+
+    public function rejectPayment(Request $request, $id, PaymentScreenshotMover $mover)
+    {
+        $request->validate([
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $payment = Payment::findOrFail($id);
+
+        if (!in_array($payment->status, [Payment::STATUS_MANUAL_REVIEW, Payment::STATUS_PROCESSING], true)) {
+            return back()->with('error', 'This payment is not awaiting review.');
+        }
+
+        $newPath = $mover->move($payment, 'reject');
+
+        $payment->update([
+            'status'          => Payment::STATUS_FAILED,
+            'screenshot_path' => $newPath ?? $payment->screenshot_path,
+            'last_error'      => 'Rejected by ' . Auth::user()->username . ($request->reason ? ': ' . $request->reason : ''),
+        ]);
+
+        return back()->with('success', "Payment {$payment->ref_code} rejected.");
+    }
+
+    // ─────────────────────────────────────────────
+    // GET /admin/payments/{id}/screenshot  — Stream the payment screenshot
+    // Screenshots live on the private `local` disk (not publicly
+    // accessible), so this route is the only way to view one — gated by
+    // the same admin middleware as everything else in this controller.
+    // ─────────────────────────────────────────────
+    public function paymentScreenshot($id)
+    {
+        $payment = Payment::findOrFail($id);
+
+        if (!$payment->screenshot_path || !Storage::disk('local')->exists($payment->screenshot_path)) {
+            abort(404);
+        }
+
+        // response()->file() instead of Storage::response() — same effect
+        // (inline display, not a forced download), but avoids the
+        // "Undefined method 'response'" IDE warning some editors show
+        // since Storage-specific methods like this aren't in every stub set.
+        return response()->file(Storage::disk('local')->path($payment->screenshot_path));
+    }
 
 
     //////////////////////////// SERVER MANAGEMENT   ////////////////////////////////

@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ServerStatusController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,27 +22,38 @@ Route::get('/blogs/{post:slug}', [TikTokPostController::class, 'show'])->name('p
 Route::get('/blogs/topics/{topic}', [TikTokPostController::class, 'category'])->name('topics.show');
 
 
-Route::middleware(['auth','verified'])->group(function () {
-
+Route::middleware(['auth', 'verified', 'check.banned'])->group(function () {
+    // Profile Method
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/posts/{id}', [TikTokPostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/posts/edit/{id}', [TikTokPostController::class, 'edit'])->name('posts.edit');
     Route::post('/posts/{id}', [TikTokPostController::class, 'update'])->name('posts.update');
+
     //  Server status
     Route::get('/jobs/status/{jobId}', [JobController::class, 'status']);
-    Route::get('/server-status', [ServerStatusController::class, 'index']); 
+    Route::get('/server-status', [ServerStatusController::class, 'index']);
+
     // ─── Dashboard ───
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/posts', [TikTokPostController::class, 'dashboardIndex'])->name('blogs.dashboardshow');
     Route::get('/dashboard/recap', [DashboardController::class, 'dashboardRecap'])->name('recap.dashboardrecap');
-    Route::get('/plan', fn () => Inertia::render('Plan'))->name('plan');
+    Route::get('/plan', fn() => Inertia::render('Plan'))->name('plan');
     Route::get('/jobs/history', [JobController::class, 'history'])->name('jobs.history');
     Route::get('/jobs/{job}/status', [JobController::class, 'status'])->name('jobs.status');
+    // Payment Method
+    Route::post('/api/payments/initiate', [PaymentController::class, 'initiate']);
+    Route::post('/api/payments/verify', [PaymentController::class, 'verify'])->middleware('throttle:3,10'); // 10 မိနစ်အတွင်း 3 ကြိမ်
+    Route::post('/api/payments/cancel', [PaymentController::class, 'cancel']);
+    Route::get('/api/payments/current', [PaymentController::class, 'current']);
+    Route::get('/api/payments/history', [PaymentController::class, 'history']);
 });
 
-Route::middleware(['auth', 'throttle:downloads']) ->get('/jobs/{jobId}/download', [JobController::class, 'download'])->name('jobs.download');
+
+
+
+Route::middleware(['auth', 'throttle:downloads'])->get('/jobs/{jobId}/download', [JobController::class, 'download'])->name('jobs.download');
 
 
 // ─── Google OAuth ───

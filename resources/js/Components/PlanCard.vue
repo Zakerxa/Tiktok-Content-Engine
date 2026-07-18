@@ -72,13 +72,21 @@
       ✓ Current Plan
     </button>
     <button
+      v-else-if="plan.price === 0"
+      type="button"
+      disabled
+      class="relative mt-8 block w-full cursor-default rounded-xl border border-white/10 bg-white/[0.03] py-3.5 text-center text-sm font-bold text-slate-500"
+    >
+      Free Plan
+    </button>
+    <button
       v-else
       type="button"
-      @click="$emit('upgrade', plan)"
+      @click="$emit('buy-now', plan)"
       class="relative mt-8 block w-full rounded-xl py-3.5 text-center text-sm font-bold transition-all duration-200 active:scale-[0.98]"
       :class="ctaClass"
     >
-      Upgrade via Telegram →
+      Buy Now →
     </button>
   </div>
 </template>
@@ -93,7 +101,7 @@ const props = defineProps({
   discountedPerDay: { type: Number, default: 0 },
 });
 
-defineEmits(['upgrade']);
+defineEmits(['buy-now']);
 
 const shellClass = computed(() => {
   if (props.isCurrent) {

@@ -40,4 +40,9 @@ Route::prefix('admin')
         Route::post('/servers/{server}',         [AdminController::class, 'updateServer'])->name('admin.servers.update');
         Route::delete('/servers/{server}',       [AdminController::class, 'deleteServer'])->name('admin.servers.delete');
         // ✅ Route::resource(...) line ကို ဖျက်လိုက်ပါ
+
+        Route::get('/payments', [AdminController::class, 'payments'])->name('admin.payments');
+        Route::post('/payments/{id}/approve', [AdminController::class, 'approvePayment'])->name('admin.payments.approve');
+        Route::post('/payments/{id}/reject', [AdminController::class, 'rejectPayment'])->name('admin.payments.reject');
+        Route::get('/payments/{id}/screenshot', [AdminController::class, 'paymentScreenshot'])->name('admin.payments.screenshot');
     });

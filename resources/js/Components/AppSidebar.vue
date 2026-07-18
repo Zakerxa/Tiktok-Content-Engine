@@ -42,7 +42,8 @@
         <div class="px-3 pt-5 pb-2">
           <span style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#475569;">Admin</span>
         </div>
-        <NavItem :href="route('admin.index')" icon="gauge" label="Admin Panel" :active="isRoute('admin.*')" accent />
+        <NavItem :href="route('admin.index')" icon="gauge" label="Admin Panel" :active="isRoute('admin.index')" accent />
+        <NavItem :href="route('admin.payments')" icon="gauge" label="Payment List" :active="isRoute('admin.payments')" accent />
         <NavItem :href="route('admin.users')" icon="users" label="Manage Users" :active="isRoute('admin.users')" accent />
         <NavItem :href="route('admin.roles')" icon="shield" label="Roles" :active="isRoute('admin.roles')" accent />
         <NavItem :href="route('admin.servers')" icon="server" label="Servers" :active="isRoute('admin.servers')" accent />

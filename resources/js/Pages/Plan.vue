@@ -30,10 +30,148 @@
           </p>
         </section>
 
+        <!-- ═══ Tabs: Plans / History ═══ -->
+        <div class="flex w-fit items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5">
+          <button
+            type="button"
+            @click="activeTab = 'plans'"
+            class="rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200"
+            :class="activeTab === 'plans'
+              ? 'bg-gradient-to-r from-violet-500 to-cyan-400 text-white'
+              : 'text-slate-400 hover:text-slate-200'"
+          >
+            အစီအစဉ်များ
+          </button>
+          <button
+            type="button"
+            @click="activeTab = 'history'"
+            class="rounded-xl px-4 py-2 text-xs font-bold transition-all duration-200"
+            :class="activeTab === 'history'
+              ? 'bg-gradient-to-r from-violet-500 to-cyan-400 text-white'
+              : 'text-slate-400 hover:text-slate-200'"
+          >
+            ငွေလွှဲမှတ်တမ်း
+          </button>
+        </div>
+
+        <template v-if="activeTab === 'plans'">
+
+                  <!-- ═══ Billing calculator — see cost by duration ═══ -->
+        <section v-if="!loading && !error && payablePlans.length" class="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+          <h2 class="text-base font-extrabold text-slate-50 sm:text-lg">ကြိုက်နစ်သက်ရာ Plan ကို၀ယ်ယူပါ</h2>
+          <p class="mt-2 text-xs text-slate-400">ရက်အလိုက် ပက်ကေ့ချ်တွေရဲ့ ကျသင့်ငွေကို နှိုင်းယှဉ်ကြည့်ပါ။</p>
+
+          <!-- Duration tabs -->
+          <div class="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <button
+              v-for="d in durationOptions"
+              :key="d.key"
+              type="button"
+              @click="selectedDurationKey = d.key"
+              class="rounded-xl border px-3 py-2.5 text-center text-xs font-bold transition-all duration-200 active:scale-[0.98] sm:px-4 sm:text-left"
+              :class="selectedDurationKey === d.key
+                ? 'border-violet-500/50 bg-violet-500/15 text-violet-200'
+                : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-slate-200'"
+            >
+              {{ d.label }}
+            </button>
+          </div>
+
+          <!-- Mobile: stacked cards -->
+          <div class="mt-5 grid gap-3 sm:hidden">
+            <div v-for="plan in payablePlans" :key="plan.key" class="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+
+              <div class="flex items-center justify-between gap-2">
+                <span class="flex items-center gap-1.5 text-sm font-bold text-slate-200">
+                  <span>{{ plan.icon }}</span> {{ plan.name }}
+                </span>
+                <span class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide" :class="selectedDuration.discountPercent > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.05] text-slate-400'">
+                  {{ selectedDuration.discountPercent > 0 ? `${selectedDuration.discountPercent}% Off` : 'နဂိုဈေး' }}
+                </span>
+              </div>
+
+              <div class="mt-3.5 flex items-center justify-between text-xs">
+                <span class="text-slate-500">{{ selectedDuration.days }} ရက် — စုစုပေါင်း</span>
+                <span class="text-[15px] font-black text-slate-50">{{ totalCost(plan).toLocaleString() }} MMK</span>
+              </div>
+
+              <div class="my-3 h-px w-full bg-white/[0.06]"></div>
+
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-500">တစ်ရက်ပျမ်းမျှဈေး</span>
+                <span class="flex items-baseline gap-1.5">
+                  <span v-if="selectedDuration.discountPercent > 0" class="text-[11px] text-slate-500 line-through">
+                    {{ plan.price.toLocaleString() }}
+                  </span>
+                  <span class="text-[15px] font-black" :class="selectedDuration.discountPercent > 0 ? 'text-emerald-400' : 'text-slate-200'">
+                    {{ perDayCost(plan).toLocaleString() }} MMK
+                  </span>
+                </span>
+              </div>
+
+              <button type="button" @click="openBuyNow(plan, closestPurchasePackageKey(selectedDuration.days))" class="mt-4 block w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2.5 text-center text-xs font-bold text-white shadow-[0_8px_20px_-8px_rgba(124,58,237,0.55)] transition-all duration-200 active:scale-[0.98]">
+                Buy Now →
+              </button>
+            </div>
+          </div>
+
+          <!-- Desktop / tablet: table -->
+          <div class="mt-6 hidden overflow-x-auto sm:block">
+            <table class="w-full min-w-[560px] border-collapse text-left text-sm">
+              <thead>
+                <tr class="border-b border-white/10 text-[11px] uppercase tracking-wide text-slate-500">
+                  <th class="py-2 pr-4 font-semibold">အစီအစဉ် (Plan)</th>
+                  <th class="py-2 pr-4 font-semibold">အသုံးပြုခွင့်ရက်</th>
+                  <th class="py-2 pr-4 font-semibold">စုစုပေါင်းကျသင့်ငွေ</th>
+                  <th class="py-2 pr-4 font-semibold">တစ်ရက်ပျမ်းမျှဈေး</th>
+                  <th class="py-2 pr-4 font-semibold">ရရှိမယ့် လျှော့ဈေး</th>
+                  <th class="py-2 font-semibold"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="plan in payablePlans" :key="plan.key" class="border-b border-white/5 last:border-0">
+                  <td class="py-3.5 pr-4 font-semibold text-slate-200">{{ plan.icon }} {{ plan.name }}</td>
+                  <td class="py-3.5 pr-4 text-slate-400">{{ selectedDuration.days }} ရက်</td>
+                  <td class="py-3.5 pr-4 font-bold text-slate-50">{{ totalCost(plan).toLocaleString() }} MMK</td>
+                  <td class="py-3.5 pr-4">
+                    <span class="flex items-baseline gap-1.5">
+                      <span v-if="selectedDuration.discountPercent > 0" class="text-xs text-slate-500 line-through">
+                        {{ plan.price.toLocaleString() }}
+                      </span>
+                      <span
+                        class="font-bold"
+                        :class="selectedDuration.discountPercent > 0 ? 'text-emerald-400' : 'text-slate-300'"
+                      >
+                        {{ perDayCost(plan).toLocaleString() }} MMK
+                      </span>
+                    </span>
+                  </td>
+                  <td class="py-3.5 pr-4">
+                    <span
+                      class="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                      :class="selectedDuration.discountPercent > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.05] text-slate-400'"
+                    >
+                      {{ selectedDuration.discountPercent > 0 ? `${selectedDuration.discountPercent}% Off` : 'နဂိုဈေး' }}
+                    </span>
+                  </td>
+                  <td class="py-3.5">
+                    <button
+                      type="button"
+                      @click="openBuyNow(plan, closestPurchasePackageKey(selectedDuration.days))"
+                      class="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-[0_6px_16px_-6px_rgba(124,58,237,0.55)] transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+                    >
+                      Buy Now →
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        
         <!-- ═══ Loading / error state (backend fetch) ═══ -->
         <p v-if="loading" class="px-1 text-sm text-slate-500">Loading plans…</p>
         <p v-else-if="error" class="px-1 text-sm text-rose-400">Couldn't load plans: {{ error }}</p>
-
         <!-- ═══ Plan cards — mobile: swipeable carousel ═══ -->
         <section v-else class="sm:hidden">
           <p class="mb-3 flex items-center gap-1.5 px-1 text-xs font-semibold text-slate-500">
@@ -59,7 +197,7 @@
                 :best-deal="bestDeal"
                 :discounted-per-day="discountedPerDay(plan)"
                 class="h-full"
-                @upgrade="openTelegram"
+                @buy-now="p => openBuyNow(p)"
               />
             </div>
           </div>
@@ -87,115 +225,87 @@
             :is-current="isCurrent(plan)"
             :best-deal="bestDeal"
             :discounted-per-day="discountedPerDay(plan)"
-            @upgrade="openTelegram"
+            @buy-now="p => openBuyNow(p)"
           />
         </section>
 
-        <!-- ═══ Billing calculator — see cost by duration ═══ -->
-        <section v-if="!loading && !error && payablePlans.length" class="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
-          <h2 class="text-base font-extrabold text-slate-50 sm:text-lg">ကျသင့်ငွေ တွက်ချက်ကြည့်ရန်</h2>
-          <p class="mt-1 text-sm text-slate-400">ရက်အလိုက် ပက်ကေ့ချ်တွေရဲ့ ကျသင့်ငွေကို နှိုင်းယှဉ်ကြည့်ပါ။</p>
 
-          <!-- Duration tabs -->
-          <div class="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+
+        </template>
+
+        <!-- ═══ History tab ═══ -->
+        <section v-else class="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-50 sm:text-lg">ငွေလွှဲမှတ်တမ်း</h2>
+              <p class="mt-1 text-sm text-slate-400">သင့်ရဲ့ ငွေပေးချေမှုများနှင့် အခြေအနေကို ကြည့်ရှုပါ။</p>
+            </div>
             <button
-              v-for="d in durationOptions"
-              :key="d.key"
               type="button"
-              @click="selectedDurationKey = d.key"
-              class="rounded-xl border px-3 py-2.5 text-center text-xs font-bold transition-all duration-200 active:scale-[0.98] sm:px-4 sm:text-left"
-              :class="selectedDurationKey === d.key
-                ? 'border-violet-500/50 bg-violet-500/15 text-violet-200'
-                : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-slate-200'"
+              @click="loadHistory(historyPage)"
+              :disabled="historyLoading"
+              class="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-slate-300 transition-colors hover:border-white/20 hover:text-slate-100 disabled:opacity-50"
             >
-              {{ d.label }}
+              ↻ Refresh
             </button>
           </div>
 
-          <!-- Mobile: stacked cards -->
-          <div class="mt-5 grid gap-3 sm:hidden">
+          <p v-if="historyLoading" class="mt-6 text-sm text-slate-500">Loading…</p>
+          <p v-else-if="historyError" class="mt-6 text-sm text-rose-400">မှတ်တမ်း ရယူ၍မရပါ: {{ historyError }}</p>
+          <p v-else-if="!historyItems.length" class="mt-6 text-sm text-slate-500">ငွေလွှဲမှတ်တမ်း မရှိသေးပါ။</p>
+
+          <div v-else class="mt-5 divide-y divide-white/[0.06]">
             <div
-              v-for="plan in payablePlans"
-              :key="plan.key"
-              class="rounded-2xl border border-white/10 bg-white/[0.025] p-4"
+              v-for="item in historyItems"
+              :key="item.ref_code"
+              class="flex flex-wrap items-center justify-between gap-3 py-4"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="flex items-center gap-1.5 text-sm font-bold text-slate-200">
-                  <span>{{ plan.icon }}</span> {{ plan.name }}
-                </span>
+              <div>
+                <p class="text-sm font-bold text-slate-200">
+                  {{ ROLE_LABELS[item.plan_key] || item.plan_key }} — {{ item.duration_days }} ရက်
+                </p>
+                <p class="mt-0.5 text-xs text-slate-500">{{ formatDate(item.created_at) }} · Ref: {{ item.ref_code }}</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-black text-slate-50">{{ item.amount.toLocaleString() }} MMK</span>
                 <span
                   class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide"
-                  :class="selectedDuration.discountPercent > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.05] text-slate-400'"
+                  :class="statusBadgeClass(item.status)"
                 >
-                  {{ selectedDuration.discountPercent > 0 ? `${selectedDuration.discountPercent}% Off` : 'နဂိုဈေး' }}
+                  {{ statusLabel(item.status) }}
                 </span>
-              </div>
-
-              <div class="mt-3.5 flex items-center justify-between text-xs">
-                <span class="text-slate-500">{{ selectedDuration.days }} ရက် — စုစုပေါင်း</span>
-                <span class="text-[15px] font-black text-slate-50">{{ totalCost(plan).toLocaleString() }} MMK</span>
-              </div>
-
-              <div class="my-3 h-px w-full bg-white/[0.06]"></div>
-
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500">တစ်ရက်ပျမ်းမျှဈေး</span>
-                <span class="flex items-baseline gap-1.5">
-                  <span v-if="selectedDuration.discountPercent > 0" class="text-[11px] text-slate-500 line-through">
-                    {{ plan.price.toLocaleString() }}
-                  </span>
-                  <span
-                    class="text-[15px] font-black"
-                    :class="selectedDuration.discountPercent > 0 ? 'text-emerald-400' : 'text-slate-200'"
-                  >
-                    {{ perDayCost(plan).toLocaleString() }} MMK
-                  </span>
-                </span>
+                <!-- <button
+                  v-if="['pending', 'processing'].includes(item.status)"
+                  type="button"
+                  :disabled="cancellingRef === item.ref_code"
+                  @click="cancelHistoryPayment(item.ref_code)"
+                  class="text-xs font-semibold text-rose-400 transition-colors hover:text-rose-300 disabled:opacity-50"
+                >
+                  {{ cancellingRef === item.ref_code ? 'ပယ်ဖျက်နေသည်…' : 'ပယ်ဖျက်ရန်' }}
+                </button> -->
               </div>
             </div>
           </div>
 
-          <!-- Desktop / tablet: table -->
-          <div class="mt-6 hidden overflow-x-auto sm:block">
-            <table class="w-full min-w-[560px] border-collapse text-left text-sm">
-              <thead>
-                <tr class="border-b border-white/10 text-[11px] uppercase tracking-wide text-slate-500">
-                  <th class="py-2 pr-4 font-semibold">အစီအစဉ် (Plan)</th>
-                  <th class="py-2 pr-4 font-semibold">အသုံးပြုခွင့်ရက်</th>
-                  <th class="py-2 pr-4 font-semibold">စုစုပေါင်းကျသင့်ငွေ</th>
-                  <th class="py-2 pr-4 font-semibold">တစ်ရက်ပျမ်းမျှဈေး</th>
-                  <th class="py-2 font-semibold">ရရှိမယ့် လျှော့ဈေး</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="plan in payablePlans" :key="plan.key" class="border-b border-white/5 last:border-0">
-                  <td class="py-3.5 pr-4 font-semibold text-slate-200">{{ plan.icon }} {{ plan.name }}</td>
-                  <td class="py-3.5 pr-4 text-slate-400">{{ selectedDuration.days }} ရက်</td>
-                  <td class="py-3.5 pr-4 font-bold text-slate-50">{{ totalCost(plan).toLocaleString() }} MMK</td>
-                  <td class="py-3.5 pr-4">
-                    <span class="flex items-baseline gap-1.5">
-                      <span v-if="selectedDuration.discountPercent > 0" class="text-xs text-slate-500 line-through">
-                        {{ plan.price.toLocaleString() }}
-                      </span>
-                      <span
-                        class="font-bold"
-                        :class="selectedDuration.discountPercent > 0 ? 'text-emerald-400' : 'text-slate-300'"
-                      >
-                        {{ perDayCost(plan).toLocaleString() }} MMK
-                      </span>
-                    </span>
-                  </td>
-                  <td class="py-3.5">
-                    <span
-                      class="rounded-full px-2.5 py-1 text-[11px] font-bold"
-                      :class="selectedDuration.discountPercent > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.05] text-slate-400'"
-                    >
-                      {{ selectedDuration.discountPercent > 0 ? `${selectedDuration.discountPercent}% Off` : 'နဂိုဈေး' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Pagination -->
+          <div v-if="historyMeta && historyMeta.last_page > 1" class="mt-5 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              :disabled="historyPage <= 1 || historyLoading"
+              @click="loadHistory(historyPage - 1)"
+              class="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-slate-300 disabled:opacity-40"
+            >
+              ← ရှေ့
+            </button>
+            <span class="text-xs text-slate-500">{{ historyPage }} / {{ historyMeta.last_page }}</span>
+            <button
+              type="button"
+              :disabled="historyPage >= historyMeta.last_page || historyLoading"
+              @click="loadHistory(historyPage + 1)"
+              class="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-slate-300 disabled:opacity-40"
+            >
+              နောက် →
+            </button>
           </div>
         </section>
 
@@ -215,6 +325,15 @@
 
       </main>
     </div>
+
+    <BuyNowModal
+      v-if="buyNowPlan"
+      :plan="buyNowPlan"
+      :packages="purchasePackages"
+      :initial-package-key="buyNowPackageKey"
+      :resume-payment="resumePaymentData"
+      @close="handleBuyNowClose"
+    />
   </AppSidebar>
 </template>
 
@@ -223,6 +342,7 @@ import { computed, ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3';
 import AppSidebar from '@/Components/AppSidebar.vue';
 import PlanCard from '@/Components/PlanCard.vue';
+import BuyNowModal from '@/Components/BuyNowModal.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user || {});
@@ -237,6 +357,12 @@ const ROLE_LABELS = {
   vip: 'VIP',
   admin: 'Admin',
 };
+
+// Reads the XSRF-TOKEN cookie — same pattern as BuyNowModal.vue.
+function csrfToken() {
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
 
 const currentRole = computed(() => (user.value.role_name || 'tester').toLowerCase());
 const roleLabel = computed(() => ROLE_LABELS[currentRole.value] || currentRole.value);
@@ -287,6 +413,7 @@ const visualConfig = {
 const plans = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const activeTab = ref('plans'); // 'plans' | 'history'
 
 // Best-deal duration shown on every card (matches plan_durations table: 30day / 40% off)
 // TODO: once /api/pricing-plans returns plan_durations data, replace this
@@ -332,6 +459,10 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+
+  await checkActivePayment();
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('focus', checkActivePayment);
 });
 
 // Current plan floats to the front — matters most on the mobile carousel,
@@ -350,7 +481,7 @@ const orderedPlans = computed(() => {
 const durationOptions = [
   { key: 'day', label: '၃ ရက်စာ (Base)', days: 3, discountPercent: 10 },
   { key: 'week', label: '၁ ပတ်စာ (Weekly Pass)', days: 7, discountPercent: 20 },
-  { key: 'twoPlusOne', label: '၂ ပတ်ဝယ် + ၁ ပတ်ရ (2+1 Pass)', days: 21, discountPercent: 33.3 },
+  { key: 'twoPlusOne', label: '၂ ပတ်ဝယ် ၁ ပတ်ရ (2+1 Pass)', days: 21, discountPercent: 33.3 },
   { key: 'month', label: '၃၀ ရက်စာ (Monthly Pass)', days: 30, discountPercent: 40 },
 ];
 
@@ -374,6 +505,191 @@ function perDayCost(plan, duration = selectedDuration.value) {
 
 function isCurrent(plan) {
   return plan.key === currentRole.value;
+}
+
+// ─── Buy Now flow ───
+// Separate from the calculator's `durationOptions` above (which keeps its
+// 1-day "Base" reference row untouched) — these are the actual sellable
+// packages shown in BuyNowModal.
+// TODO: confirm the 3-day discount — 10% is a placeholder estimate
+// (interpolated between 0% at 1-day and 20% at 7-day). Change it here once
+// you tell me the real number, nothing else needs to change.
+const purchasePackages = [
+  { key: 'threeDay', label: '၃ ရက်စာ', days: 3, discountPercent: 10 },
+  { key: 'week', label: '၁ ပတ်စာ (Weekly)', days: 7, discountPercent: 20 },
+  { key: 'twoPlusOne', label: '၂ ပတ်ဝယ် ၁ ပတ်ရ', days: 21, discountPercent: 33.3 },
+  { key: 'month', label: '၃၀ ရက်စာ (Monthly)', days: 30, discountPercent: 40 },
+];
+
+// Maps a calculator duration (1/7/21/30 days) to the closest purchasable
+// package — the calculator's 1-day "Base" row isn't sellable on its own,
+// so it falls back to the smallest real package (3-day).
+function closestPurchasePackageKey(days) {
+  const match = purchasePackages.find(p => p.days === days);
+  return match ? match.key : purchasePackages[0].key;
+}
+
+const buyNowPlan = ref(null);
+const buyNowPackageKey = ref(null);
+// Populated from GET /api/payments/current when the user has an unfinished
+// checkout (e.g. they left for the KPay app and came back) — passed straight
+// through to BuyNowModal so it reopens directly on the payment step.
+const resumePaymentData = ref(null);
+
+function openBuyNow(plan, packageKey = 'month') {
+  resumePaymentData.value = null;
+  buyNowPlan.value = plan;
+  buyNowPackageKey.value = packageKey;
+}
+
+function closeBuyNowModal() {
+  buyNowPlan.value = null;
+  buyNowPackageKey.value = null;
+  resumePaymentData.value = null;
+}
+
+// BuyNowModal emits a reason: 'submitted' | 'cancelled' | 'expired' | 'dismissed'.
+// Only 'submitted' and 'cancelled' change a row's status, so only those need
+// to refresh the History tab. 'dismissed' just hides the modal — the pending
+// checkout is still alive server-side and will be picked up again by
+// checkActivePayment() next time the user returns to this route/tab.
+function handleBuyNowClose(reason) {
+  closeBuyNowModal();
+  if (reason === 'submitted' || reason === 'cancelled') {
+    loadHistory(historyPage.value);
+  }
+}
+
+// Checks for an unfinished checkout (status pending/processing) and, if one
+// exists, reopens BuyNowModal straight to the payment step. Called on mount,
+// whenever the tab/window regains focus (user coming back from the KPay
+// app), and whenever the user navigates back to this route — covers the
+// case where the mobile browser killed the tab entirely while they were away.
+async function checkActivePayment() {
+  // Don't clobber a checkout the user is actively in the middle of starting.
+  if (buyNowPlan.value && !resumePaymentData.value) return;
+  if (!plans.value.length) return; // need plan data loaded to match plan_key -> plan object
+
+  try {
+    const res = await fetch('/api/payments/current', { headers: { Accept: 'application/json' } });
+    if (!res.ok) return;
+    const json = await res.json();
+
+    if (!json.payment) {
+      // Nothing pending server-side anymore (expired/finished elsewhere) —
+      // drop any stale resumed modal we might still be showing.
+      if (resumePaymentData.value) closeBuyNowModal();
+      return;
+    }
+
+    const matchedPlan = plans.value.find(p => p.key === json.payment.plan_key);
+    if (!matchedPlan) return;
+
+    resumePaymentData.value = json.payment;
+    buyNowPlan.value = matchedPlan;
+    buyNowPackageKey.value = closestPurchasePackageKey(json.payment.duration_days);
+  } catch (e) {
+    // Non-critical — silently skip; user can still start a fresh purchase.
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') checkActivePayment();
+}
+
+/* ─── History tab ─── */
+const historyItems = ref([]);
+const historyLoading = ref(false);
+const historyError = ref(null);
+const historyPage = ref(1);
+const historyMeta = ref(null);
+const cancellingRef = ref(null);
+
+async function loadHistory(page = 1) {
+  historyLoading.value = true;
+  historyError.value = null;
+  try {
+    const res = await fetch(`/api/payments/history?page=${page}`, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('Failed to load history');
+    const json = await res.json();
+    historyItems.value = json.data;
+    historyMeta.value = json;
+    historyPage.value = page;
+  } catch (e) {
+    historyError.value = e.message;
+  } finally {
+    historyLoading.value = false;
+  }
+}
+
+// Lazy-load: only fetch the first time the user switches to the tab.
+watch(activeTab, (tab) => {
+  if (tab === 'history' && !historyItems.value.length && !historyLoading.value) {
+    loadHistory();
+  }
+});
+
+const STATUS_LABELS = {
+  pending: 'ငွေလွှဲရန် စောင့်ဆိုင်းနေသည်',
+  processing: 'စစ်ဆေးနေသည်',
+  success: 'အောင်မြင်ပါသည်',
+  manual_review: 'Admin စစ်ဆေးနေသည်',
+  failed: 'မအောင်မြင်ပါ',
+  cancelled: 'ပယ်ဖျက်ထားသည်',
+};
+function statusLabel(status) {
+  return STATUS_LABELS[status] || status;
+}
+function statusBadgeClass(status) {
+  switch (status) {
+    case 'success':
+      return 'bg-emerald-500/15 text-emerald-300';
+    case 'processing':
+    case 'manual_review':
+      return 'bg-amber-500/15 text-amber-300';
+    case 'pending':
+      return 'bg-sky-500/15 text-sky-300';
+    case 'failed':
+    case 'cancelled':
+      return 'bg-rose-500/15 text-rose-300';
+    default:
+      return 'bg-white/[0.05] text-slate-400';
+  }
+}
+function formatDate(d) {
+  return new Date(d).toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// Cancel button next to a pending/processing row in the History tab itself
+// (separate from the "cancel" button inside BuyNowModal — same backend call).
+async function cancelHistoryPayment(refCode) {
+  if (cancellingRef.value) return;
+  cancellingRef.value = refCode;
+  try {
+    const res = await fetch('/api/payments/cancel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-XSRF-TOKEN': csrfToken(),
+      },
+      body: JSON.stringify({ ref_code: refCode }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'ပယ်ဖျက်ရာတွင် အမှားတစ်ခု ဖြစ်သွားပါသည်');
+
+    // If the row being cancelled is also the one driving a currently-open
+    // resumed modal, close that modal too instead of leaving it stale.
+    if (resumePaymentData.value?.ref_code === refCode) closeBuyNowModal();
+
+    await loadHistory(historyPage.value);
+  } catch (e) {
+    historyError.value = e.message;
+  } finally {
+    cancellingRef.value = null;
+  }
 }
 
 function openTelegram(plan) {
@@ -422,6 +738,8 @@ watch(loading, async (isLoading) => {
 
 onBeforeUnmount(() => {
   if (observer) observer.disconnect();
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  window.removeEventListener('focus', checkActivePayment);
 });
 </script>
 

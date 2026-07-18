@@ -26,12 +26,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'role_name',
         'is_active',
+        'is_banned',
+        'banned_reason',
         'recap_limit',
         'email_verified_at',
         'total_recap_used',
         'recap_limit_total',
         'plan_expires_at',
-        'session_expires_at',
+        'session_expires_at'
     ];
 
     /**

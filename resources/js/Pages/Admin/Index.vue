@@ -89,6 +89,48 @@
         </div>
       </section>
 
+            <!-- ═══════════════ PAYMENTS (Tailwind) ═══════════════ -->
+      <section class="rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div class="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-violet-400">Overview</div>
+            <h2 class="text-lg font-extrabold text-slate-50 sm:text-xl">Payments</h2>
+          </div>
+          <Link
+            :href="route('admin.payments')"
+            class="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-[0_8px_20px_-8px_rgba(124,58,237,0.55)] transition-all duration-200 hover:brightness-110"
+          >
+            Payments Queue ကြည့်ရန် →
+          </Link>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="flex items-center gap-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-lg">⏳</div>
+            <div>
+              <span class="block text-2xl font-extrabold tracking-tight text-slate-50">{{ stats.payments_awaiting_review }}</span>
+              <span class="text-xs text-slate-400">Awaiting Review</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-lg">✓</div>
+            <div>
+              <span class="block text-2xl font-extrabold tracking-tight text-slate-50">{{ stats.payments_success_today }}</span>
+              <span class="text-xs text-slate-400">Approved Today</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 rounded-2xl border border-violet-500/20 bg-violet-500/[0.06] p-4">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-lg">💰</div>
+            <div>
+              <span class="block text-2xl font-extrabold tracking-tight text-slate-50">{{ Number(stats.revenue_today).toLocaleString() }}</span>
+              <span class="text-xs text-slate-400">Revenue Today (MMK)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══════════════ USERS BY ROLE ═══════════════ -->
       <section class="posts-section">
         <div class="posts-header">
@@ -130,7 +172,7 @@
 <script setup>
 import AppSidebar from '@/Components/AppSidebar.vue';
 import AdminNav from '@/Components/Admin/AdminNav.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
