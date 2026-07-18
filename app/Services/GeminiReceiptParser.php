@@ -97,7 +97,8 @@ class GeminiReceiptParser
      */
     private function callModel(string $model, string $mime, string $bytes, string $apiKey): array
     {
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
+        // $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
+        $endpoint = "https://gemini-proxy.zakerxa.workers.dev/gemini-proxy/v1beta/models/{$model}:generateContent";
 
         try {
             $response = Http::timeout(30)->post($endpoint . '?key=' . $apiKey, [
