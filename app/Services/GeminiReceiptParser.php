@@ -101,7 +101,9 @@ class GeminiReceiptParser
         $endpoint = "https://gemini-proxy.zakerxa.workers.dev/gemini-proxy/v1beta/models/{$model}:generateContent";
 
         try {
-            $response = Http::timeout(30)->post($endpoint . '?key=' . $apiKey, [
+            $response = Http::timeout(30)
+            ->withHeaders(['X-Proxy-Secret' => config('services.gemini.proxy_secret')])
+            ->post($endpoint . '?key=' . $apiKey, [
                 'contents' => [[
                     'parts' => [
                         ['text' => self::SYSTEM_PROMPT],

@@ -16,8 +16,9 @@ return [
 
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
+        'proxy_secret'  => env('GEMINI_PROXY_SECRET'),
     ],
-    
+
     'telegram' => [
         'token'          => env('TELEGRAM_BOT_TOKEN'),
         'admin_chat_id'  => env('TELEGRAM_ADMIN_CHAT_ID'),
