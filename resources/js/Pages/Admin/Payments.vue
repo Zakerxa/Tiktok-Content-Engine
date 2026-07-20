@@ -49,10 +49,10 @@
             <div
               v-for="p in payments.data"
               :key="p.id"
-              class="rounded-2xl border border-white/10 bg-white/[0.02] p-4"
+              class="min-w-0 rounded-2xl border border-white/10 bg-white/[0.02] p-4"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-mono text-sm font-bold text-slate-200">{{ p.ref_code }}</span>
+              <div class="flex min-w-0 items-center justify-between gap-2">
+                <span class="min-w-0 truncate font-mono text-sm font-bold text-slate-200">{{ p.ref_code }}</span>
                 <span class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide" :class="statusBadgeClass(p.status)">
                   {{ p.status }}
                 </span>
@@ -67,7 +67,7 @@
                 v-if="p.last_error"
                 type="button"
                 @click="openDetail(p)"
-                class="mt-3 block w-full truncate rounded-lg bg-amber-500/[0.08] px-3 py-2 text-left text-[11px] leading-relaxed text-amber-300 hover:bg-amber-500/[0.14]"
+                class="mt-3 block w-full min-w-0 line-clamp-2 rounded-lg bg-amber-500/[0.08] px-3 py-2 text-left text-[11px] leading-relaxed text-amber-300 hover:bg-amber-500/[0.14]"
               >
                 {{ p.last_error }}
               </button>

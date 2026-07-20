@@ -238,8 +238,7 @@
                 <p class="text-xs text-[#64748B] mb-2">Blur box ကို Video Preview ထဲမှာ Drag လုပ်ပြီး position သတ်မှတ်ပါ
                 </p>
                 <div class="flex flex-wrap gap-2 items-center">
-                  <input type="range" id="blur-height" min="5" max="20" value="10" class="w-full accent-[#7C3AED]"
-                    @input="setBlurHeight($event.target.value)" :disabled="isProcessing" />
+                  <input type="range" id="blur-height" min="5" max="25" value="20" class="w-full accent-[#7C3AED]" @input="setBlurHeight($event.target.value)" :disabled="isProcessing" />
                   <div class="flex flex-wrap gap-2 mt-2">
                     <div
                       class="bg-[rgba(124,58,237,0.12)] px-2 py-1 rounded-md text-xs font-semibold text-[#A78BFA] font-mono">
@@ -415,19 +414,31 @@
                       :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
                         selectedBgMusic === 'Epic-Spectrum-Wandering.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
                       <span>{{ playingMusic === 'Epic-Spectrum-Wandering.mp3' ? '⏸️' : '🔊' }}</span>
-                      <span>🎬 Epic Spectrum</span>
+                      <span>🎬 Spectrum</span>
+                    </button>
+                    <button type="button" @click="selectBgMusic('Heroes.mp3')" :disabled="isProcessing"
+                      :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
+                        selectedBgMusic === 'Heroes.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span>{{ playingMusic === 'Heroes.mp3' ? '⏸️' : '🔊' }}</span>
+                      <span>🎬 Heroes</span>
+                    </button>
+                    <button type="button" @click="selectBgMusic('Lavender.mp3')" :disabled="isProcessing"
+                      :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
+                        selectedBgMusic === 'Lavender.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
+                      <span>{{ playingMusic === 'Lavender.mp3' ? '⏸️' : '🔊' }}</span>
+                      <span>🎬 Lavender</span>
                     </button>
                     <button type="button" @click="selectBgMusic('Aylex-Colossal.mp3')" :disabled="isProcessing"
                       :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
                         selectedBgMusic === 'Aylex-Colossal.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
                       <span>{{ playingMusic === 'Aylex-Colossal.mp3' ? '⏸️' : '🔊' }}</span>
-                      <span>🌩️ Colossal</span>
+                      <span>🎬 Colossal</span>
                     </button>
                     <button type="button" @click="selectBgMusic('Pufino-Legend.mp3')" :disabled="isProcessing"
                       :class="['flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border-2 cursor-pointer transition-all text-xs font-semibold bg-[rgba(255,255,255,0.02)]',
                         selectedBgMusic === 'Pufino-Legend.mp3' ? 'border-[#7C3AED] bg-[rgba(124,58,237,0.12)] text-[#A78BFA]' : 'border-[rgba(255,255,255,0.1)] text-[#CBD5E1] hover:border-[rgba(255,255,255,0.25)]']">
                       <span>{{ playingMusic === 'Pufino-Legend.mp3' ? '⏸️' : '🔊' }}</span>
-                      <span>🗺️ Legend</span>
+                      <span>🎬 Legend</span>
                     </button>
                   </div>
                 </div>
@@ -560,8 +571,8 @@ export default {
       logoX: 0,
       logoY: 0,
       blurX: 0,
-      blurY: 88,
-      blurH: 12,
+      blurY: 75,
+      blurH: 20,
 
       uploadProgress: null,
       hasVideoSelected: false,
@@ -751,8 +762,8 @@ export default {
         b.style.display = 'block';
         b.style.width = '100%';
         b.style.left = '0px';
-        b.style.top     = '73%';
-        b.style.height  = '13%';
+        b.style.top     = '80%';
+        b.style.height  = '20%';
         setTimeout(() => this.updateBlurCoordinates(), 100);
       }
     },
@@ -965,7 +976,7 @@ export default {
     },
 
     cleanDashboardPreview() {
-      this.blurX = 0; this.blurY = 85; this.blurH = 15;
+      this.blurX = 0; this.blurY = 75; this.blurH = 20;
       if (this.$refs.urlInput) this.$refs.urlInput.value = '';
       if (this.$refs.enableSubtitles) this.$refs.enableSubtitles.checked = false;
       this.subtitlesEnabled = false;
@@ -1251,6 +1262,7 @@ export default {
       finalForm.append('enable_voiceover', options.voiceover);
       finalForm.append('subtitle_style', options.subtitleColor);
       finalForm.append('bg_music', options.bgMusic);
+      finalForm.append('enable_bg_music', options.bgMusicEnabled);
       if (options.watermark) {
         finalForm.append('watermark_x', options.logoX.toFixed(2));
         finalForm.append('watermark_y', options.logoY.toFixed(2));
@@ -1322,6 +1334,7 @@ export default {
     
       const options = {
         voice, subtitleColor, bgMusic, watermark, subtitles, flip, voiceover, logoFile,
+        bgMusicEnabled: this.bgMusicEnabled,
         blurX: this.blurX, blurY: this.blurY, blurH: this.blurH,
         logoX: this.logoX, logoY: this.logoY,
       };
@@ -1361,6 +1374,7 @@ export default {
             formData.append('enable_voiceover', voiceover);
             formData.append('subtitle_style', subtitleColor);
             formData.append('bg_music', bgMusic);
+            formData.append('enable_bg_music', this.bgMusicEnabled);
             if (watermark) {
               formData.append('watermark_x', this.logoX.toFixed(2));
               formData.append('watermark_y', this.logoY.toFixed(2));

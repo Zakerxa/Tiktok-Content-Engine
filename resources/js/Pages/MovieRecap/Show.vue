@@ -560,8 +560,8 @@ export default {
       logoX: 0,
       logoY: 0,
       blurX: 0,
-      blurY: 88,
-      blurH: 12,
+      blurY: 75,
+      blurH: 20,
 
       uploadProgress: null,
       hasVideoSelected: false,
@@ -751,8 +751,8 @@ export default {
         b.style.display = 'block';
         b.style.width = '100%';
         b.style.left = '0px';
-        b.style.top     = '73%';
-        b.style.height  = '13%';
+        b.style.top     = '80%';
+        b.style.height  = '20%';
         setTimeout(() => this.updateBlurCoordinates(), 100);
       }
     },
@@ -965,7 +965,7 @@ export default {
     },
 
     cleanDashboardPreview() {
-      this.blurX = 0; this.blurY = 85; this.blurH = 15;
+      this.blurX = 0; this.blurY = 75; this.blurH = 20;
       if (this.$refs.urlInput) this.$refs.urlInput.value = '';
       if (this.$refs.enableSubtitles) this.$refs.enableSubtitles.checked = false;
       this.subtitlesEnabled = false;
@@ -1143,60 +1143,38 @@ export default {
     },
     
     // Resolve baseUrl: candidate list ကို priority + role-position order အတိုင်း တစ်ခုချင်းစမ်း
-    async resolveBaseUrl() {
+    async resolveBaseUrl(excludeUrls = new Set()) {
       const roleName = this.auth.user?.role_name;
       const allServers = await this.fetchServers();
-      const candidates = this.getServersForRole(allServers, roleName);
+      const candidates = this.getServersForRole(allServers, roleName)
+        .filter(s => !excludeUrls.has(s.url));   // ✅ fail ဖြစ်ပြီးသား server တွေကို ဖယ်
     
       if (!candidates.length) {
-        console.error(`[resolveBaseUrl] role=${roleName} -> no server configured for this role`);
-        this.showAlert('error', 'ဒီ role အတွက် Server မသတ်မှတ်ရသေးပါ။');
+        console.error(`[resolveBaseUrl] role=${roleName} -> no more servers to try`);
         this.baseUrl = null;
         this.baseUrlReady = false;
         return null;
       }
-
-      console.log(allServers, candidates);
     
       for (const server of candidates) {
-        // ✅ is_busy ဖြစ်ပေမယ့် is_stuck လည်းဖြစ်နေရင် (45min ကျော်နေရင်)
-        // FastAPI ဘက်က job ကို timeout kill လုပ်ပြီးသားလို့ ယူဆပြီး
-        // "genuinely busy" လို့ မသတ်မှတ်ဘဲ health check ဆီဆက်ရဲရဲသွားမယ်
         const isTrulyBusy = server.is_busy && !server.is_stuck;
+        if (isTrulyBusy) continue;
     
-        if (isTrulyBusy) {
-          // console.log(`[resolveBaseUrl] ${server.name} is genuinely busy — skip`);
-          continue;
-        }
-    
-        if (server.is_busy && server.is_stuck) {
-          console.warn(`[resolveBaseUrl] ${server.name} looks stuck (>45min) — verifying via health check before reuse`);
-        }
-    
-        // ✅ Health check — server တကယ်ရှင်လား confirm လုပ်တာ
-        // stuck job ဖြစ်နေတဲ့ server ဆိုရင်တောင် health check ok ရင် ပြန်သုံးလို့ရမယ်
         const healthy = await this.checkHealth(server.url);
-        if (!healthy) {
-          // console.warn(`[resolveBaseUrl] ${server.name} unreachable — skip`);
-          continue;
-        }
+        if (!healthy) continue;
     
         this.baseUrl = server.url;
         this.baseUrlReady = true;
-        // console.log(`[resolveBaseUrl] role=${roleName} -> ${server.name}`);
         return server.url;
       }
     
-      // candidate အားလုံး busy ဖြစ်နေရင် — error မထုတ်ဘဲ ပထမဆုံး preference
-      // (candidates[0]) ကို default အနေနဲ့ ပြန်ယူပြီး queue လုပ်ထားခိုင်းမယ်
       const fallback = candidates[0];
       console.warn(`[resolveBaseUrl] role=${roleName} -> all busy, falling back to default ${fallback.name}`);
-      // this.showAlert('warning', `Server အားလုံး အလုပ်များနေလို့ ${fallback.name} ကို queue ထဲထည့်ပေးလိုက်ပါပြီ။`);
       this.baseUrl = fallback.url;
       this.baseUrlReady = true;
-      console.log("Fall back to ",candidates[0].name);
       return fallback.url;
     },
+
 
     async uploadChunkWithRetry(jobBaseUrl, chunkForm, chunkIndex, maxRetries = 3) {
       let lastError;
@@ -1237,16 +1215,68 @@ export default {
       throw lastError; // Retry အားလုံးကုန်သွားပြီး ဆက်fail ရင် error ပြန် throw
     },
 
-    async startProcess() {
-
-      if (!this.auth.user) {
-        this.showAlert('info', 'ဤ feature ကို အသုံးပြုရန် Login ဝင်ရောက်ရန် လိုအပ်ပါသည်။');
-        return;
+    // jobBaseUrl တစ်ခုအတွက် chunk upload အားလုံးကို run — success ရင် finalize response ကို ပြန်ပေး
+    async uploadAllChunks(jobBaseUrl, file, options) {
+      const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+      const MAX_RETRIES = 3;
+      const totalChunks = Math.ceil(file.size / MAX_CHUNK_SIZE);
+      const sessionId = crypto.randomUUID(); // ✅ server အသစ်တိုင်းအတွက် sessionId အသစ်
+    
+      this.showUploadProgressState(0, totalChunks);
+    
+      for (let i = 0; i < totalChunks; i++) {
+        const chunk = file.slice(i * MAX_CHUNK_SIZE, (i + 1) * MAX_CHUNK_SIZE);
+        const chunkForm = new FormData();
+        chunkForm.append('chunk', chunk, 'chunk');
+        chunkForm.append('chunkIndex', i);
+        chunkForm.append('totalChunks', totalChunks);
+        chunkForm.append('sessionId', sessionId);
+    
+        await this.uploadChunkWithRetry(jobBaseUrl, chunkForm, i, MAX_RETRIES);
+        this.showUploadProgressState(i + 1, totalChunks);
       }
-
+    
+      this.showUploadFinalizingState();
+    
+      const finalForm = new FormData();
+      finalForm.append('sessionId', sessionId);
+      finalForm.append('originalFileName', file.name);
+      finalForm.append('voice_model', options.voice);
+      finalForm.append('blur_x', options.blurX.toFixed(2));
+      finalForm.append('blur_y', options.blurY.toFixed(2));
+      finalForm.append('blur_h', options.blurH.toFixed(2));
+      finalForm.append('enable_subtitles', options.subtitles);
+      finalForm.append('enable_flip', options.flip);
+      finalForm.append('enable_watermark', options.watermark);
+      finalForm.append('enable_voiceover', options.voiceover);
+      finalForm.append('subtitle_style', options.subtitleColor);
+      finalForm.append('bg_music', options.bgMusic);
+      finalForm.append('enable_bg_music', options.bgMusicEnabled);
+      if (options.watermark) {
+        finalForm.append('watermark_x', options.logoX.toFixed(2));
+        finalForm.append('watermark_y', options.logoY.toFixed(2));
+        if (options.logoFile) finalForm.append('watermark_file', options.logoFile);
+      }
+    
+      const response = await fetch(`${jobBaseUrl}/upload-chunk-finalize`, {
+        method: 'POST',
+        body: finalForm,
+        headers: { 'X-Session-ID': window.APP_SESSION_ID }
+      });
+    
+      if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.detail || 'Failed to start processing job on Server.');
+      }
+      return response;
+    },
+    
+    async startProcess() {
+  
+      if (!this.auth.user) return this.showAlert('info', 'ဤ feature ကို အသုံးပြုရန် Login ဝင်ရောက်ရန် လိုအပ်ပါသည်။');
       this.isProcessing = true;
       this.stopBgMusicPreview();
-
+    
       const file = this.$refs.videoFileInput?.files[0];
       const youtubeUrl = this.$refs.urlInput?.value;
       const subtitles = this.$refs.enableSubtitles?.checked;
@@ -1257,26 +1287,24 @@ export default {
       const logoFile = this.$refs.logoFileInput?.files[0];
       const subtitleColor = this.selectedSubtitleColor;
       const bgMusic = this.selectedBgMusic;
-
+    
       if (this.activeMode === 'youtube' && !youtubeUrl) { this.showAlert('warning', 'YouTube URL တစ်ခု ထည့်သွင်းပါ။'); return; }
       if (this.activeMode === 'upload' && !file) { this.showAlert('warning', 'Upload လုပ်မည့် Video File တစ်ခု ရွေးချယ်ပါ။'); return; }
-
-      if (this.auth.user.role_name != 'admin') {       
-
+    
+      if (this.auth.user.role_name != 'admin') {
+    
         if (this.todayUsed >= this.dailyLimit) {
           let msg = '';
-          console.log("Daily limit reached:", this.auth.user.recap_limit, this.auth.user.total_recap_used);
-          if(this.auth.user.recap_limit >= this.auth.user.total_recap_used)  msg = 'သင့် Plan အရ နောက်နေ့မှသာ အသုံးပြုနိုင်ပါသည်။' ;
+          if (this.auth.user.recap_limit >= this.auth.user.total_recap_used) msg = 'သင့် Plan အရ နောက်နေ့မှသာ အသုံးပြုနိုင်ပါသည်။';
           else msg = 'သင့် Plan ကိုအဆင့်မြင့်တင်ပါ။';
           this.showAlert('warning', `ဒီနေ့ limit (${this.todayUsed}/${this.dailyLimit}) ပြည့်သွားပြီ။ ${msg}`)
           return;
         }
-
+    
         const duration = await this.getVideoDuration(file);
-        // မိနစ်၊ စက္ကန့် အနေနဲ့ ကြည့်ချင်ရင်
         const mins = Math.floor(duration / 60);
         const secs = Math.floor(duration % 60);
-        console.log(`Video Duration: ${duration} seconds`, secs, mins);
+      
         if (this.auth.user.role_name == 'tester') {
           if (watermark) return this.showAlert('warning', 'WaterMark အသုံးပြုရန် သင့် Plan ကိုအဆင့်မြင်‌တင်ပါ။');
           if (secs > 60) return this.showAlert('warning', `သင့် video မှာ ${secs}s ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Normal Plan ကိုအဆင့်မြင့်တင်ပါ။`);
@@ -1288,128 +1316,92 @@ export default {
         if (this.auth.user.role_name == 'pro') {
           if (secs > 150) return this.showAlert('warning', `သင့် video မှာ သတ်မှတ်ချက်ထက်ကျော်လွန်နေ၍တင်မရပါ။ သို့ Vip Plan ကိုအဆင့်မြင့်တင်ပါ။`);
         }
-
+    
       }
-
-
-      const jobBaseUrl = await this.resolveBaseUrl(); // local variable
-
-      console.log(jobBaseUrl);
-      if (!jobBaseUrl) {
-        this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
-        return;
-      }
-
-
+    
+      if (this.activeMode === 'youtube' && this.auth.user.role_name == 'tester') return this.showAlert("warning", "Please upgrade your plan!");
+    
+      const options = {
+        voice, subtitleColor, bgMusic, watermark, subtitles, flip, voiceover, logoFile,
+        bgMusicEnabled: this.bgMusicEnabled,
+        blurX: this.blurX, blurY: this.blurY, blurH: this.blurH,
+        logoX: this.logoX, logoY: this.logoY,
+      };
+    
       this.inlineError = '';
       this.resetSteps();
-
-      try {
-        let response;
-
-        if (this.activeMode === 'upload') {
-            const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB — chunk size ကို ဒီတစ်ခုတည်းနေရာမှာ ထားပြီး ထိန်းထားပါ
-            const MAX_RETRIES = 3;                   // chunk တစ်ခုချင်း ပြန်ကြိုးစားမည့် အကြိမ်ရေ
-          
-            const totalChunks = Math.ceil(file.size / MAX_CHUNK_SIZE);
-            const sessionId = crypto.randomUUID();
-            this.showUploadProgressState(0, totalChunks);
-          
-            for (let i = 0; i < totalChunks; i++) {
-              const chunk = file.slice(i * MAX_CHUNK_SIZE, (i + 1) * MAX_CHUNK_SIZE);
-              const chunkForm = new FormData();
-              chunkForm.append('chunk', chunk, 'chunk');
-              chunkForm.append('chunkIndex', i);
-              chunkForm.append('totalChunks', totalChunks);
-              chunkForm.append('sessionId', sessionId);
-          
-              try {
-                await this.uploadChunkWithRetry(jobBaseUrl, chunkForm, i, MAX_RETRIES);
-              } catch (chunkErr) {
-                // Retry အားလုံးကုန်သွားလို့ fail ရင် — outer catch ကို ပို့ပြီး upload process ရပ်
-                throw new Error(`Chunk ${i + 1}/${totalChunks} upload failed after ${MAX_RETRIES} attempts: ${chunkErr.message}`);
-              }
-          
-              this.showUploadProgressState(i + 1, totalChunks);
-            }
-          
-            this.showUploadFinalizingState();
-          
-            const finalForm = new FormData();
-            finalForm.append('sessionId', sessionId);
-            finalForm.append('originalFileName', file.name);
-            finalForm.append('voice_model', voice);
-            finalForm.append('blur_x', this.blurX.toFixed(2));
-            finalForm.append('blur_y', this.blurY.toFixed(2));
-            finalForm.append('blur_h', this.blurH.toFixed(2));
-            finalForm.append('enable_subtitles', subtitles);
-            finalForm.append('enable_flip', flip);
-            finalForm.append('enable_watermark', watermark);
-            finalForm.append('enable_voiceover', voiceover);
-            finalForm.append('subtitle_style', subtitleColor);
-            finalForm.append('bg_music', bgMusic);
+    
+      const excludeUrls = new Set();
+      const MAX_SERVER_SWITCHES = 2;
+    
+      for (let serverAttempt = 0; serverAttempt <= MAX_SERVER_SWITCHES; serverAttempt++) {
+    
+        const jobBaseUrl = await this.resolveBaseUrl(excludeUrls);
+        console.log(jobBaseUrl);
+    
+        if (!jobBaseUrl) {
+          this.hideUploadProgressState();
+          this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
+          return;
+        }
+    
+        try {
+          let response;
+    
+          if (this.activeMode === 'upload') {
+            response = await this.uploadAllChunks(jobBaseUrl, file, options);
+          } else {
+            const formData = new FormData();
+            formData.append('url', youtubeUrl);
+            formData.append('voice_model', voice);
+            formData.append('blur_x', this.blurX.toFixed(2));
+            formData.append('blur_y', this.blurY.toFixed(2));
+            formData.append('blur_h', this.blurH.toFixed(2));
+            formData.append('enable_subtitles', subtitles);
+            formData.append('enable_flip', flip);
+            formData.append('enable_watermark', watermark);
+            formData.append('enable_voiceover', voiceover);
+            formData.append('subtitle_style', subtitleColor);
+            formData.append('bg_music', bgMusic);
+            formData.append('enable_bg_music', this.bgMusicEnabled);
             if (watermark) {
-              finalForm.append('watermark_x', this.logoX.toFixed(2));
-              finalForm.append('watermark_y', this.logoY.toFixed(2));
-              if (logoFile) finalForm.append('watermark_file', logoFile);
+              formData.append('watermark_x', this.logoX.toFixed(2));
+              formData.append('watermark_y', this.logoY.toFixed(2));
+              if (logoFile) formData.append('watermark_file', logoFile);
             }
-          
-            response = await fetch(`${jobBaseUrl}/upload-chunk-finalize`, {
+            response = await fetch(`${jobBaseUrl}/process-youtube`, {
               method: 'POST',
-              body: finalForm,
-              headers: {
-                'X-Session-ID': window.APP_SESSION_ID
-              }
+              body: formData,
+              headers: { 'X-Session-ID': window.APP_SESSION_ID }
             });
-
-        } else {
-
-          if (this.auth.user.role_name == 'tester') {
-            this.showAlert("warning", "Please upgrade your plan!");
-            return
-          }
-          const formData = new FormData();
-          formData.append('url', youtubeUrl);
-          formData.append('voice_model', voice);
-          formData.append('blur_x', this.blurX.toFixed(2));
-          formData.append('blur_y', this.blurY.toFixed(2));
-          formData.append('blur_h', this.blurH.toFixed(2));
-          formData.append('enable_subtitles', subtitles);
-          formData.append('enable_flip', flip);
-          formData.append('enable_watermark', watermark);
-          formData.append('enable_voiceover', voiceover);
-          formData.append('subtitle_style', subtitleColor);
-          formData.append('bg_music', bgMusic);
-          if (watermark) {
-            formData.append('watermark_x', this.logoX.toFixed(2));
-            formData.append('watermark_y', this.logoY.toFixed(2));
-            if (logoFile) formData.append('watermark_file', logoFile);
-          }
-          response = await fetch(`${jobBaseUrl}/process-youtube`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-Session-ID': window.APP_SESSION_ID
+    
+            if (!response.ok) {
+              const err = await response.json().catch(() => null);
+              throw new Error(err?.detail || 'Failed to start processing job on Server.');
             }
-          });
+          }
+    
+          // ✅ ဒီနေရာ ရောက်ရင် server အလုပ်ဖြစ်ပြီ — success path
+          this.stepCurrent = 1;
+          this.stepProgress = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          this.hideUploadProgressState();
+          const data = await response.json();
+          this._pollActive = true;
+          this.pollStatus(data.job_id, jobBaseUrl);
+          return;
+    
+        } catch (error) {
+          console.warn(`⚠️ Server ${jobBaseUrl} failed (attempt ${serverAttempt + 1}): ${error.message}`);
+          excludeUrls.add(jobBaseUrl);
+    
+          if (serverAttempt === MAX_SERVER_SWITCHES) {
+            this.hideUploadProgressState();
+            this.showError(`${error.message} (Server ${serverAttempt + 1} ခု စမ်းပြီး အားလုံး fail ဖြစ်ခဲ့ပါတယ်)`);
+            return;
+          }
+    
+          this.showAlert('warning', `Server ပြဿနာရှိနေလို့ တခြား server ကို ပြောင်းပြီး ပြန်ကြိုးစားနေပါတယ်...`);
         }
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => null);
-          throw new Error(err?.detail || 'Failed to start processing job on Server.');
-        }
-
-        this.stepCurrent = 1;
-        this.stepProgress = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-        this.hideUploadProgressState();
-        const data = await response.json();
-        this._pollActive = true;
-        this.pollStatus(data.job_id, jobBaseUrl);
-
-      } catch (error) {
-        this.hideUploadProgressState();
-        this.showError(error.message);
       }
     },
   },
