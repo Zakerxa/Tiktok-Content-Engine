@@ -1137,28 +1137,20 @@ export default {
       return allServers
         .filter(s => !s.role_access?.length || s.role_access.includes(roleName))
         .map(s => {
-          // role_access ထဲမှာ ကိုယ့် role ဘယ်နေရာမှာရှိလဲ ကြည့်မယ်
-          // role_access အလွတ် [] ဆိုရင် "All" ဖြစ်လို့ tie-break အနေနဲ့ အနောက်ဆုံးထားမယ်
           const roleIdx = s.role_access?.length ? s.role_access.indexOf(roleName) : Infinity;
           return { ...s, _roleIdx: roleIdx };
         })
         .sort((a, b) => {
-          // 1st: priority (small = first)
           if (a.priority !== b.priority) return a.priority - b.priority;
-          // 2nd: same priority ဆိုရင် role_access array ထဲက role position (small index = first)
-          // V1/V3 လိုမျိုး index တူသွားရင် Array.sort ဟာ stable sort ဖြစ်တဲ့အတွက်
-          // DB order (id အလိုက်) အတိုင်း ဘယ်ဟာအရင်လာလာ ကျန်နေမယ် — order မတူသော်လည်း
-          // logic အရ ဘယ်ဟာယူယူ ကိစ္စမရှိပါ (busy check ကနေဆက်စစ်မှာမို့)
           return a._roleIdx - b._roleIdx;
         });
     },
     
-    // Resolve baseUrl: candidate list ကို priority + role-position order အတိုင်း တစ်ခုချင်းစမ်း
     async resolveBaseUrl(excludeUrls = new Set()) {
       const roleName = this.auth.user?.role_name;
       const allServers = await this.fetchServers();
       const candidates = this.getServersForRole(allServers, roleName)
-        .filter(s => !excludeUrls.has(s.url));   // ✅ fail ဖြစ်ပြီးသား server တွေကို ဖယ်
+        .filter(s => !excludeUrls.has(s.url));
     
       if (!candidates.length) {
         console.error(`[resolveBaseUrl] role=${roleName} -> no more servers to try`);
@@ -1167,7 +1159,20 @@ export default {
         return null;
       }
     
-      for (const server of candidates) {
+      // 🆕 "Full" ဖြစ်နေတဲ့ server ကို လုံးဝ candidate ထဲက ဖယ်ထားမယ်
+      // (queue ထဲ ဆွဲထည့်တာက user ကို ကိုယ့်ဘာသာ hang ဖြစ်စေသလို ခံစားရစေမယ်)
+      const usableCandidates = candidates.filter(s => !s.is_full);
+    
+      if (!usableCandidates.length) {
+        // 🆕 Server အားလုံး full ဖြစ်နေပြီ — force-assign မလုပ်တော့ဘဲ user ကို ခဏစောင့်ခိုင်းမယ်
+        console.warn(`[resolveBaseUrl] role=${roleName} -> ALL servers full`);
+        this.baseUrl = null;
+        this.baseUrlReady = false;
+        this._allServersFull = true;   // startProcess() ကနေ error message ကွဲပြားအောင် သုံးမယ်
+        return null;
+      }
+    
+      for (const server of usableCandidates) {
         const isTrulyBusy = server.is_busy && !server.is_stuck;
         if (isTrulyBusy) continue;
     
@@ -1179,11 +1184,15 @@ export default {
         return server.url;
       }
     
-      const fallback = candidates[0];
-      console.warn(`[resolveBaseUrl] role=${roleName} -> all busy, falling back to default ${fallback.name}`);
-      this.baseUrl = fallback.url;
+      // 🆕 candidates[0] အစား — busy ဖြစ်နေပေမယ့် "အနည်းဆုံး busy" တစ်ခုကို ရွေးမယ်
+      const leastBusy = [...usableCandidates].sort(
+        (a, b) => a.processing_count - b.processing_count
+      )[0];
+    
+      console.warn(`[resolveBaseUrl] role=${roleName} -> all busy, falling back to least-busy ${leastBusy.name} (${leastBusy.processing_count} jobs)`);
+      this.baseUrl = leastBusy.url;
       this.baseUrlReady = true;
-      return fallback.url;
+      return leastBusy.url;
     },
 
 
@@ -1352,10 +1361,15 @@ export default {
     
         if (!jobBaseUrl) {
           this.hideUploadProgressState();
-          this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
+          if (this._allServersFull) {
+            this._allServersFull = false;
+            this.showAlert('warning', 'ဆာဗာများအားလုံး Busy နေပါသည်။ ခဏစောင့်ပြီး ပြန်ကြိုးစားပေးပါ။');
+          } else {
+            this.showAlert('error', 'Server အကုန် မရရှိနိုင်ပါ။ နောက်မှ ပြန်ကြိုးစားပါ။');
+          }
           return;
         }
-    
+            
         try {
           let response;
     

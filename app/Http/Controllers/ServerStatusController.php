@@ -8,6 +8,12 @@ use Carbon\Carbon;
 
 class ServerStatusController extends Controller
 {
+    // 🆕 Server တစ်ခုမှာ ဒီ count ကို ကျော်ရင် "full" လို့ သတ်မှတ်မယ် —
+    // job_routes.py က global_semaphore(1) ဖြစ်ပြီး, save_job() ကနေ status='processing'
+    // ကို instant ထည့်တာမို့, ဒီ count က "processing နေတဲ့ 1 job + queue ထဲ wait
+    // နေတဲ့ ကျန် job အားလုံး" ကို ပေါင်းပြပါတယ်. Load test လုပ်ပြီး tune ပေးပါ.
+    private const MAX_JOBS_PER_SERVER = 4;
+
     public function index()
     {
         // 1. Active server list ယူမယ်
@@ -38,6 +44,8 @@ class ServerStatusController extends Controller
                 'processing_count' => $processingCount,
                 'is_busy'       => $processingCount > 0,
                 'is_stuck'      => $ageMinutes > 25,
+                // 🆕 threshold ကျော်ရင် "full" — frontend က ဒီ server ကို လုံးဝ မသုံးစေရန်
+                'is_full'       => $processingCount >= self::MAX_JOBS_PER_SERVER,
             ];
         });
 

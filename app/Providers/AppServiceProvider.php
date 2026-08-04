@@ -38,11 +38,11 @@ class AppServiceProvider extends ServiceProvider
             $userId = $request->user()?->id ?: $request->ip();
             $jobId  = $request->route('jobId');
 
-            return Limit::perDay(2)
+            return Limit::perDay(4)
                 ->by("{$userId}:{$jobId}")
                 ->response(function () {
                     return response()->json([
-                        'message' => 'ဒီ Video ကို ဒီနေ့အတွက် Download limit (2 ကြိမ်) ပြည့်သွားပါပြီ။'
+                        'message' => 'ဒီ Video ကို ဒီနေ့အတွက် Download limit (4 ကြိမ်) ပြည့်သွားပါပြီ။'
                     ], 429);
                 });
         });
